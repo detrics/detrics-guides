@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Detrics + Claude — Encontrá tus quick-win SEO con GSC + GA4</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue: #2563EB;
+    --blue-dark: #1D4ED8;
+    --blue-light: #3B82F6;
+    --blue-glow: rgba(37, 99, 235, 0.25);
+    --ink: #0F172A;
+    --surface: #FFFFFF;
+    --gray-50: #F8FAFC;
+    --gray-100: #F1F5F9;
+    --gray-200: #E2E8F0;
+    --gray-300: #CBD5E1;
+    --gray-400: #94A3B8;
+    --gray-500: #64748B;
+    --gray-600: #475569;
+    --gray-700: #334155;
+    --green: #10B981;
+    --green-bg: #ECFDF5;
+    --amber: #F59E0B;
+    --amber-bg: #FFFBEB;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    color: var(--ink);
+    background: var(--gray-50);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .fade-up { opacity: 0; transform: translateY(24px); transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1), transform 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
+  .fade-up.visible { opacity: 1; transform: translateY(0); }
+
+  .hero { background: linear-gradient(160deg, #0B1120 0%, #0F172A 40%, #131C2E 100%); color: white; padding: 80px 40px 60px; text-align: center; position: relative; overflow: hidden; }
+  .hero::before {
+    content: ''; position: absolute; top: -40%; left: -20%; width: 140%; height: 180%;
+    background:
+      radial-gradient(ellipse 600px 400px at 25% 30%, rgba(37, 99, 235, 0.18) 0%, transparent 70%),
+      radial-gradient(ellipse 500px 500px at 75% 70%, rgba(59, 130, 246, 0.1) 0%, transparent 60%),
+      radial-gradient(ellipse 300px 300px at 50% 50%, rgba(16, 185, 129, 0.06) 0%, transparent 50%);
+    animation: heroPulse 10s ease-in-out infinite alternate;
+  }
+  @keyframes heroPulse { 0% { opacity: 0.5; transform: scale(1); } 100% { opacity: 1; transform: scale(1.05); } }
+  .hero::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(37, 99, 235, 0.3), transparent); }
+  .hero-content { position: relative; z-index: 1; max-width: 720px; margin: 0 auto; }
+  .hero-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(37, 99, 235, 0.12); border: 1px solid rgba(37, 99, 235, 0.25); border-radius: 100px; padding: 6px 16px; font-size: 12px; font-weight: 600; color: #93C5FD; margin-bottom: 28px; letter-spacing: 1px; text-transform: uppercase; backdrop-filter: blur(8px); animation: badgeFade 1s ease-out; }
+  @keyframes badgeFade { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+  .hero h1 { font-size: 44px; font-weight: 800; line-height: 1.12; margin-bottom: 18px; letter-spacing: -1px; animation: heroTitle 0.8s ease-out 0.1s both; }
+  @keyframes heroTitle { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  .hero h1 span { background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 50%, #2563EB 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .hero p { font-size: 17px; color: #94A3B8; max-width: 540px; margin: 0 auto 36px; line-height: 1.75; animation: heroTitle 0.8s ease-out 0.25s both; }
+  .hero-logos { display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 32px; animation: heroTitle 0.8s ease-out 0.4s both; }
+  .hero-logos img { width: 40px; height: 40px; border-radius: 10px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); padding: 6px; object-fit: contain; transition: transform 0.3s, box-shadow 0.3s; }
+  .hero-logos img:hover { transform: scale(1.1); box-shadow: 0 0 20px var(--blue-glow); }
+  .hero-logos .plus { color: var(--gray-500); font-size: 18px; font-weight: 300; }
+  .hero-time { display: inline-flex; align-items: center; gap: 8px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 100px; padding: 8px 20px; font-size: 13px; color: #6EE7B7; font-weight: 500; backdrop-filter: blur(8px); animation: heroTitle 0.8s ease-out 0.55s both; }
+
+  .container { max-width: 760px; margin: 0 auto; padding: 0 24px; }
+  .intro { padding: 56px 0 40px; text-align: center; }
+  .intro p { font-size: 17px; color: var(--gray-600); max-width: 600px; margin: 0 auto; line-height: 1.8; }
+
+  .step { background: var(--surface); border: 1px solid var(--gray-200); border-radius: 16px; margin-bottom: 32px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.02); transition: box-shadow 0.3s, border-color 0.3s; }
+  .step:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.06), 0 12px 32px rgba(0,0,0,0.04); border-color: var(--gray-300); }
+  .step-header { display: flex; align-items: center; gap: 16px; padding: 28px 32px; border-bottom: 1px solid var(--gray-100); background: linear-gradient(180deg, var(--gray-50) 0%, var(--surface) 100%); }
+  .step-number { width: 42px; height: 42px; border-radius: 12px; background: linear-gradient(135deg, var(--blue) 0%, var(--blue-dark) 100%); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 18px; flex-shrink: 0; box-shadow: 0 2px 8px var(--blue-glow); }
+  .step-header h2 { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
+  .step-header h2 small { display: block; font-size: 13px; font-weight: 400; color: var(--gray-400); margin-top: 3px; }
+  .step-body { padding: 28px 32px; }
+  .step-body p { font-size: 15px; color: var(--gray-600); margin-bottom: 16px; line-height: 1.7; }
+  .step-body ul { list-style: none; margin-bottom: 20px; }
+  .step-body ul li { position: relative; padding-left: 28px; margin-bottom: 10px; font-size: 15px; color: var(--gray-600); line-height: 1.6; }
+  .step-body ul li::before { content: '\2192'; position: absolute; left: 0; color: var(--blue); font-weight: 600; }
+
+  .url-box { display: flex; align-items: center; gap: 12px; background: linear-gradient(135deg, #EFF6FF 0%, var(--gray-50) 100%); border: 1px solid rgba(37, 99, 235, 0.15); border-radius: 10px; padding: 12px 16px; margin: 16px 0; transition: border-color 0.2s, box-shadow 0.2s; }
+  .url-box:hover { border-color: rgba(37, 99, 235, 0.35); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.06); }
+  .url-box .url-icon { width: 28px; height: 28px; background: var(--blue); border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .url-box .url-icon svg { width: 14px; height: 14px; fill: white; }
+  .url-box a { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--blue); text-decoration: none; word-break: break-all; font-weight: 500; }
+  .url-box a:hover { text-decoration: underline; }
+
+  .screenshot { border: 1px solid var(--gray-200); border-radius: 12px; overflow: hidden; margin: 20px 0; background: var(--gray-50); cursor: pointer; transition: box-shadow 0.3s; position: relative; }
+  .screenshot:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+  .screenshot::after { content: 'Click para ampliar'; position: absolute; bottom: 0; left: 0; right: 0; padding: 6px; background: linear-gradient(transparent, rgba(0,0,0,0.5)); color: white; font-size: 11px; text-align: center; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+  .screenshot:hover::after { opacity: 1; }
+  .screenshot img { width: 100%; display: block; object-fit: contain; }
+  .screenshot-caption { padding: 10px 16px; font-size: 12px; color: var(--gray-400); text-align: center; border-top: 1px solid var(--gray-100); font-style: italic; background: var(--surface); }
+
+  .lightbox { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 9999; cursor: zoom-out; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s; }
+  .lightbox.active { opacity: 1; visibility: visible; }
+  .lightbox img { max-width: 92%; max-height: 90vh; border-radius: 12px; box-shadow: 0 8px 40px rgba(0,0,0,0.4); transform: scale(0.95); transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1); }
+  .lightbox.active img { transform: scale(1); }
+  .lightbox-close { position: absolute; top: 24px; right: 28px; color: white; font-size: 32px; font-weight: 300; cursor: pointer; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(255,255,255,0.1); transition: background 0.2s; }
+  .lightbox-close:hover { background: rgba(255,255,255,0.2); }
+
+  .platform-chips { display: flex; gap: 10px; flex-wrap: wrap; margin: 16px 0; }
+  .chip { display: inline-flex; align-items: center; gap: 8px; background: var(--surface); border: 1px solid var(--gray-200); border-radius: 10px; padding: 10px 16px; font-size: 14px; font-weight: 500; color: var(--gray-700); transition: border-color 0.2s, box-shadow 0.2s; }
+  .chip:hover { border-color: var(--blue-light); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.06); }
+  .chip img { width: 22px; height: 22px; border-radius: 4px; object-fit: contain; }
+
+  .code-block { background: #0B1120; border-radius: 14px; overflow: hidden; margin: 20px 0; border: 1px solid rgba(255,255,255,0.06); box-shadow: 0 4px 24px rgba(0,0,0,0.15); }
+  .code-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; background: rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .code-header span { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--gray-500); }
+
+  .copy-btn { font-size: 11px; color: var(--gray-400); background: rgba(255,255,255,0.06); padding: 4px 12px; border-radius: 6px; cursor: pointer; border: 1px solid rgba(255,255,255,0.08); font-family: 'DM Mono', monospace; transition: all 0.2s; white-space: nowrap; }
+  .copy-btn:hover { background: rgba(37, 99, 235, 0.2); border-color: rgba(37, 99, 235, 0.3); color: #93C5FD; }
+  .copy-btn-light { font-size: 11px; color: var(--gray-400); background: var(--gray-100); padding: 3px 10px; border-radius: 6px; cursor: pointer; border: 1px solid var(--gray-200); font-family: 'DM Mono', monospace; transition: all 0.2s; white-space: nowrap; flex-shrink: 0; }
+  .copy-btn-light:hover { background: #DBEAFE; border-color: var(--blue-light); color: var(--blue); }
+
+  .code-body { padding: 24px; font-family: 'DM Mono', monospace; font-size: 13px; line-height: 1.8; color: #CBD5E1; white-space: pre-wrap; overflow-x: auto; }
+  .code-body .comment { color: #475569; }
+  .code-body .highlight { color: #60A5FA; }
+  .code-body .keyword { color: #FBBF24; }
+
+  .tip { display: flex; gap: 12px; padding: 16px 20px; border-radius: 12px; margin: 20px 0; font-size: 14px; line-height: 1.6; transition: transform 0.2s; }
+  .tip:hover { transform: translateY(-1px); }
+  .tip.green { background: linear-gradient(135deg, #ECFDF5, #F0FDF4); border: 1px solid #A7F3D0; color: #065F46; }
+  .tip.amber { background: linear-gradient(135deg, #FFFBEB, #FEF9C3); border: 1px solid #FDE68A; color: #92400E; }
+  .tip-icon { font-size: 18px; flex-shrink: 0; line-height: 1.4; }
+
+  .substeps { counter-reset: substep; list-style: none; margin: 20px 0; padding: 0; }
+  .substeps li { counter-increment: substep; position: relative; padding-left: 48px; margin-bottom: 24px; font-size: 15px; color: var(--gray-600); line-height: 1.6; }
+  .substeps li::before { content: counter(substep); position: absolute; left: 0; top: 0; width: 30px; height: 30px; border-radius: 10px; background: linear-gradient(135deg, var(--gray-100), var(--gray-50)); border: 1px solid var(--gray-200); color: var(--ink); font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center; text-align: center; line-height: 30px; }
+  .substeps li strong { color: var(--ink); }
+
+  code { font-family: 'DM Mono', monospace; font-size: 13px; background: linear-gradient(135deg, #EFF6FF, var(--gray-100)); border: 1px solid rgba(37, 99, 235, 0.12); border-radius: 6px; padding: 2px 8px; color: var(--blue-dark); }
+
+  .field-input { margin-top: 8px; display: flex; gap: 12px; flex-wrap: wrap; }
+  .field-input > div { flex: 1; min-width: 200px; }
+  .field-label { font-size: 11px; color: var(--gray-400); margin-bottom: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  .field-value { display: flex; align-items: center; justify-content: space-between; gap: 8px; background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: 8px; padding: 10px 14px; font-family: 'DM Mono', monospace; font-size: 14px; transition: border-color 0.2s; }
+  .field-value:hover { border-color: var(--blue-light); }
+  .field-value.url { color: var(--blue); }
+  .field-value .text { flex: 1; }
+
+  .copyable-field { display: flex; align-items: center; gap: 10px; background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: 10px; padding: 12px 16px; margin: 8px 0 16px; transition: border-color 0.2s; }
+  .copyable-field:hover { border-color: var(--blue-light); }
+  .copyable-field .cf-text { flex: 1; font-size: 14px; color: var(--ink); font-weight: 500; line-height: 1.5; }
+
+  .prompt-grid { display: grid; grid-template-columns: 1fr; gap: 14px; margin: 24px 0; }
+  .prompt-card { background: var(--surface); border: 1px solid var(--gray-200); border-radius: 14px; padding: 20px 24px; transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1); position: relative; overflow: hidden; }
+  .prompt-card::before { content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%; background: linear-gradient(180deg, var(--blue), var(--blue-light)); opacity: 0; transition: opacity 0.3s; }
+  .prompt-card:hover { border-color: var(--blue-light); box-shadow: 0 4px 16px rgba(37, 99, 235, 0.08); transform: translateX(4px); }
+  .prompt-card:hover::before { opacity: 1; }
+  .prompt-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; gap: 12px; }
+  .prompt-card .prompt-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--blue); }
+  .prompt-card .prompt-text { font-size: 15px; color: var(--ink); font-weight: 500; line-height: 1.5; font-style: italic; }
+  .prompt-card .prompt-desc { font-size: 13px; color: var(--gray-500); margin-top: 8px; line-height: 1.5; }
+
+  .divider { height: 1px; background: linear-gradient(90deg, transparent, var(--gray-300), transparent); margin: 56px 0; }
+
+  .section-title { font-size: 26px; font-weight: 800; text-align: center; margin-bottom: 8px; letter-spacing: -0.5px; }
+  .section-subtitle { text-align: center; color: var(--gray-500); font-size: 15px; margin-bottom: 32px; }
+
+  .cta-section { text-align: center; padding: 60px 0 80px; }
+  .cta-section h2 { font-size: 30px; font-weight: 800; margin-bottom: 12px; letter-spacing: -0.5px; }
+  .cta-section p { font-size: 16px; color: var(--gray-500); margin-bottom: 28px; }
+  .cta-button { display: inline-flex; align-items: center; gap: 10px; background: linear-gradient(135deg, var(--blue) 0%, var(--blue-dark) 100%); color: white; text-decoration: none; padding: 16px 36px; border-radius: 12px; font-weight: 600; font-size: 16px; transition: all 0.3s; box-shadow: 0 4px 16px var(--blue-glow); }
+  .cta-button:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(37, 99, 235, 0.35); }
+  .cta-button svg { width: 18px; height: 18px; fill: white; }
+
+  .footer { text-align: center; padding: 40px 0; border-top: 1px solid var(--gray-200); font-size: 13px; color: var(--gray-400); }
+  .footer a { color: var(--blue); text-decoration: none; }
+
+  .flow { display: flex; align-items: flex-start; justify-content: center; gap: 0; margin: 28px 0; flex-wrap: wrap; }
+  .flow-node { display: flex; flex-direction: column; align-items: center; gap: 10px; transition: transform 0.3s; }
+  .flow-node:hover { transform: translateY(-4px); }
+  .flow-node .flow-icon { width: 64px; height: 64px; border-radius: 16px; background: var(--surface); border: 1px solid var(--gray-200); display: flex; align-items: center; justify-content: center; transition: box-shadow 0.3s, border-color 0.3s; }
+  .flow-node:hover .flow-icon { box-shadow: 0 4px 16px rgba(0,0,0,0.08); border-color: var(--gray-300); }
+  .flow-node .flow-icon img { width: 32px; height: 32px; border-radius: 6px; object-fit: contain; }
+  .flow-node .flow-label { font-size: 12px; color: var(--gray-500); font-weight: 600; }
+  .flow-arrow { color: var(--gray-300); font-size: 20px; font-weight: 300; height: 64px; display: flex; align-items: center; padding: 0 14px; }
+  .flow-sources { display: flex; flex-direction: column; gap: 8px; }
+  .flow-sources .flow-icon { width: 56px; height: 56px; }
+  .flow-sources .flow-icon img { width: 28px; height: 28px; }
+
+  .context-tag { display: inline; background: linear-gradient(135deg, #DBEAFE, #EFF6FF); border: 1px solid rgba(37, 99, 235, 0.2); border-radius: 4px; padding: 1px 6px; font-family: 'DM Mono', monospace; font-size: 13px; color: var(--blue-dark); font-weight: 500; font-style: normal; }
+
+  @media print {
+    body { background: white; }
+    .hero { padding: 40px 20px 30px; }
+    .hero h1 { font-size: 32px; }
+    .step { break-inside: avoid; }
+    .code-block { break-inside: avoid; }
+    .fade-up { opacity: 1 !important; transform: none !important; }
+  }
+
+  @media (max-width: 640px) {
+    .hero { padding: 48px 20px 40px; }
+    .hero h1 { font-size: 28px; letter-spacing: -0.5px; }
+    .step-header { padding: 20px; }
+    .step-body { padding: 20px; }
+    .container { padding: 0 16px; }
+    .flow { gap: 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Lightbox overlay -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <div class="lightbox-close">&times;</div>
+  <img id="lightbox-img" src="" alt="">
+</div>
+
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-badge">Guia paso a paso</div>
+    <h1>Converti a Claude en tu <span>analista SEO con GSC + GA4</span></h1>
+    <p>Conecta Google Search Console y Google Analytics 4 a Claude a traves de Detrics. En 5 minutos, Claude te encuentra las keywords con mayor ROI por hora invertida &mdash; cruzando impresiones, posicion, CTR y sesiones reales.</p>
+    <div class="hero-logos">
+      <img src="https://storage.googleapis.com/detrics-static/public/img/google-search-console-logo.png" alt="Google Search Console">
+      <img src="https://storage.googleapis.com/detrics-static/public/img/google-analytics-4-logo.png" alt="Google Analytics 4">
+      <span class="plus">&rarr;</span>
+      <img src="https://storage.googleapis.com/detrics-static/public/img/claude-logo.png" alt="Claude">
+    </div>
+    <br>
+    <div class="hero-time">Setup completo: ~5 minutos &middot; 6 prompts adentro</div>
+  </div>
+</section>
+
+<div class="container">
+
+<!-- ============ INTRO ============ -->
+<div class="intro fade-up">
+  <p>Esta guia te muestra como conectar Google Search Console y GA4 a Claude usando el MCP de Detrics. Al terminar, vas a poder preguntarle cosas como "traeme keywords ranking en posicion 10-30 con CTR menor a 1% y mas de 1000 impresiones, cruzado con sesiones de GA4" &mdash; y recibir una lista de oportunidades reales, no adivinanzas. Incluye 6 prompts listos para copiar y pegar para auditorias SEO completas.</p>
+</div>
+
+<!-- ============ STEP 1 ============ -->
+<div class="step fade-up">
+  <div class="step-header">
+    <div class="step-number">1</div>
+    <h2>Conecta tus fuentes de datos <small>Google Search Console + Google Analytics 4</small></h2>
+  </div>
+  <div class="step-body">
+    <p>Entra a la seccion de Data Sources en Detrics y conecta Google Search Console y GA4. Si ya las tenias conectadas, verifica que esten activas.</p>
+
+    <div class="url-box">
+      <div class="url-icon">
+        <svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg>
+      </div>
+      <a href="https://app.detrics.io/datasources" target="_blank" rel="noopener">app.detrics.io/datasources</a>
+    </div>
+
+    <div class="platform-chips">
+      <div class="chip">
+        <img src="https://storage.googleapis.com/detrics-static/public/img/google-search-console-logo.png" alt="Google Search Console">
+        Google Search Console
+      </div>
+      <div class="chip">
+        <img src="https://storage.googleapis.com/detrics-static/public/img/google-analytics-4-logo.png" alt="Google Analytics 4">
+        Google Analytics 4
+      </div>
+    </div>
+
+    <div class="screenshot" onclick="openLightbox(this)">
+      <img src="images/datasources.png" alt="Data Sources en Detrics mostrando Google Search Console y GA4 conectados">
+      <div class="screenshot-caption">Seccion de Data Sources en Detrics: conecta GSC y GA4</div>
+    </div>
+
+    <ul>
+      <li>Click en <strong>Google Search Console</strong> y autoriza con la cuenta que tiene acceso a tu propiedad</li>
+      <li>Click en <strong>Google Analytics 4</strong> y autoriza con la cuenta que tiene acceso a tu property</li>
+      <li>Verifica que las dos esten en estado <strong>Connected</strong> (verde)</li>
+    </ul>
+
+    <div class="tip green">
+      <span class="tip-icon">&#10003;</span>
+      <span>Si ya sos usuario de Detrics y tenes GSC + GA4 conectados, saltea al Paso 2.</span>
+    </div>
+
+    <div class="tip amber">
+      <span class="tip-icon">&#9733;</span>
+      <span>Conecta las dos: GSC sin GA4 te da impresiones y CTR; GA4 sin GSC te da sesiones y conversiones. El cruce es donde aparecen las oportunidades reales.</span>
+    </div>
+  </div>
+</div>
+
+<!-- ============ STEP 2 ============ -->
+<div class="step fade-up">
+  <div class="step-header">
+    <div class="step-number">2</div>
+    <h2>Crea un AI Context <small>Agrupa la propiedad GSC + GA4 de un mismo sitio</small></h2>
+  </div>
+  <div class="step-body">
+    <p>Un Context es una agrupacion de cuentas que pertenecen a un mismo cliente o proyecto. Para analisis SEO, juntas en el mismo contexto la propiedad de GSC y la property de GA4 del mismo dominio. Asi Claude sabe exactamente que consultar y puede cruzar la data automaticamente.</p>
+
+    <div class="url-box">
+      <div class="url-icon">
+        <svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg>
+      </div>
+      <a href="https://app.detrics.io/mcp/contexts" target="_blank" rel="noopener">app.detrics.io/mcp/contexts</a>
+    </div>
+
+    <div class="screenshot" onclick="openLightbox(this)">
+      <img src="images/contexts-view.png" alt="Vista de AI Contexts en Detrics con sidebar y boton New Context">
+      <div class="screenshot-caption">Vista de AI Contexts en Detrics: cada contexto agrupa las cuentas de un cliente. Click en "+ New Context" para crear uno.</div>
+    </div>
+
+    <ul>
+      <li>Hace click en <strong>"Create Context"</strong></li>
+      <li>Dale un nombre descriptivo (ej: "SEO &mdash; Cliente ABC" o "SEO &mdash; midominio.com")</li>
+      <li>Selecciona la <strong>propiedad de GSC</strong> y la <strong>property de GA4</strong> del mismo sitio</li>
+      <li>Guarda el contexto</li>
+    </ul>
+
+    <div class="tip amber">
+      <span class="tip-icon">&#9733;</span>
+      <span>Si manejas SEO para varios clientes, crea un contexto por sitio. Claude nunca mezcla la data entre contextos &mdash; ni el cruce GSC/GA4.</span>
+    </div>
+  </div>
+</div>
+
+<!-- ============ STEP 3 ============ -->
+<div class="step fade-up">
+  <div class="step-header">
+    <div class="step-number">3</div>
+    <h2>Configura el MCP de Detrics en Claude <small>~30 segundos, sin instalar nada</small></h2>
+  </div>
+  <div class="step-body">
+    <p>Ahora conectamos Claude con Detrics. El MCP (Model Context Protocol) le da a Claude acceso directo a tus datos de marketing. No necesitas instalar nada &mdash; se configura desde claude.ai.</p>
+
+    <ol class="substeps">
+      <li>Abri <a href="https://claude.ai" target="_blank" rel="noopener"><strong>claude.ai</strong></a> y logueate con tu cuenta</li>
+      <li>Click en tu perfil (abajo a la izquierda) &rarr; <strong>Settings</strong>
+        <div class="screenshot" onclick="openLightbox(this)" style="margin-top: 12px;">
+          <img src="images/claude-settings.png" alt="Claude - click en Settings desde el menu de perfil">
+          <div class="screenshot-caption">Abri Settings desde el menu de tu perfil</div>
+        </div>
+      </li>
+      <li>En el sidebar, click en <strong>Connectors</strong>
+        <div class="screenshot" onclick="openLightbox(this)" style="margin-top: 12px;">
+          <img src="images/claude-connectors-page.png" alt="Pagina de Connectors en Claude Settings">
+          <div class="screenshot-caption">Pagina de Connectors en Claude Settings</div>
+        </div>
+      </li>
+      <li>Click en <strong>"Add custom connector"</strong>
+        <div class="screenshot" onclick="openLightbox(this)" style="margin-top: 12px;">
+          <img src="images/add-custom-connector-btn.png" alt="Boton Add custom connector en la pagina de Connectors">
+          <div class="screenshot-caption">Click en "Add custom connector" al final de la lista</div>
+        </div>
+      </li>
+      <li>Ingresa los datos del connector:
+        <div class="field-input">
+          <div>
+            <div class="field-label">Name</div>
+            <div class="field-value">
+              <span class="text">Detrics</span>
+              <button class="copy-btn-light" onclick="copyText('Detrics',this)">Copiar</button>
+            </div>
+          </div>
+          <div style="flex: 2; min-width: 280px;">
+            <div class="field-label">URL</div>
+            <div class="field-value url">
+              <span class="text">https://mcp.detrics.io</span>
+              <button class="copy-btn-light" onclick="copyText('https://mcp.detrics.io',this)">Copiar</button>
+            </div>
+          </div>
+        </div>
+        <div class="screenshot" onclick="openLightbox(this)" style="margin-top: 12px;">
+          <img src="images/add-custom-connector.png" alt="Dialogo Add custom connector en Claude con Name: Detrics y URL: https://mcp.detrics.io">
+          <div class="screenshot-caption">Ingresa "Detrics" como nombre y "https://mcp.detrics.io" como URL</div>
+        </div>
+      </li>
+      <li>Click en <strong>Connect</strong>
+        <div class="screenshot" onclick="openLightbox(this)" style="margin-top: 12px;">
+          <img src="images/detrics-connect.png" alt="Detrics aparece como custom connector - click en Connect">
+          <div class="screenshot-caption">Detrics aparece como connector custom &mdash; click en "Connect"</div>
+        </div>
+      </li>
+      <li><strong>Autoriza</strong> el acceso &mdash; segui el flujo de autorizacion de Detrics
+        <div class="screenshot" onclick="openLightbox(this)" style="margin-top: 12px;">
+          <img src="images/detrics-authorize.png" alt="Pantalla de autorizacion de Detrics MCP">
+          <div class="screenshot-caption">Autoriza a Claude para acceder a tus datos de Detrics</div>
+        </div>
+      </li>
+      <li>Verifica que funciona: abri un chat nuevo y preguntale a Claude <code>Que contextos ves para Detrics?</code>
+        <div class="screenshot" onclick="openLightbox(this)" style="margin-top: 12px;">
+          <img src="images/claude-connectors.png" alt="Connectors en Claude con Detrics activado">
+          <div class="screenshot-caption">Detrics aparece como connector activo (toggle azul) en Claude</div>
+        </div>
+      </li>
+    </ol>
+
+    <div class="tip green">
+      <span class="tip-icon">&#10003;</span>
+      <span>No necesitas instalar Claude Desktop. Todo funciona desde <strong>claude.ai</strong> en el navegador.</span>
+    </div>
+  </div>
+</div>
+
+<!-- ============ STEP 4 ============ -->
+<div class="step fade-up">
+  <div class="step-header">
+    <div class="step-number">4</div>
+    <h2>Crea tu proyecto de Analista SEO <small>El paso que hace la magia</small></h2>
+  </div>
+  <div class="step-body">
+    <p>Ahora vamos a crear un <strong>Proyecto en Claude</strong> con instrucciones especificas para que se comporte como un analista SEO senior que cruza GSC + GA4. Esto es lo que transforma a Claude de un chatbot generico en tu auditor SEO on-demand.</p>
+
+    <h3 style="font-size:16px; margin: 24px 0 12px; color: var(--ink);">Como crear el proyecto</h3>
+
+    <ol class="substeps">
+      <li>En el sidebar izquierdo de claude.ai, hace click en <strong>"Projects"</strong>
+        <div class="screenshot" onclick="openLightbox(this)" style="margin-top: 12px;">
+          <img src="images/claude-projects-sidebar.png" alt="Sidebar de Claude mostrando la opcion Projects">
+          <div class="screenshot-caption">Encontra "Projects" en el sidebar izquierdo de Claude</div>
+        </div>
+      </li>
+      <li>Click en <strong>"+ New project"</strong>
+        <div class="screenshot" onclick="openLightbox(this)" style="margin-top: 12px;">
+          <img src="images/new-project-btn.png" alt="Boton New project en la pagina de Projects">
+          <div class="screenshot-caption">Click en "+ New project" arriba a la derecha</div>
+        </div>
+      </li>
+      <li>Completa los datos del proyecto:
+        <div style="margin-top: 8px;">
+          <p style="font-size: 14px; margin-bottom: 8px;"><strong>Name:</strong></p>
+          <div class="copyable-field">
+            <span class="cf-text">Detrics MCP - Analista SEO (GSC + GA4)</span>
+            <button class="copy-btn-light" onclick="copyText('Detrics MCP - Analista SEO (GSC + GA4)',this)">Copiar</button>
+          </div>
+          <p style="font-size: 14px; margin-bottom: 8px;"><strong>Description:</strong></p>
+          <div class="copyable-field">
+            <span class="cf-text">Auditorias SEO on-demand cruzando Google Search Console + GA4: quick-win keywords (posicion 10-30), oportunidades de CTR, canibalizacion, paginas con trafico sin conversiones y queries en tendencia.</span>
+            <button class="copy-btn-light" onclick="copyText('Auditorias SEO on-demand cruzando Google Search Console + GA4: quick-win keywords (posicion 10-30), oportunidades de CTR, canibalizacion, paginas con trafico sin conversiones y queries en tendencia.',this)">Copiar</button>
+          </div>
+        </div>
+        <div class="screenshot" onclick="openLightbox(this)" style="margin-top: 12px;">
+          <img src="images/edit-project-details.png" alt="Dialogo Edit details del proyecto en Claude">
+          <div class="screenshot-caption">Completa el nombre y la descripcion del proyecto</div>
+        </div>
+      </li>
+      <li>Una vez creado el proyecto, anda a la seccion <strong>"Instructions"</strong> (panel derecho) y pega las instrucciones de abajo. Esto le dice a Claude como pensar y analizar tu SEO.
+        <div class="screenshot" onclick="openLightbox(this)" style="margin-top: 12px;">
+          <img src="images/project-instructions.png" alt="Seccion de Instructions del proyecto en Claude">
+          <div class="screenshot-caption">Las instrucciones van en la seccion "Instructions" del proyecto &mdash; no en la descripcion</div>
+        </div>
+      </li>
+    </ol>
+
+    <h3 style="font-size:16px; margin: 24px 0 12px; color: var(--ink);">Instrucciones del proyecto</h3>
+    <p>Copia y pega esto en la seccion <strong>Instructions</strong> de tu proyecto:</p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span>Project Instructions &mdash; Analista SEO (GSC + GA4)</span>
+        <button class="copy-btn" onclick="copyText(document.getElementById('project-instructions').innerText,this)">Copiar</button>
+      </div>
+      <div class="code-body" id="project-instructions">Sos un analista SEO senior con 10+ anos de experiencia en search organico. Tenes acceso a datos reales de Google Search Console y Google Analytics 4 a traves del MCP de Detrics, y siempre cruzas las dos fuentes antes de recomendar.
+
+<span class="comment">## Tu expertise</span>
+- SEO tecnico, on-page, content y intent matching
+- Lectura de GSC: queries, paginas, posicion promedio, impresiones, clicks, CTR
+- Lectura de GA4: landing pages, sesiones organicas, engagement, conversiones, conv rate
+- Cruce GSC + GA4 por landing page para detectar oportunidades de mayor ROI por hora invertida
+- Deteccion de canibalizacion, CTR underperformance vs benchmark de posicion, y queries en tendencia
+
+<span class="comment">## Framework de analisis</span>
+Cada query y cada landing page se evalua sobre tres ejes:
+- <span class="highlight">Visibilidad</span>: impresiones GSC, posicion promedio, tendencia de impresiones
+- <span class="highlight">Eficiencia de captura</span>: CTR vs benchmark de su posicion (pos 1 ~30%, pos 5 ~5%, pos 10 ~2%)
+- <span class="highlight">Conversion</span>: sesiones organicas en GA4, engagement rate, conversiones / conv rate
+
+<span class="comment">## Como trabajas</span>
+1. Primero lista los contextos disponibles y elegi el relevante para SEO
+2. Consulta data de GSC a nivel query y a nivel pagina con rangos de fecha claros (ultimos 28 dias por default)
+3. Consulta data de GA4 a nivel landing page filtrando por trafico organico
+4. Crucca las dos fuentes por URL cuando sea relevante: GSC te dice como se llega, GA4 que pasa despues
+5. Compara periodos: ultimos 28 dias vs 28 dias previos, o mes vs mes
+6. Analiza &mdash; no solo listes queries, interpretalas
+
+<span class="comment">## Principios</span>
+- Siempre cuantifica: "la query X tiene 4,200 impresiones, posicion 14, CTR 0.6% &mdash; mover a top 10 deberia traer ~80 clicks/mes adicionales", no "X tiene potencial"
+- Prioriza por impacto: arranca por las oportunidades de mayor volumen de impresiones x delta de CTR estimado
+- Se especifico y accionable: "reescribir title", "agregar FAQ schema", "expandir seccion X", "fusionar URL A con URL B (canibalizacion)"
+- Cuando cruzas con GA4: si una pagina tiene muchas sesiones organicas pero conv rate bajo, el problema no es SEO &mdash; es on-page/CTA
+- Separa senal de ruido: 10% de caida en una query de bajo volumen no es lo mismo que 10% en queries top
+- Flaguea problemas de data: si GA4 no tiene canal organico configurado o GSC no tiene la propiedad correcta, sugeri revisar el setup
+
+<span class="comment">## Formato de respuesta</span>
+- Tablas para listas de queries (query, impresiones, clicks, CTR, posicion) y paginas (URL, sesiones organicas, conv rate, conversiones)
+- Agrupa hallazgos en: Quick wins (pos 10-30), CTR underperformance, Canibalizacion, Paginas con trafico sin conversion, Queries en tendencia
+- Redondea: porcentajes a 1 decimal, posicion a 1 decimal
+- Siempre incluye el rango de fechas analizado
+- Terminar con una lista de acciones priorizada (que hacer esta semana, este mes, este trimestre)</div>
+    </div>
+
+    <div class="tip green">
+      <span class="tip-icon">&#10003;</span>
+      <span>Una vez creado el proyecto con estas instrucciones, cada chat nuevo dentro del proyecto ya esta configurado. Solo abri un chat y corre un prompt.</span>
+    </div>
+  </div>
+</div>
+
+<!-- ============ PROMPTS ============ -->
+<div class="divider"></div>
+
+<h2 class="section-title fade-up">Los 6 prompts</h2>
+<p class="section-subtitle fade-up">Abri un chat nuevo en tu proyecto y proba estos. Reemplaza <span class="context-tag">{tu contexto}</span> con el nombre del contexto que creaste en el Paso 2.</p>
+
+<div class="prompt-grid">
+
+  <div class="prompt-card fade-up">
+    <div class="prompt-top">
+      <div class="prompt-label">1 &middot; Quick-win SEO (la query estrella)</div>
+      <button class="copy-btn-light" onclick="copyText('Usando el contexto {tu contexto}, traeme las queries de Google Search Console rankeando entre posicion 10 y 30 con mas de 1000 impresiones mensuales y CTR menor a 1% en los ultimos 28 dias. Cruzalas con GA4: para la URL que rankea esa query, dame sesiones organicas y conversiones de los ultimos 28 dias. Ordena por impresiones descendente y marca las top 10 oportunidades.',this)">Copiar</button>
+    </div>
+    <div class="prompt-text">"Usando el contexto <span class="context-tag">{tu contexto}</span>, traeme las queries de Google Search Console rankeando entre posicion 10 y 30 con mas de 1000 impresiones mensuales y CTR menor a 1% en los ultimos 28 dias. Cruzalas con GA4: para la URL que rankea esa query, dame sesiones organicas y conversiones de los ultimos 28 dias. Ordena por impresiones descendente y marca las top 10 oportunidades."</div>
+    <div class="prompt-desc">La lista corta de iniciativas con mayor ROI por hora invertida. Google ya te muestra a la audiencia &mdash; solo falta mejorar contenido, expandir o recargar el meta para empujar 5-10 puntos de posicion sin escribir un articulo nuevo.</div>
+  </div>
+
+  <div class="prompt-card fade-up">
+    <div class="prompt-top">
+      <div class="prompt-label">2 &middot; CTR underperformance</div>
+      <button class="copy-btn-light" onclick="copyText('Usando el contexto {tu contexto}, traeme queries de GSC con mas de 500 impresiones en los ultimos 28 dias y CTR muy por debajo del benchmark de su posicion (pos 1 ~30%, pos 3 ~10%, pos 5 ~5%, pos 10 ~2%). Para cada una, mostrame query, posicion promedio, CTR actual, CTR esperado y el gap. Priorizar por clicks potenciales perdidos.',this)">Copiar</button>
+    </div>
+    <div class="prompt-text">"Usando el contexto <span class="context-tag">{tu contexto}</span>, traeme queries de GSC con mas de 500 impresiones en los ultimos 28 dias y CTR muy por debajo del benchmark de su posicion (pos 1 ~30%, pos 3 ~10%, pos 5 ~5%, pos 10 ~2%). Para cada una, mostrame query, posicion promedio, CTR actual, CTR esperado y el gap. Priorizar por clicks potenciales perdidos."</div>
+    <div class="prompt-desc">Cuando una query rankea bien pero nadie hace click, el problema casi siempre es el title o la meta description. Esta auditoria te lo muestra ordenado por impacto.</div>
+  </div>
+
+  <div class="prompt-card fade-up">
+    <div class="prompt-top">
+      <div class="prompt-label">3 &middot; Canibalizacion</div>
+      <button class="copy-btn-light" onclick="copyText('Usando el contexto {tu contexto}, identifica queries de GSC donde mas de una URL del sitio aparece en los resultados en los ultimos 28 dias. Para cada caso, mostrame la query, las URLs que estan rankeando, posicion promedio de cada una, impresiones y clicks. Sugeri que URL deberia ser la canonica y como consolidar.',this)">Copiar</button>
+    </div>
+    <div class="prompt-text">"Usando el contexto <span class="context-tag">{tu contexto}</span>, identifica queries de GSC donde mas de una URL del sitio aparece en los resultados en los ultimos 28 dias. Para cada caso, mostrame la query, las URLs que estan rankeando, posicion promedio de cada una, impresiones y clicks. Sugeri que URL deberia ser la canonica y como consolidar."</div>
+    <div class="prompt-desc">Canibalizacion = dos URLs tuyas peleando por la misma query, repartiendo la autoridad. Consolidar suele dar saltos de posicion grandes sin tocar contenido nuevo.</div>
+  </div>
+
+  <div class="prompt-card fade-up">
+    <div class="prompt-top">
+      <div class="prompt-label">4 &middot; Paginas con trafico sin conversion</div>
+      <button class="copy-btn-light" onclick="copyText('Usando el contexto {tu contexto}, dame las landing pages con trafico organico en GA4 de los ultimos 28 dias ordenadas por sesiones descendente. Filtra las que tienen mas de 200 sesiones organicas y conv rate por debajo del promedio del sitio. Cruzalas con GSC: para cada una, traeme las top queries que la rankean y posicion promedio. Marca las que serian quick-wins de CRO mas que de SEO.',this)">Copiar</button>
+    </div>
+    <div class="prompt-text">"Usando el contexto <span class="context-tag">{tu contexto}</span>, dame las landing pages con trafico organico en GA4 de los ultimos 28 dias ordenadas por sesiones descendente. Filtra las que tienen mas de 200 sesiones organicas y conv rate por debajo del promedio del sitio. Cruzalas con GSC: para cada una, traeme las top queries que la rankean y posicion promedio. Marca las que serian quick-wins de CRO mas que de SEO."</div>
+    <div class="prompt-desc">A veces el problema no es SEO &mdash; ya tenes el trafico, lo que falla es lo que pasa cuando aterrizan. Esta vista te separa "necesita mas trafico" de "necesita mejor pagina".</div>
+  </div>
+
+  <div class="prompt-card fade-up">
+    <div class="prompt-top">
+      <div class="prompt-label">5 &middot; Queries en tendencia</div>
+      <button class="copy-btn-light" onclick="copyText('Usando el contexto {tu contexto}, compara las queries de GSC de los ultimos 28 dias contra los 28 dias previos. Mostrame las top 15 queries con mayor crecimiento absoluto de impresiones y las top 15 con mayor caida. Para cada una incluye impresiones del periodo anterior, periodo actual, % de cambio y posicion promedio.',this)">Copiar</button>
+    </div>
+    <div class="prompt-text">"Usando el contexto <span class="context-tag">{tu contexto}</span>, compara las queries de GSC de los ultimos 28 dias contra los 28 dias previos. Mostrame las top 15 queries con mayor crecimiento absoluto de impresiones y las top 15 con mayor caida. Para cada una incluye impresiones del periodo anterior, periodo actual, % de cambio y posicion promedio."</div>
+    <div class="prompt-desc">Senal temprana: que esta apareciendo en SERPs nuevo y que esta cayendo. Lo que sube te dice donde apoyarte; lo que cae, donde mirar antes que duela.</div>
+  </div>
+
+  <div class="prompt-card fade-up">
+    <div class="prompt-top">
+      <div class="prompt-label">6 &middot; Hidden gems &mdash; paginas que convierten poco visibles</div>
+      <button class="copy-btn-light" onclick="copyText('Usando el contexto {tu contexto}, dame las landing pages con conv rate organico arriba del promedio del sitio en GA4 (ultimos 28 dias) pero menos de 500 sesiones organicas. Cruzalas con GSC: para cada una, traeme la query que mas impresiones le trae y su posicion promedio. Estas son las paginas donde mas SEO traffic = mas conversiones casi linealmente. Prioriza por conv rate descendente.',this)">Copiar</button>
+    </div>
+    <div class="prompt-text">"Usando el contexto <span class="context-tag">{tu contexto}</span>, dame las landing pages con conv rate organico arriba del promedio del sitio en GA4 (ultimos 28 dias) pero menos de 500 sesiones organicas. Cruzalas con GSC: para cada una, traeme la query que mas impresiones le trae y su posicion promedio. Estas son las paginas donde mas SEO traffic = mas conversiones casi linealmente. Prioriza por conv rate descendente."</div>
+    <div class="prompt-desc">El inverso del Prompt 4: paginas que ya estan convirtiendo bien y necesitan mas atencion SEO. Empujar estas en SERPs es plata directa.</div>
+  </div>
+
+</div>
+
+<!-- ============ FLOW ============ -->
+<div class="divider"></div>
+
+<h2 class="section-title fade-up">El flujo completo</h2>
+<br>
+
+<div class="flow fade-up">
+  <div class="flow-sources">
+    <div class="flow-node">
+      <div class="flow-icon">
+        <img src="https://storage.googleapis.com/detrics-static/public/img/google-search-console-logo.png" alt="Google Search Console">
+      </div>
+      <span class="flow-label">GSC</span>
+    </div>
+    <div class="flow-node">
+      <div class="flow-icon">
+        <img src="https://storage.googleapis.com/detrics-static/public/img/google-analytics-4-logo.png" alt="Google Analytics 4">
+      </div>
+      <span class="flow-label">GA4</span>
+    </div>
+  </div>
+  <span class="flow-arrow">&rarr;</span>
+  <div class="flow-node">
+    <div class="flow-icon" style="border-color: var(--blue); background: #EFF6FF;">
+      <img src="https://detrics.io/_astro/detrics-logo.C-sT4k0h_ZovnhR.svg" alt="Detrics" style="width: 40px; height: 32px;">
+    </div>
+    <span class="flow-label">Detrics MCP</span>
+  </div>
+  <span class="flow-arrow">&rarr;</span>
+  <div class="flow-node">
+    <div class="flow-icon">
+      <img src="https://storage.googleapis.com/detrics-static/public/img/claude-logo.png" alt="Claude">
+    </div>
+    <span class="flow-label">Claude</span>
+  </div>
+  <span class="flow-arrow">&rarr;</span>
+  <div class="flow-node">
+    <div class="flow-icon" style="border-color: var(--green); background: var(--green-bg);">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+    </div>
+    <span class="flow-label">Quick-wins SEO</span>
+  </div>
+</div>
+
+<!-- ============ CTA ============ -->
+<div class="cta-section fade-up">
+  <h2>Listo para empezar?</h2>
+  <p>Crea tu cuenta en Detrics (tiene plan gratuito) y segui estos pasos.</p>
+  <a href="https://detrics.io/get-started" target="_blank" rel="noopener" class="cta-button">
+    Crear cuenta gratis
+    <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+  </a>
+</div>
+
+</div><!-- /container -->
+
+<!-- ============ FOOTER ============ -->
+<div class="footer">
+  <p><a href="https://detrics.io" target="_blank" rel="noopener">detrics.io</a> &mdash; Automatiza tu pipeline de datos de marketing</p>
+</div>
+
+<!-- Scripts -->
+<script>
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 80);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+  function openLightbox(el) {
+    const img = el.querySelector('img');
+    if (!img) return;
+    const lb = document.getElementById('lightbox');
+    document.getElementById('lightbox-img').src = img.src;
+    lb.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('active');
+    document.body.style.overflow = '';
+  }
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLightbox(); });
+
+  function copyText(text, btn) {
+    navigator.clipboard.writeText(text).then(() => {
+      const orig = btn.textContent;
+      btn.textContent = 'Copiado!';
+      btn.style.color = '#10B981';
+      setTimeout(() => { btn.textContent = orig; btn.style.color = ''; }, 2000);
+    });
+  }
+</script>
+
+</body>
+</html>
