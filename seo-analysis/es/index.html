@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Detrics + Claude — Find your quick-win SEO opportunities with GSC + GA4</title>
+<title>Detrics + Claude — Encontrá tus quick-win SEO con GSC + GA4</title>
 <link rel="icon" type="image/png" href="/favicon.png">
 <link rel="apple-touch-icon" href="/favicon.png">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -91,7 +91,7 @@
 
   .screenshot { border: 1px solid var(--gray-200); border-radius: 12px; overflow: hidden; margin: 20px 0; background: var(--gray-50); cursor: pointer; transition: box-shadow 0.3s; position: relative; }
   .screenshot:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
-  .screenshot::after { content: 'Click to enlarge'; position: absolute; bottom: 0; left: 0; right: 0; padding: 6px; background: linear-gradient(transparent, rgba(0,0,0,0.5)); color: white; font-size: 11px; text-align: center; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+  .screenshot::after { content: 'Click para ampliar'; position: absolute; bottom: 0; left: 0; right: 0; padding: 6px; background: linear-gradient(transparent, rgba(0,0,0,0.5)); color: white; font-size: 11px; text-align: center; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
   .screenshot:hover::after { opacity: 1; }
   .screenshot img { width: 100%; display: block; object-fit: contain; }
   .screenshot-caption { padding: 10px 16px; font-size: 12px; color: var(--gray-400); text-align: center; border-top: 1px solid var(--gray-100); font-style: italic; background: var(--surface); }
@@ -216,9 +216,9 @@
 <!-- ============ HERO ============ -->
 <section class="hero">
   <div class="hero-content">
-    <div class="hero-badge">Step-by-step guide</div>
-    <h1>Turn Claude into your <span>SEO analyst with GSC + GA4</span></h1>
-    <p>Connect Google Search Console and Google Analytics 4 to Claude through Detrics. In 5 minutes, Claude surfaces the keywords with the highest ROI per hour invested &mdash; cross-referencing impressions, position, CTR, and real sessions.</p>
+    <div class="hero-badge">Guia paso a paso</div>
+    <h1>Converti a Claude en tu <span>analista SEO con GSC + GA4</span></h1>
+    <p>Conecta Google Search Console y Google Analytics 4 a Claude a traves de Detrics. En 5 minutos, Claude te encuentra las keywords con mayor ROI por hora invertida &mdash; cruzando impresiones, posicion, CTR y sesiones reales.</p>
     <div class="hero-logos">
       <img src="https://storage.googleapis.com/detrics-static/public/img/google-search-console-logo.png" alt="Google Search Console">
       <img src="https://storage.googleapis.com/detrics-static/public/img/google-analytics-4-logo.png" alt="Google Analytics 4">
@@ -226,7 +226,7 @@
       <img src="https://storage.googleapis.com/detrics-static/public/img/claude-logo.png" alt="Claude">
     </div>
     <br>
-    <div class="hero-time">Full setup: ~5 minutes &middot; 6 prompts inside</div>
+    <div class="hero-time">Setup completo: ~5 minutos &middot; 6 prompts adentro</div>
   </div>
 </section>
 
@@ -234,17 +234,17 @@
 
 <!-- ============ INTRO ============ -->
 <div class="intro fade-up">
-  <p>This guide shows you how to connect Google Search Console and GA4 to Claude using the Detrics MCP. Once you finish, you'll be able to ask Claude things like "bring me keywords ranking in positions 10-30 with CTR below 1% and 1,000+ monthly impressions, cross-referenced with GA4 sessions" &mdash; and get back a list of real opportunities, not guesses. Includes 6 ready-to-paste prompts for full SEO audits.</p>
+  <p>Esta guia te muestra como conectar Google Search Console y GA4 a Claude usando el MCP de Detrics. Al terminar, vas a poder preguntarle cosas como "traeme keywords ranking en posicion 10-30 con CTR menor a 1% y mas de 1000 impresiones, cruzado con sesiones de GA4" &mdash; y recibir una lista de oportunidades reales, no adivinanzas. Incluye 6 prompts listos para copiar y pegar para auditorias SEO completas.</p>
 </div>
 
 <!-- ============ STEP 1 ============ -->
 <div class="step fade-up">
   <div class="step-header">
     <div class="step-number">1</div>
-    <h2>Connect your data sources <small>Google Search Console + Google Analytics 4</small></h2>
+    <h2>Conecta tus fuentes de datos <small>Google Search Console + Google Analytics 4</small></h2>
   </div>
   <div class="step-body">
-    <p>Go to Data Sources in Detrics and connect both Google Search Console and GA4. If they're already connected, verify they're active.</p>
+    <p>Entra a la seccion de Data Sources en Detrics y conecta Google Search Console y GA4. Si ya las tenias conectadas, verifica que esten activas.</p>
 
     <div class="url-box">
       <div class="url-icon">
@@ -265,24 +265,24 @@
     </div>
 
     <div class="screenshot" onclick="openLightbox(this)">
-      <img src="images/datasources.png" alt="Data Sources in Detrics showing Google Search Console and GA4 connected">
-      <div class="screenshot-caption">Data Sources in Detrics: connect GSC and GA4</div>
+      <img src="../images/datasources.png" alt="Data Sources en Detrics mostrando Google Search Console y GA4 conectados">
+      <div class="screenshot-caption">Seccion de Data Sources en Detrics: conecta GSC y GA4</div>
     </div>
 
     <ul>
-      <li>Click <strong>Google Search Console</strong> and authorize with the account that owns your property</li>
-      <li>Click <strong>Google Analytics 4</strong> and authorize with the account that has access to your property</li>
-      <li>Verify both show <strong>Connected</strong> (green)</li>
+      <li>Click en <strong>Google Search Console</strong> y autoriza con la cuenta que tiene acceso a tu propiedad</li>
+      <li>Click en <strong>Google Analytics 4</strong> y autoriza con la cuenta que tiene acceso a tu property</li>
+      <li>Verifica que las dos esten en estado <strong>Connected</strong> (verde)</li>
     </ul>
 
     <div class="tip green">
       <span class="tip-icon">&#10003;</span>
-      <span>If you're already a Detrics user with GSC + GA4 connected, skip to Step 2.</span>
+      <span>Si ya sos usuario de Detrics y tenes GSC + GA4 conectados, saltea al Paso 2.</span>
     </div>
 
     <div class="tip amber">
       <span class="tip-icon">&#9733;</span>
-      <span>Connect both: GSC without GA4 gives you impressions and CTR; GA4 without GSC gives you sessions and conversions. The cross-reference is where the real opportunities show up.</span>
+      <span>Conecta las dos: GSC sin GA4 te da impresiones y CTR; GA4 sin GSC te da sesiones y conversiones. El cruce es donde aparecen las oportunidades reales.</span>
     </div>
   </div>
 </div>
@@ -291,10 +291,10 @@
 <div class="step fade-up">
   <div class="step-header">
     <div class="step-number">2</div>
-    <h2>Create an AI Context <small>Group the GSC property + GA4 property of the same site</small></h2>
+    <h2>Crea un AI Context <small>Agrupa la propiedad GSC + GA4 de un mismo sitio</small></h2>
   </div>
   <div class="step-body">
-    <p>A Context groups accounts that belong to the same client or project. For SEO analysis, you bundle the GSC property and the GA4 property of the same domain into one context. That way Claude knows exactly what to query and can cross-reference both sources automatically.</p>
+    <p>Un Context es una agrupacion de cuentas que pertenecen a un mismo cliente o proyecto. Para analisis SEO, juntas en el mismo contexto la propiedad de GSC y la property de GA4 del mismo dominio. Asi Claude sabe exactamente que consultar y puede cruzar la data automaticamente.</p>
 
     <div class="url-box">
       <div class="url-icon">
@@ -304,20 +304,20 @@
     </div>
 
     <div class="screenshot" onclick="openLightbox(this)">
-      <img src="images/contexts-view.png" alt="AI Contexts view in Detrics with sidebar and New Context button">
-      <div class="screenshot-caption">AI Contexts view in Detrics: each context groups one client's accounts. Click "+ New Context" to create one.</div>
+      <img src="../images/contexts-view.png" alt="Vista de AI Contexts en Detrics con sidebar y boton New Context">
+      <div class="screenshot-caption">Vista de AI Contexts en Detrics: cada contexto agrupa las cuentas de un cliente. Click en "+ New Context" para crear uno.</div>
     </div>
 
     <ul>
-      <li>Click <strong>"Create Context"</strong></li>
-      <li>Give it a descriptive name (e.g., "SEO &mdash; Client ABC" or "SEO &mdash; mydomain.com")</li>
-      <li>Select the <strong>GSC property</strong> and the <strong>GA4 property</strong> of the same site</li>
-      <li>Save the context</li>
+      <li>Hace click en <strong>"Create Context"</strong></li>
+      <li>Dale un nombre descriptivo (ej: "SEO &mdash; Cliente ABC" o "SEO &mdash; midominio.com")</li>
+      <li>Selecciona la <strong>propiedad de GSC</strong> y la <strong>property de GA4</strong> del mismo sitio</li>
+      <li>Guarda el contexto</li>
     </ul>
 
     <div class="tip amber">
       <span class="tip-icon">&#9733;</span>
-      <span>If you manage SEO for multiple clients, create one context per site. Claude never mixes data across contexts &mdash; or across GSC/GA4 cross-references.</span>
+      <span>Si manejas SEO para varios clientes, crea un contexto por sitio. Claude nunca mezcla la data entre contextos &mdash; ni el cruce GSC/GA4.</span>
     </div>
   </div>
 </div>
@@ -326,76 +326,76 @@
 <div class="step fade-up">
   <div class="step-header">
     <div class="step-number">3</div>
-    <h2>Set up the Detrics MCP in Claude <small>~30 seconds, no installs</small></h2>
+    <h2>Configura el MCP de Detrics en Claude <small>~30 segundos, sin instalar nada</small></h2>
   </div>
   <div class="step-body">
-    <p>Now we connect Claude with Detrics. The MCP (Model Context Protocol) gives Claude direct access to your marketing data. No installs &mdash; it's all configured from claude.ai.</p>
+    <p>Ahora conectamos Claude con Detrics. El MCP (Model Context Protocol) le da a Claude acceso directo a tus datos de marketing. No necesitas instalar nada &mdash; se configura desde claude.ai.</p>
 
     <ol class="substeps">
-      <li>Open <a href="https://claude.ai" target="_blank" rel="noopener"><strong>claude.ai</strong></a> and log in</li>
-      <li>Click on your profile (bottom left) &rarr; <strong>Settings</strong>
+      <li>Abri <a href="https://claude.ai" target="_blank" rel="noopener"><strong>claude.ai</strong></a> y logueate con tu cuenta</li>
+      <li>Click en tu perfil (abajo a la izquierda) &rarr; <strong>Settings</strong>
         <div class="screenshot" onclick="openLightbox(this)" style="margin-top: 12px;">
-          <img src="images/claude-settings.png" alt="Claude - click Settings from the profile menu">
-          <div class="screenshot-caption">Open Settings from your profile menu</div>
+          <img src="../images/claude-settings.png" alt="Claude - click en Settings desde el menu de perfil">
+          <div class="screenshot-caption">Abri Settings desde el menu de tu perfil</div>
         </div>
       </li>
-      <li>In the sidebar, click <strong>Connectors</strong>
+      <li>En el sidebar, click en <strong>Connectors</strong>
         <div class="screenshot" onclick="openLightbox(this)" style="margin-top: 12px;">
-          <img src="images/claude-connectors-page.png" alt="Connectors page in Claude Settings">
-          <div class="screenshot-caption">Connectors page in Claude Settings</div>
+          <img src="../images/claude-connectors-page.png" alt="Pagina de Connectors en Claude Settings">
+          <div class="screenshot-caption">Pagina de Connectors en Claude Settings</div>
         </div>
       </li>
-      <li>Click <strong>"Add custom connector"</strong>
+      <li>Click en <strong>"Add custom connector"</strong>
         <div class="screenshot" onclick="openLightbox(this)" style="margin-top: 12px;">
-          <img src="images/add-custom-connector-btn.png" alt="Add custom connector button on the Connectors page">
-          <div class="screenshot-caption">Click "Add custom connector" at the bottom of the list</div>
+          <img src="../images/add-custom-connector-btn.png" alt="Boton Add custom connector en la pagina de Connectors">
+          <div class="screenshot-caption">Click en "Add custom connector" al final de la lista</div>
         </div>
       </li>
-      <li>Enter the connector details:
+      <li>Ingresa los datos del connector:
         <div class="field-input">
           <div>
             <div class="field-label">Name</div>
             <div class="field-value">
               <span class="text">Detrics</span>
-              <button class="copy-btn-light" onclick="copyText('Detrics',this)">Copy</button>
+              <button class="copy-btn-light" onclick="copyText('Detrics',this)">Copiar</button>
             </div>
           </div>
           <div style="flex: 2; min-width: 280px;">
             <div class="field-label">URL</div>
             <div class="field-value url">
               <span class="text">https://mcp.detrics.io</span>
-              <button class="copy-btn-light" onclick="copyText('https://mcp.detrics.io',this)">Copy</button>
+              <button class="copy-btn-light" onclick="copyText('https://mcp.detrics.io',this)">Copiar</button>
             </div>
           </div>
         </div>
         <div class="screenshot" onclick="openLightbox(this)" style="margin-top: 12px;">
-          <img src="images/add-custom-connector.png" alt="Add custom connector dialog in Claude with Name: Detrics and URL: https://mcp.detrics.io">
-          <div class="screenshot-caption">Enter "Detrics" as the name and "https://mcp.detrics.io" as the URL</div>
+          <img src="../images/add-custom-connector.png" alt="Dialogo Add custom connector en Claude con Name: Detrics y URL: https://mcp.detrics.io">
+          <div class="screenshot-caption">Ingresa "Detrics" como nombre y "https://mcp.detrics.io" como URL</div>
         </div>
       </li>
-      <li>Click <strong>Connect</strong>
+      <li>Click en <strong>Connect</strong>
         <div class="screenshot" onclick="openLightbox(this)" style="margin-top: 12px;">
-          <img src="images/detrics-connect.png" alt="Detrics shows up as a custom connector - click Connect">
-          <div class="screenshot-caption">Detrics appears as a custom connector &mdash; click "Connect"</div>
+          <img src="../images/detrics-connect.png" alt="Detrics aparece como custom connector - click en Connect">
+          <div class="screenshot-caption">Detrics aparece como connector custom &mdash; click en "Connect"</div>
         </div>
       </li>
-      <li><strong>Authorize</strong> access &mdash; follow the Detrics authorization flow
+      <li><strong>Autoriza</strong> el acceso &mdash; segui el flujo de autorizacion de Detrics
         <div class="screenshot" onclick="openLightbox(this)" style="margin-top: 12px;">
-          <img src="images/detrics-authorize.png" alt="Detrics MCP authorization screen">
-          <div class="screenshot-caption">Authorize Claude to access your Detrics data</div>
+          <img src="../images/detrics-authorize.png" alt="Pantalla de autorizacion de Detrics MCP">
+          <div class="screenshot-caption">Autoriza a Claude para acceder a tus datos de Detrics</div>
         </div>
       </li>
-      <li>Verify it works: open a new chat and ask Claude <code>What contexts do you see for Detrics?</code>
+      <li>Verifica que funciona: abri un chat nuevo y preguntale a Claude <code>Que contextos ves para Detrics?</code>
         <div class="screenshot" onclick="openLightbox(this)" style="margin-top: 12px;">
-          <img src="images/claude-connectors.png" alt="Connectors in Claude with Detrics enabled">
-          <div class="screenshot-caption">Detrics appears as an active connector (blue toggle) in Claude</div>
+          <img src="../images/claude-connectors.png" alt="Connectors en Claude con Detrics activado">
+          <div class="screenshot-caption">Detrics aparece como connector activo (toggle azul) en Claude</div>
         </div>
       </li>
     </ol>
 
     <div class="tip green">
       <span class="tip-icon">&#10003;</span>
-      <span>You don't need to install Claude Desktop. Everything runs from <strong>claude.ai</strong> in the browser.</span>
+      <span>No necesitas instalar Claude Desktop. Todo funciona desde <strong>claude.ai</strong> en el navegador.</span>
     </div>
   </div>
 </div>
@@ -404,102 +404,102 @@
 <div class="step fade-up">
   <div class="step-header">
     <div class="step-number">4</div>
-    <h2>Create your SEO Analyst project <small>This is the step that makes the magic happen</small></h2>
+    <h2>Crea tu proyecto de Analista SEO <small>El paso que hace la magia</small></h2>
   </div>
   <div class="step-body">
-    <p>Now we're going to create a <strong>Project in Claude</strong> with specific instructions so it behaves like a senior SEO analyst that cross-references GSC + GA4. This is what turns Claude from a generic chatbot into your on-demand SEO auditor.</p>
+    <p>Ahora vamos a crear un <strong>Proyecto en Claude</strong> con instrucciones especificas para que se comporte como un analista SEO senior que cruza GSC + GA4. Esto es lo que transforma a Claude de un chatbot generico en tu auditor SEO on-demand.</p>
 
-    <h3 style="font-size:16px; margin: 24px 0 12px; color: var(--ink);">How to create the project</h3>
+    <h3 style="font-size:16px; margin: 24px 0 12px; color: var(--ink);">Como crear el proyecto</h3>
 
     <ol class="substeps">
-      <li>In the left sidebar of claude.ai, click <strong>"Projects"</strong>
+      <li>En el sidebar izquierdo de claude.ai, hace click en <strong>"Projects"</strong>
         <div class="screenshot" onclick="openLightbox(this)" style="margin-top: 12px;">
-          <img src="images/claude-projects-sidebar.png" alt="Claude sidebar showing the Projects option">
-          <div class="screenshot-caption">Find "Projects" in Claude's left sidebar</div>
+          <img src="../images/claude-projects-sidebar.png" alt="Sidebar de Claude mostrando la opcion Projects">
+          <div class="screenshot-caption">Encontra "Projects" en el sidebar izquierdo de Claude</div>
         </div>
       </li>
-      <li>Click <strong>"+ New project"</strong>
+      <li>Click en <strong>"+ New project"</strong>
         <div class="screenshot" onclick="openLightbox(this)" style="margin-top: 12px;">
-          <img src="images/new-project-btn.png" alt="New project button on the Projects page">
-          <div class="screenshot-caption">Click "+ New project" in the top right</div>
+          <img src="../images/new-project-btn.png" alt="Boton New project en la pagina de Projects">
+          <div class="screenshot-caption">Click en "+ New project" arriba a la derecha</div>
         </div>
       </li>
-      <li>Fill in the project details:
+      <li>Completa los datos del proyecto:
         <div style="margin-top: 8px;">
           <p style="font-size: 14px; margin-bottom: 8px;"><strong>Name:</strong></p>
           <div class="copyable-field">
-            <span class="cf-text">Detrics MCP - SEO Analyst (GSC + GA4)</span>
-            <button class="copy-btn-light" onclick="copyText('Detrics MCP - SEO Analyst (GSC + GA4)',this)">Copy</button>
+            <span class="cf-text">Detrics MCP - Analista SEO (GSC + GA4)</span>
+            <button class="copy-btn-light" onclick="copyText('Detrics MCP - Analista SEO (GSC + GA4)',this)">Copiar</button>
           </div>
           <p style="font-size: 14px; margin-bottom: 8px;"><strong>Description:</strong></p>
           <div class="copyable-field">
-            <span class="cf-text">On-demand SEO audits cross-referencing Google Search Console + GA4: quick-win keywords (position 10-30), CTR opportunities, cannibalization, pages with traffic but no conversions, and trending queries.</span>
-            <button class="copy-btn-light" onclick="copyText('On-demand SEO audits cross-referencing Google Search Console + GA4: quick-win keywords (position 10-30), CTR opportunities, cannibalization, pages with traffic but no conversions, and trending queries.',this)">Copy</button>
+            <span class="cf-text">Auditorias SEO on-demand cruzando Google Search Console + GA4: quick-win keywords (posicion 10-30), oportunidades de CTR, canibalizacion, paginas con trafico sin conversiones y queries en tendencia.</span>
+            <button class="copy-btn-light" onclick="copyText('Auditorias SEO on-demand cruzando Google Search Console + GA4: quick-win keywords (posicion 10-30), oportunidades de CTR, canibalizacion, paginas con trafico sin conversiones y queries en tendencia.',this)">Copiar</button>
           </div>
         </div>
         <div class="screenshot" onclick="openLightbox(this)" style="margin-top: 12px;">
-          <img src="images/edit-project-details.png" alt="Edit project details dialog in Claude">
-          <div class="screenshot-caption">Fill in the project name and description</div>
+          <img src="../images/edit-project-details.png" alt="Dialogo Edit details del proyecto en Claude">
+          <div class="screenshot-caption">Completa el nombre y la descripcion del proyecto</div>
         </div>
       </li>
-      <li>Once the project is created, go to the <strong>"Instructions"</strong> section (right panel) and paste the instructions below. This tells Claude how to think about and analyze your SEO.
+      <li>Una vez creado el proyecto, anda a la seccion <strong>"Instructions"</strong> (panel derecho) y pega las instrucciones de abajo. Esto le dice a Claude como pensar y analizar tu SEO.
         <div class="screenshot" onclick="openLightbox(this)" style="margin-top: 12px;">
-          <img src="images/project-instructions.png" alt="Project Instructions section in Claude">
-          <div class="screenshot-caption">Instructions go in the project's "Instructions" section &mdash; not in the description</div>
+          <img src="../images/project-instructions.png" alt="Seccion de Instructions del proyecto en Claude">
+          <div class="screenshot-caption">Las instrucciones van en la seccion "Instructions" del proyecto &mdash; no en la descripcion</div>
         </div>
       </li>
     </ol>
 
-    <h3 style="font-size:16px; margin: 24px 0 12px; color: var(--ink);">Project instructions</h3>
-    <p>Copy and paste this into the <strong>Instructions</strong> section of your project:</p>
+    <h3 style="font-size:16px; margin: 24px 0 12px; color: var(--ink);">Instrucciones del proyecto</h3>
+    <p>Copia y pega esto en la seccion <strong>Instructions</strong> de tu proyecto:</p>
 
     <div class="code-block">
       <div class="code-header">
-        <span>Project Instructions &mdash; SEO Analyst (GSC + GA4)</span>
-        <button class="copy-btn" onclick="copyText(document.getElementById('project-instructions').innerText,this)">Copy</button>
+        <span>Project Instructions &mdash; Analista SEO (GSC + GA4)</span>
+        <button class="copy-btn" onclick="copyText(document.getElementById('project-instructions').innerText,this)">Copiar</button>
       </div>
-      <div class="code-body" id="project-instructions">You are a senior SEO analyst with 10+ years of experience in organic search. You have access to real Google Search Console and Google Analytics 4 data through the Detrics MCP, and you always cross-reference both sources before recommending.
+      <div class="code-body" id="project-instructions">Sos un analista SEO senior con 10+ anos de experiencia en search organico. Tenes acceso a datos reales de Google Search Console y Google Analytics 4 a traves del MCP de Detrics, y siempre cruzas las dos fuentes antes de recomendar.
 
-<span class="comment">## Your expertise</span>
-- Technical SEO, on-page, content, and intent matching
-- Reading GSC: queries, pages, average position, impressions, clicks, CTR
-- Reading GA4: landing pages, organic sessions, engagement, conversions, conv rate
-- Cross-referencing GSC + GA4 by landing page to find higher-ROI-per-hour opportunities
-- Detecting cannibalization, CTR underperformance vs position benchmark, and trending queries
+<span class="comment">## Tu expertise</span>
+- SEO tecnico, on-page, content y intent matching
+- Lectura de GSC: queries, paginas, posicion promedio, impresiones, clicks, CTR
+- Lectura de GA4: landing pages, sesiones organicas, engagement, conversiones, conv rate
+- Cruce GSC + GA4 por landing page para detectar oportunidades de mayor ROI por hora invertida
+- Deteccion de canibalizacion, CTR underperformance vs benchmark de posicion, y queries en tendencia
 
-<span class="comment">## Analysis framework</span>
-Every query and every landing page is evaluated on three axes:
-- <span class="highlight">Visibility</span>: GSC impressions, average position, impression trend
-- <span class="highlight">Capture efficiency</span>: CTR vs benchmark for its position (pos 1 ~30%, pos 5 ~5%, pos 10 ~2%)
-- <span class="highlight">Conversion</span>: GA4 organic sessions, engagement rate, conversions / conv rate
+<span class="comment">## Framework de analisis</span>
+Cada query y cada landing page se evalua sobre tres ejes:
+- <span class="highlight">Visibilidad</span>: impresiones GSC, posicion promedio, tendencia de impresiones
+- <span class="highlight">Eficiencia de captura</span>: CTR vs benchmark de su posicion (pos 1 ~30%, pos 5 ~5%, pos 10 ~2%)
+- <span class="highlight">Conversion</span>: sesiones organicas en GA4, engagement rate, conversiones / conv rate
 
-<span class="comment">## How you work</span>
-1. First, list the available contexts and pick the one relevant for SEO
-2. Query GSC data at the query level and at the page level with clear date ranges (last 28 days by default)
-3. Query GA4 data at the landing page level, filtering for organic traffic
-4. Cross-reference both sources by URL when relevant: GSC tells you how people arrive, GA4 tells you what happens next
-5. Compare periods: last 28 days vs prior 28 days, or month over month
-6. Analyze &mdash; don't just list queries, interpret them
+<span class="comment">## Como trabajas</span>
+1. Primero lista los contextos disponibles y elegi el relevante para SEO
+2. Consulta data de GSC a nivel query y a nivel pagina con rangos de fecha claros (ultimos 28 dias por default)
+3. Consulta data de GA4 a nivel landing page filtrando por trafico organico
+4. Crucca las dos fuentes por URL cuando sea relevante: GSC te dice como se llega, GA4 que pasa despues
+5. Compara periodos: ultimos 28 dias vs 28 dias previos, o mes vs mes
+6. Analiza &mdash; no solo listes queries, interpretalas
 
-<span class="comment">## Principles</span>
-- Always quantify: "query X has 4,200 impressions, position 14, CTR 0.6% &mdash; moving it to top 10 should bring ~80 additional clicks/month", not "X has potential"
-- Prioritize by impact: start with the biggest volume of impressions x estimated CTR delta
-- Be specific and actionable: "rewrite title", "add FAQ schema", "expand section X", "merge URL A with URL B (cannibalization)"
-- When cross-referencing with GA4: if a page has lots of organic sessions but a low conv rate, the problem isn't SEO &mdash; it's on-page/CTA
-- Separate signal from noise: a 10% drop in a low-volume query is not the same as 10% across top queries
-- Flag data issues: if GA4 doesn't have organic channel set up correctly or GSC doesn't have the right property, suggest reviewing the setup
+<span class="comment">## Principios</span>
+- Siempre cuantifica: "la query X tiene 4,200 impresiones, posicion 14, CTR 0.6% &mdash; mover a top 10 deberia traer ~80 clicks/mes adicionales", no "X tiene potencial"
+- Prioriza por impacto: arranca por las oportunidades de mayor volumen de impresiones x delta de CTR estimado
+- Se especifico y accionable: "reescribir title", "agregar FAQ schema", "expandir seccion X", "fusionar URL A con URL B (canibalizacion)"
+- Cuando cruzas con GA4: si una pagina tiene muchas sesiones organicas pero conv rate bajo, el problema no es SEO &mdash; es on-page/CTA
+- Separa senal de ruido: 10% de caida en una query de bajo volumen no es lo mismo que 10% en queries top
+- Flaguea problemas de data: si GA4 no tiene canal organico configurado o GSC no tiene la propiedad correcta, sugeri revisar el setup
 
-<span class="comment">## Response format</span>
-- Tables for query lists (query, impressions, clicks, CTR, position) and page lists (URL, organic sessions, conv rate, conversions)
-- Group findings into: Quick wins (pos 10-30), CTR underperformance, Cannibalization, Pages with traffic but no conversion, Trending queries
-- Round: percentages to 1 decimal, position to 1 decimal
-- Always include the date range analyzed
-- End with a prioritized action list (what to do this week, this month, this quarter)</div>
+<span class="comment">## Formato de respuesta</span>
+- Tablas para listas de queries (query, impresiones, clicks, CTR, posicion) y paginas (URL, sesiones organicas, conv rate, conversiones)
+- Agrupa hallazgos en: Quick wins (pos 10-30), CTR underperformance, Canibalizacion, Paginas con trafico sin conversion, Queries en tendencia
+- Redondea: porcentajes a 1 decimal, posicion a 1 decimal
+- Siempre incluye el rango de fechas analizado
+- Terminar con una lista de acciones priorizada (que hacer esta semana, este mes, este trimestre)</div>
     </div>
 
     <div class="tip green">
       <span class="tip-icon">&#10003;</span>
-      <span>Once the project is set up with these instructions, every new chat inside the project is already configured. Just open a chat and run a prompt.</span>
+      <span>Una vez creado el proyecto con estas instrucciones, cada chat nuevo dentro del proyecto ya esta configurado. Solo abri un chat y corre un prompt.</span>
     </div>
   </div>
 </div>
@@ -507,63 +507,63 @@ Every query and every landing page is evaluated on three axes:
 <!-- ============ PROMPTS ============ -->
 <div class="divider"></div>
 
-<h2 class="section-title fade-up">The 6 prompts</h2>
-<p class="section-subtitle fade-up">Open a new chat in your project and try these. Replace <span class="context-tag">{your context}</span> with the name of the context you created in Step 2.</p>
+<h2 class="section-title fade-up">Los 6 prompts</h2>
+<p class="section-subtitle fade-up">Abri un chat nuevo en tu proyecto y proba estos. Reemplaza <span class="context-tag">{tu contexto}</span> con el nombre del contexto que creaste en el Paso 2.</p>
 
 <div class="prompt-grid">
 
   <div class="prompt-card fade-up">
     <div class="prompt-top">
-      <div class="prompt-label">1 &middot; Quick-win SEO (the headline prompt)</div>
-      <button class="copy-btn-light" onclick="copyText('Using context {your context}, bring me the Google Search Console queries ranking between position 10 and 30 with more than 1,000 monthly impressions and CTR below 1% in the last 28 days. Cross-reference them with GA4: for the URL ranking each query, give me organic sessions and conversions in the last 28 days. Sort by impressions descending and highlight the top 10 opportunities.',this)">Copy</button>
+      <div class="prompt-label">1 &middot; Quick-win SEO (la query estrella)</div>
+      <button class="copy-btn-light" onclick="copyText('Usando el contexto {tu contexto}, traeme las queries de Google Search Console rankeando entre posicion 10 y 30 con mas de 1000 impresiones mensuales y CTR menor a 1% en los ultimos 28 dias. Cruzalas con GA4: para la URL que rankea esa query, dame sesiones organicas y conversiones de los ultimos 28 dias. Ordena por impresiones descendente y marca las top 10 oportunidades.',this)">Copiar</button>
     </div>
-    <div class="prompt-text">"Using context <span class="context-tag">{your context}</span>, bring me the Google Search Console queries ranking between position 10 and 30 with more than 1,000 monthly impressions and CTR below 1% in the last 28 days. Cross-reference them with GA4: for the URL ranking each query, give me organic sessions and conversions in the last 28 days. Sort by impressions descending and highlight the top 10 opportunities."</div>
-    <div class="prompt-desc">The short list of initiatives with the highest ROI per hour invested. Google already shows you to the audience &mdash; all that's missing is better content, expansion, or a meta refresh to push 5-10 position points without writing a new article.</div>
+    <div class="prompt-text">"Usando el contexto <span class="context-tag">{tu contexto}</span>, traeme las queries de Google Search Console rankeando entre posicion 10 y 30 con mas de 1000 impresiones mensuales y CTR menor a 1% en los ultimos 28 dias. Cruzalas con GA4: para la URL que rankea esa query, dame sesiones organicas y conversiones de los ultimos 28 dias. Ordena por impresiones descendente y marca las top 10 oportunidades."</div>
+    <div class="prompt-desc">La lista corta de iniciativas con mayor ROI por hora invertida. Google ya te muestra a la audiencia &mdash; solo falta mejorar contenido, expandir o recargar el meta para empujar 5-10 puntos de posicion sin escribir un articulo nuevo.</div>
   </div>
 
   <div class="prompt-card fade-up">
     <div class="prompt-top">
       <div class="prompt-label">2 &middot; CTR underperformance</div>
-      <button class="copy-btn-light" onclick="copyText('Using context {your context}, bring me GSC queries with more than 500 impressions in the last 28 days and CTR well below the benchmark for their position (pos 1 ~30%, pos 3 ~10%, pos 5 ~5%, pos 10 ~2%). For each, show me query, average position, actual CTR, expected CTR, and the gap. Prioritize by potential clicks lost.',this)">Copy</button>
+      <button class="copy-btn-light" onclick="copyText('Usando el contexto {tu contexto}, traeme queries de GSC con mas de 500 impresiones en los ultimos 28 dias y CTR muy por debajo del benchmark de su posicion (pos 1 ~30%, pos 3 ~10%, pos 5 ~5%, pos 10 ~2%). Para cada una, mostrame query, posicion promedio, CTR actual, CTR esperado y el gap. Priorizar por clicks potenciales perdidos.',this)">Copiar</button>
     </div>
-    <div class="prompt-text">"Using context <span class="context-tag">{your context}</span>, bring me GSC queries with more than 500 impressions in the last 28 days and CTR well below the benchmark for their position (pos 1 ~30%, pos 3 ~10%, pos 5 ~5%, pos 10 ~2%). For each, show me query, average position, actual CTR, expected CTR, and the gap. Prioritize by potential clicks lost."</div>
-    <div class="prompt-desc">When a query ranks well but nobody clicks, the problem is almost always the title or meta description. This audit shows it ordered by impact.</div>
+    <div class="prompt-text">"Usando el contexto <span class="context-tag">{tu contexto}</span>, traeme queries de GSC con mas de 500 impresiones en los ultimos 28 dias y CTR muy por debajo del benchmark de su posicion (pos 1 ~30%, pos 3 ~10%, pos 5 ~5%, pos 10 ~2%). Para cada una, mostrame query, posicion promedio, CTR actual, CTR esperado y el gap. Priorizar por clicks potenciales perdidos."</div>
+    <div class="prompt-desc">Cuando una query rankea bien pero nadie hace click, el problema casi siempre es el title o la meta description. Esta auditoria te lo muestra ordenado por impacto.</div>
   </div>
 
   <div class="prompt-card fade-up">
     <div class="prompt-top">
-      <div class="prompt-label">3 &middot; Cannibalization</div>
-      <button class="copy-btn-light" onclick="copyText('Using context {your context}, identify GSC queries where more than one URL from the site appears in results in the last 28 days. For each case, show me the query, the URLs ranking, average position of each, impressions, and clicks. Suggest which URL should be the canonical one and how to consolidate.',this)">Copy</button>
+      <div class="prompt-label">3 &middot; Canibalizacion</div>
+      <button class="copy-btn-light" onclick="copyText('Usando el contexto {tu contexto}, identifica queries de GSC donde mas de una URL del sitio aparece en los resultados en los ultimos 28 dias. Para cada caso, mostrame la query, las URLs que estan rankeando, posicion promedio de cada una, impresiones y clicks. Sugeri que URL deberia ser la canonica y como consolidar.',this)">Copiar</button>
     </div>
-    <div class="prompt-text">"Using context <span class="context-tag">{your context}</span>, identify GSC queries where more than one URL from the site appears in results in the last 28 days. For each case, show me the query, the URLs ranking, average position of each, impressions, and clicks. Suggest which URL should be the canonical one and how to consolidate."</div>
-    <div class="prompt-desc">Cannibalization = two of your URLs fighting for the same query, splitting authority. Consolidating usually delivers big position jumps without touching new content.</div>
+    <div class="prompt-text">"Usando el contexto <span class="context-tag">{tu contexto}</span>, identifica queries de GSC donde mas de una URL del sitio aparece en los resultados en los ultimos 28 dias. Para cada caso, mostrame la query, las URLs que estan rankeando, posicion promedio de cada una, impresiones y clicks. Sugeri que URL deberia ser la canonica y como consolidar."</div>
+    <div class="prompt-desc">Canibalizacion = dos URLs tuyas peleando por la misma query, repartiendo la autoridad. Consolidar suele dar saltos de posicion grandes sin tocar contenido nuevo.</div>
   </div>
 
   <div class="prompt-card fade-up">
     <div class="prompt-top">
-      <div class="prompt-label">4 &middot; Pages with traffic but no conversion</div>
-      <button class="copy-btn-light" onclick="copyText('Using context {your context}, give me the landing pages with organic traffic in GA4 in the last 28 days, sorted by sessions descending. Filter for pages with more than 200 organic sessions and conv rate below the site average. Cross-reference with GSC: for each, bring me the top queries ranking them and average position. Mark which ones would be CRO quick-wins rather than SEO.',this)">Copy</button>
+      <div class="prompt-label">4 &middot; Paginas con trafico sin conversion</div>
+      <button class="copy-btn-light" onclick="copyText('Usando el contexto {tu contexto}, dame las landing pages con trafico organico en GA4 de los ultimos 28 dias ordenadas por sesiones descendente. Filtra las que tienen mas de 200 sesiones organicas y conv rate por debajo del promedio del sitio. Cruzalas con GSC: para cada una, traeme las top queries que la rankean y posicion promedio. Marca las que serian quick-wins de CRO mas que de SEO.',this)">Copiar</button>
     </div>
-    <div class="prompt-text">"Using context <span class="context-tag">{your context}</span>, give me the landing pages with organic traffic in GA4 in the last 28 days, sorted by sessions descending. Filter for pages with more than 200 organic sessions and conv rate below the site average. Cross-reference with GSC: for each, bring me the top queries ranking them and average position. Mark which ones would be CRO quick-wins rather than SEO."</div>
-    <div class="prompt-desc">Sometimes the problem isn't SEO &mdash; you already have the traffic; what fails is what happens after they land. This view separates "needs more traffic" from "needs a better page".</div>
+    <div class="prompt-text">"Usando el contexto <span class="context-tag">{tu contexto}</span>, dame las landing pages con trafico organico en GA4 de los ultimos 28 dias ordenadas por sesiones descendente. Filtra las que tienen mas de 200 sesiones organicas y conv rate por debajo del promedio del sitio. Cruzalas con GSC: para cada una, traeme las top queries que la rankean y posicion promedio. Marca las que serian quick-wins de CRO mas que de SEO."</div>
+    <div class="prompt-desc">A veces el problema no es SEO &mdash; ya tenes el trafico, lo que falla es lo que pasa cuando aterrizan. Esta vista te separa "necesita mas trafico" de "necesita mejor pagina".</div>
   </div>
 
   <div class="prompt-card fade-up">
     <div class="prompt-top">
-      <div class="prompt-label">5 &middot; Trending queries</div>
-      <button class="copy-btn-light" onclick="copyText('Using context {your context}, compare GSC queries from the last 28 days against the previous 28 days. Show me the top 15 queries with the biggest absolute growth in impressions and the top 15 with the biggest drop. For each, include impressions from the prior period, current period, % change, and average position.',this)">Copy</button>
+      <div class="prompt-label">5 &middot; Queries en tendencia</div>
+      <button class="copy-btn-light" onclick="copyText('Usando el contexto {tu contexto}, compara las queries de GSC de los ultimos 28 dias contra los 28 dias previos. Mostrame las top 15 queries con mayor crecimiento absoluto de impresiones y las top 15 con mayor caida. Para cada una incluye impresiones del periodo anterior, periodo actual, % de cambio y posicion promedio.',this)">Copiar</button>
     </div>
-    <div class="prompt-text">"Using context <span class="context-tag">{your context}</span>, compare GSC queries from the last 28 days against the previous 28 days. Show me the top 15 queries with the biggest absolute growth in impressions and the top 15 with the biggest drop. For each, include impressions from the prior period, current period, % change, and average position."</div>
-    <div class="prompt-desc">Early signal: what's newly showing up in SERPs and what's dropping. What's rising tells you where to lean in; what's falling, where to look before it hurts.</div>
+    <div class="prompt-text">"Usando el contexto <span class="context-tag">{tu contexto}</span>, compara las queries de GSC de los ultimos 28 dias contra los 28 dias previos. Mostrame las top 15 queries con mayor crecimiento absoluto de impresiones y las top 15 con mayor caida. Para cada una incluye impresiones del periodo anterior, periodo actual, % de cambio y posicion promedio."</div>
+    <div class="prompt-desc">Senal temprana: que esta apareciendo en SERPs nuevo y que esta cayendo. Lo que sube te dice donde apoyarte; lo que cae, donde mirar antes que duela.</div>
   </div>
 
   <div class="prompt-card fade-up">
     <div class="prompt-top">
-      <div class="prompt-label">6 &middot; Hidden gems &mdash; high-converting pages with low visibility</div>
-      <button class="copy-btn-light" onclick="copyText('Using context {your context}, give me the landing pages with organic conv rate above the site average in GA4 (last 28 days) but fewer than 500 organic sessions. Cross-reference with GSC: for each, bring me the query bringing the most impressions and its average position. These are the pages where more SEO traffic = more conversions almost linearly. Prioritize by conv rate descending.',this)">Copy</button>
+      <div class="prompt-label">6 &middot; Hidden gems &mdash; paginas que convierten poco visibles</div>
+      <button class="copy-btn-light" onclick="copyText('Usando el contexto {tu contexto}, dame las landing pages con conv rate organico arriba del promedio del sitio en GA4 (ultimos 28 dias) pero menos de 500 sesiones organicas. Cruzalas con GSC: para cada una, traeme la query que mas impresiones le trae y su posicion promedio. Estas son las paginas donde mas SEO traffic = mas conversiones casi linealmente. Prioriza por conv rate descendente.',this)">Copiar</button>
     </div>
-    <div class="prompt-text">"Using context <span class="context-tag">{your context}</span>, give me the landing pages with organic conv rate above the site average in GA4 (last 28 days) but fewer than 500 organic sessions. Cross-reference with GSC: for each, bring me the query bringing the most impressions and its average position. These are the pages where more SEO traffic = more conversions almost linearly. Prioritize by conv rate descending."</div>
-    <div class="prompt-desc">The inverse of Prompt 4: pages that are already converting well and deserve more SEO attention. Pushing these up in SERPs is direct money.</div>
+    <div class="prompt-text">"Usando el contexto <span class="context-tag">{tu contexto}</span>, dame las landing pages con conv rate organico arriba del promedio del sitio en GA4 (ultimos 28 dias) pero menos de 500 sesiones organicas. Cruzalas con GSC: para cada una, traeme la query que mas impresiones le trae y su posicion promedio. Estas son las paginas donde mas SEO traffic = mas conversiones casi linealmente. Prioriza por conv rate descendente."</div>
+    <div class="prompt-desc">El inverso del Prompt 4: paginas que ya estan convirtiendo bien y necesitan mas atencion SEO. Empujar estas en SERPs es plata directa.</div>
   </div>
 
 </div>
@@ -571,7 +571,7 @@ Every query and every landing page is evaluated on three axes:
 <!-- ============ FLOW ============ -->
 <div class="divider"></div>
 
-<h2 class="section-title fade-up">The full flow</h2>
+<h2 class="section-title fade-up">El flujo completo</h2>
 <br>
 
 <div class="flow fade-up">
@@ -608,16 +608,16 @@ Every query and every landing page is evaluated on three axes:
     <div class="flow-icon" style="border-color: var(--green); background: var(--green-bg);">
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
     </div>
-    <span class="flow-label">SEO quick-wins</span>
+    <span class="flow-label">Quick-wins SEO</span>
   </div>
 </div>
 
 <!-- ============ CTA ============ -->
 <div class="cta-section fade-up">
-  <h2>Ready to get started?</h2>
-  <p>Create your Detrics account (free plan available) and follow these steps.</p>
+  <h2>Listo para empezar?</h2>
+  <p>Crea tu cuenta en Detrics (tiene plan gratuito) y segui estos pasos.</p>
   <a href="https://detrics.io/get-started" target="_blank" rel="noopener" class="cta-button">
-    Create free account
+    Crear cuenta gratis
     <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
   </a>
 </div>
@@ -626,7 +626,7 @@ Every query and every landing page is evaluated on three axes:
 
 <!-- ============ FOOTER ============ -->
 <div class="footer">
-  <p><a href="https://detrics.io" target="_blank" rel="noopener">detrics.io</a> &mdash; Automate your marketing data pipeline</p>
+  <p><a href="https://detrics.io" target="_blank" rel="noopener">detrics.io</a> &mdash; Automatiza tu pipeline de datos de marketing</p>
 </div>
 
 <!-- Scripts -->
@@ -658,7 +658,7 @@ Every query and every landing page is evaluated on three axes:
   function copyText(text, btn) {
     navigator.clipboard.writeText(text).then(() => {
       const orig = btn.textContent;
-      btn.textContent = 'Copied!';
+      btn.textContent = 'Copiado!';
       btn.style.color = '#10B981';
       setTimeout(() => { btn.textContent = orig; btn.style.color = ''; }, 2000);
     });
