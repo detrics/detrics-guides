@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code Workshop — Detrics</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<meta name="robots" content="noindex">
+<meta property="og:title" content="Claude Code Workshop — Detrics">
+<meta property="og:description" content="How we run growth at Detrics with Claude Code.">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=DM+Mono:wght@400;500&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --blue: #2563EB; --blue-light: #60A5FA; --ink: #0F172A; --surface: #1E293B;
+    --line: #334155; --text: #E2E8F0; --muted: #94A3B8; --dim: #64748B;
+    --green: #4ADE80; --amber: #FBBF24; --red: #F87171; --purple: #C084FC;
+  }
+  html, body { height: 100%; }
+  body {
+    font-family: 'Inter', sans-serif; background: var(--ink); color: var(--text);
+    overflow: hidden;
+  }
+
+  .deck { width: 100vw; height: 100vh; position: relative; }
+
+  .slide {
+    position: absolute; inset: 0; display: none;
+    flex-direction: column; justify-content: center;
+    padding: 6vh 9vw; opacity: 0;
+    background: radial-gradient(circle at 75% 15%, rgba(37,99,235,0.08) 0%, transparent 45%), var(--ink);
+  }
+  .slide.active { display: flex; animation: fade .45s ease; opacity: 1; }
+  @keyframes fade { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+
+  .kicker { font-family: 'DM Mono', monospace; font-size: 13px; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--blue-light); margin-bottom: 20px; }
+  h1 { font-size: clamp(34px, 5.6vw, 76px); font-weight: 900; color: #F8FAFC; line-height: 1.05; letter-spacing: -1.5px; }
+  h1 .g { background: linear-gradient(120deg, var(--blue), var(--blue-light)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  h2 { font-size: clamp(26px, 3.4vw, 46px); font-weight: 800; color: #F8FAFC; line-height: 1.1; letter-spacing: -1px; margin-bottom: 26px; }
+  .lead { font-size: clamp(16px, 1.7vw, 23px); color: var(--muted); line-height: 1.55; max-width: 60ch; margin-top: 22px; }
+  .big { font-size: clamp(22px, 2.6vw, 38px); font-weight: 700; color: #F8FAFC; line-height: 1.3; max-width: 22ch; }
+
+  ul.points { list-style: none; margin-top: 26px; display: flex; flex-direction: column; gap: 16px; max-width: 64ch; }
+  ul.points li { font-size: clamp(15px, 1.6vw, 21px); color: var(--text); line-height: 1.5; padding-left: 30px; position: relative; }
+  ul.points li::before { content: '→'; position: absolute; left: 0; color: var(--blue-light); font-weight: 700; }
+  ul.points li b { color: #F8FAFC; }
+  ul.points li .m { color: var(--muted); }
+
+  /* two-column split */
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-top: 10px; }
+  .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 30px 28px; }
+  .panel.web { border-color: rgba(148,163,184,0.3); }
+  .panel.code { border-color: var(--blue); background: rgba(37,99,235,0.07); }
+  .panel .tag { font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: var(--dim); margin-bottom: 14px; }
+  .panel.code .tag { color: var(--blue-light); }
+  .panel h3 { font-size: clamp(18px, 2vw, 26px); font-weight: 800; color: #F8FAFC; margin-bottom: 14px; }
+  .panel p { font-size: clamp(13px, 1.4vw, 18px); color: var(--muted); line-height: 1.5; }
+  .panel .res { margin-top: 16px; font-size: clamp(13px,1.4vw,17px); font-weight: 600; }
+  .panel.web .res { color: var(--muted); }
+  .panel.code .res { color: var(--green); }
+
+  /* repo decision tree */
+  .repotree { margin-top: 18px; display: flex; flex-direction: column; align-items: center; }
+  .node { font-family: 'DM Mono', monospace; border-radius: 12px; padding: 12px 20px; text-align: center;
+    background: var(--surface); border: 1px solid var(--line); }
+  .node .name { font-size: clamp(13px, 1.5vw, 20px); font-weight: 600; color: #F8FAFC; }
+  .node .desc { font-family: 'Inter', sans-serif; font-size: clamp(11px, 1.1vw, 14px); color: var(--dim); margin-top: 3px; }
+  /* root */
+  .node.brain { border-color: var(--amber); background: rgba(245,158,11,0.1); }
+  .node.brain .name { color: var(--amber); font-size: clamp(15px, 1.8vw, 24px); }
+  /* the split connector */
+  .stem { width: 2px; height: 22px; background: var(--line); }
+  .branch-row { display: flex; justify-content: center; align-items: flex-start; gap: clamp(40px, 9vw, 130px); position: relative; }
+  .branch-row::before { content: ''; position: absolute; top: 0; left: 25%; right: 25%; height: 2px; background: var(--line); }
+  .branch { display: flex; flex-direction: column; align-items: center; }
+  .branch > .stem { height: 18px; }
+  .col-head { font-family: 'DM Mono', monospace; font-size: clamp(11px, 1.2vw, 15px); letter-spacing: 2px;
+    text-transform: uppercase; font-weight: 600; margin-bottom: 12px; }
+  .col-head.proc { color: var(--blue-light); }
+  .col-head.tool { color: var(--green); }
+  .col-nodes { display: flex; flex-direction: column; gap: 10px; }
+  .node.proc { border-color: rgba(96,165,250,0.4); }
+  .node.proc .name { color: var(--blue-light); }
+  .node.tool { border-color: rgba(74,222,128,0.4); }
+  .node.tool .name { color: var(--green); }
+  .node.non { border-color: rgba(100,116,139,0.4); margin-top: 4px; }
+  .node.non .name { color: var(--muted); font-weight: 500; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; max-width: 70ch; }
+  .chip { font-family: 'DM Mono', monospace; font-size: clamp(11px,1.2vw,15px); font-weight: 500;
+    padding: 7px 14px; border-radius: 8px; background: rgba(37,99,235,0.1); border: 1px solid rgba(37,99,235,0.25); color: var(--blue-light); }
+  .chip.green { background: rgba(34,197,94,0.1); border-color: rgba(34,197,94,0.25); color: var(--green); }
+  .chip.amber { background: rgba(245,158,11,0.1); border-color: rgba(245,158,11,0.25); color: var(--amber); }
+  .chip.purple { background: rgba(168,85,247,0.1); border-color: rgba(168,85,247,0.25); color: var(--purple); }
+  .chip.gray { background: rgba(100,116,139,0.1); border-color: rgba(100,116,139,0.25); color: var(--muted); }
+
+  /* numbered flow */
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 26px; }
+  .steps.four { grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .step { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px 18px; }
+  .step.ship { border-color: var(--green); background: rgba(34,197,94,0.07); }
+  .step.ship .n { color: var(--green); }
+  .step.ship h4 { color: var(--green); }
+  .step .n { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--blue-light); font-weight: 600; }
+  .step h4 { font-size: clamp(14px,1.5vw,19px); font-weight: 700; color: #F8FAFC; margin: 8px 0 6px; }
+  .step p { font-size: clamp(12px,1.3vw,15px); color: var(--muted); line-height: 1.45; }
+
+  /* terminal */
+  .term { background: #0a0f1c; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; margin-top: 26px; max-width: 64ch; box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
+  .term-bar { display: flex; gap: 8px; padding: 14px 16px; border-bottom: 1px solid var(--line); background: #0d1424; }
+  .term-bar span { width: 12px; height: 12px; border-radius: 50%; }
+  .term-bar .r { background: #ff5f57; } .term-bar .y { background: #febc2e; } .term-bar .g { background: #28c840; }
+  .term-body { padding: 26px 24px; font-family: 'DM Mono', monospace; font-size: clamp(15px,1.8vw,24px); line-height: 1.7; }
+  .term-body .prompt { color: var(--green); }
+  .term-body .cmd { color: #F8FAFC; font-weight: 600; }
+  .term-body .cur { display: inline-block; width: 11px; height: 1.1em; background: var(--blue-light); vertical-align: text-bottom; animation: blink 1s step-end infinite; margin-left: 3px; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .term-body .out { color: var(--muted); font-size: 0.7em; margin-top: 12px; display: block; }
+
+  .live-badge { display: inline-flex; align-items: center; gap: 10px; font-family: 'DM Mono', monospace;
+    font-size: 14px; letter-spacing: 2px; text-transform: uppercase; color: var(--red); margin-bottom: 18px; font-weight: 600; }
+  .live-badge .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--red); animation: pulse 1.2s infinite; }
+  @keyframes pulse { 0%,100% { opacity:1; transform:scale(1);} 50% { opacity:.4; transform:scale(.8);} }
+
+  .quote { font-size: clamp(18px,2vw,28px); font-weight: 600; color: #F8FAFC; line-height: 1.4; max-width: 30ch; margin-top: 24px; }
+  .quote .m { color: var(--blue-light); }
+
+  /* skill anatomy split */
+  .skillgrid { display: grid; grid-template-columns: 0.82fr 1.18fr; gap: 30px; margin-top: 14px; align-items: start; }
+  .skillgrid .lead { margin-top: 16px; font-size: clamp(13px,1.4vw,18px); }
+  .chainlist { list-style: none; margin-top: 18px; display: flex; flex-direction: column; gap: 13px; }
+  .chainlist li { font-size: clamp(13px,1.4vw,18px); color: var(--text); line-height: 1.45; padding-left: 26px; position: relative; }
+  .chainlist li::before { content: '↳'; position: absolute; left: 0; color: var(--blue-light); font-weight: 700; }
+  .chainlist li:first-child::before { content: '→'; }
+  .chainlist li b { color: #F8FAFC; }
+  .chainlist code { font-family: 'DM Mono', monospace; font-size: 0.88em; color: var(--blue-light); }
+  /* file viewer */
+  .filecard { background: #0a0f1c; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; box-shadow: 0 14px 40px rgba(0,0,0,0.35); }
+  .filecard .fbar { font-family: 'DM Mono', monospace; font-size: clamp(11px,1.1vw,13px); color: var(--blue-light); padding: 11px 16px; border-bottom: 1px solid var(--line); background: #0d1424; display: flex; align-items: center; gap: 8px; }
+  .filecard .fbar::before { content: '◰'; color: var(--dim); }
+  .filecard pre { font-family: 'DM Mono', monospace; font-size: clamp(9.5px,1.0vw,13px); line-height: 1.55; padding: 16px 18px; color: var(--muted); white-space: pre-wrap; margin: 0; }
+  .filecard pre .h { color: #F8FAFC; font-weight: 600; }
+  .filecard pre .p { color: var(--blue-light); }
+  .filecard pre .neg { color: var(--red); font-weight: 600; }
+  /* helper tools strip */
+  .helpers { margin-top: 16px; }
+  .helpers .ht { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--dim); margin-bottom: 10px; }
+  .helper { display: flex; gap: 12px; align-items: baseline; padding: 7px 0; border-bottom: 1px solid rgba(51,65,85,0.4); }
+  .helper:last-child { border-bottom: none; }
+  .helper .hn { font-family: 'DM Mono', monospace; font-size: clamp(11px,1.2vw,15px); color: var(--green); font-weight: 500; white-space: nowrap; }
+  .helper .hd { font-size: clamp(11px,1.2vw,15px); color: var(--muted); line-height: 1.35; }
+
+  /* screenshot storyboard */
+  .story { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 18px; align-items: start; }
+  .frame { display: flex; flex-direction: column; }
+  .frame .shot { position: relative; background: #0a0f1c; border: 1px solid var(--line); border-radius: 12px; overflow: hidden;
+    height: clamp(150px, 24vh, 240px); display: flex; align-items: center; justify-content: center; }
+  .frame .shot img { width: 100%; height: 100%; object-fit: contain; }
+  .frame .num { position: absolute; top: 8px; left: 8px; width: 26px; height: 26px; border-radius: 50%;
+    background: var(--blue); color: #fff; font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; z-index: 2; box-shadow: 0 2px 8px rgba(0,0,0,.4); }
+  .frame .out-badge { border-color: var(--green); }
+  .frame.win .shot { border-color: var(--green); }
+  .frame.win .num { background: var(--green); color: #06210f; }
+  .frame .cap { margin-top: 10px; }
+  .frame .cap .t { font-size: clamp(12px,1.3vw,16px); font-weight: 700; color: #F8FAFC; line-height: 1.25; }
+  .frame .cap .d { font-size: clamp(11px,1.1vw,13px); color: var(--muted); line-height: 1.35; margin-top: 3px; }
+  .story .arrow { display: none; }
+  .frame .shot img { cursor: zoom-in; transition: transform .2s; }
+  .frame .shot:hover img { transform: scale(1.03); }
+  .frame .shot::after { content: '⤢'; position: absolute; bottom: 8px; right: 8px; font-size: 14px; color: var(--muted);
+    background: rgba(10,15,28,.8); border: 1px solid var(--line); border-radius: 6px; width: 24px; height: 24px;
+    display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity .2s; z-index: 2; }
+  .frame .shot:hover::after { opacity: 1; }
+
+  /* lightbox */
+  .lightbox { position: fixed; inset: 0; z-index: 100; display: none; align-items: center; justify-content: center;
+    background: rgba(5,8,18,.92); backdrop-filter: blur(6px); cursor: zoom-out; padding: 4vh 4vw; }
+  .lightbox.open { display: flex; animation: lbfade .25s ease; }
+  @keyframes lbfade { from { opacity: 0; } to { opacity: 1; } }
+  .lightbox img { max-width: 94vw; max-height: 88vh; border-radius: 12px; border: 1px solid var(--line);
+    box-shadow: 0 30px 90px rgba(0,0,0,.6); animation: lbzoom .28s cubic-bezier(.2,.8,.25,1); }
+  @keyframes lbzoom { from { transform: scale(.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .lightbox .lb-cap { position: absolute; bottom: 3vh; left: 0; right: 0; text-align: center;
+    font-size: 15px; color: var(--muted); font-weight: 500; }
+  .lightbox .lb-close { position: absolute; top: 22px; right: 28px; font-size: 26px; color: var(--muted);
+    background: none; border: none; cursor: pointer; line-height: 1; }
+  .lightbox .lb-close:hover { color: #fff; }
+
+  /* repo screenshot slide */
+  .repogrid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 28px; margin-top: 10px; align-items: start; }
+  .repo-shot { position: relative; background: #0a0f1c; border: 1px solid var(--line); border-radius: 12px; overflow: hidden;
+    height: clamp(300px, 62vh, 580px); display: flex; align-items: flex-start; justify-content: center; }
+  .repo-shot img { width: 100%; height: 100%; object-fit: contain; object-position: top; cursor: zoom-in; transition: transform .2s; }
+  .repo-shot:hover img { transform: scale(1.015); }
+  .repo-shot::after { content: '⤢ click to zoom'; position: absolute; bottom: 10px; right: 10px; font-family: 'DM Mono', monospace; font-size: 12px;
+    color: var(--muted); background: rgba(10,15,28,.85); border: 1px solid var(--line); border-radius: 6px; padding: 4px 10px;
+    opacity: 0; transition: opacity .2s; z-index: 2; }
+  .repo-shot:hover::after { opacity: 1; }
+  .hl-head { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--amber); margin-bottom: 14px; }
+  .hlcard { background: var(--surface); border: 1px solid var(--line); border-left: 3px solid var(--amber);
+    border-radius: 0 12px 12px 0; padding: 15px 18px; margin-bottom: 13px; }
+  .hlcard .q { font-family: 'DM Mono', monospace; font-size: clamp(12px,1.3vw,16px); color: #F8FAFC; font-weight: 600; line-height: 1.4; }
+  .hlcard .w { font-size: clamp(12px,1.2vw,15px); color: var(--muted); margin-top: 6px; line-height: 1.4; }
+
+  /* nav */
+  .nav { position: fixed; bottom: 22px; right: 28px; display: flex; align-items: center; gap: 16px; z-index: 50; }
+  .nav button { background: var(--surface); border: 1px solid var(--line); color: var(--muted); width: 40px; height: 40px;
+    border-radius: 10px; font-size: 18px; cursor: pointer; transition: .2s; }
+  .nav button:hover { border-color: var(--blue); color: #fff; }
+  .counter { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--dim); }
+  .progress { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(90deg, var(--blue), var(--blue-light)); z-index: 50; transition: width .3s; }
+  .hint { position: fixed; bottom: 26px; left: 28px; font-family: 'DM Mono', monospace; font-size: 12px; color: var(--dim); z-index: 50; }
+  .footer-brand { position: fixed; top: 20px; right: 28px; font-family: 'DM Mono', monospace; font-size: 12px; color: var(--dim); letter-spacing: 1px; z-index: 50; }
+</style>
+</head>
+<body>
+
+<div class="progress" id="bar"></div>
+<div class="footer-brand">DETRICS × HIKE</div>
+
+<div class="deck" id="deck">
+
+  <!-- 1 — TITLE -->
+  <section class="slide">
+    <div class="kicker">Workshop · 30 min</div>
+    <h1>Claude Code<br><span class="g">an AI that works your computer</span></h1>
+    <p class="lead">How we run most of growth at Detrics — not with a chatbot, with an operator that reads our real data and ships real work.</p>
+  </section>
+
+  <!-- 2 — WHAT IT IS -->
+  <section class="slide">
+    <div class="kicker">What it is</div>
+    <h2>It's Claude — in your terminal.</h2>
+    <div class="big">Same model you know from the browser. The difference: it can <span style="color:var(--blue-light)">act</span>, not just talk.</div>
+    <ul class="points">
+      <li>Reads your <b>files</b>, runs your <b>shell</b>, calls your <b>tools</b> — Google, Notion, BigQuery, LinkedIn, Slack.</li>
+      <li><span class="m">Everyone here has used ChatGPT or Claude in a browser. What's next is the entire reason we run growth on this.</span></li>
+    </ul>
+  </section>
+
+  <!-- 3 — THE CORE DIFFERENCE -->
+  <section class="slide">
+    <div class="kicker">The one slide that matters</div>
+    <h2>Web AI vs. Claude Code</h2>
+    <div class="split">
+      <div class="panel web">
+        <div class="tag">AI in the browser</div>
+        <h3>A conversation in a box</h3>
+        <p>It can think and write text back to you. That's the ceiling. You copy-paste the result out yourself.</p>
+        <div class="res">→ You get a recipe.</div>
+      </div>
+      <div class="panel code">
+        <div class="tag">Claude Code</div>
+        <h3>Creates files. Runs programs.</h3>
+        <p>The output isn't text in a chat — it's a draft sitting in your Gmail, a row in your CRM, a rendered image on disk, a query that actually executed.</p>
+        <div class="res">→ It cooks the meal.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 — WHY THAT'S POWER -->
+  <section class="slide">
+    <div class="kicker">Why that's power</div>
+    <h2>Read real data → make a real artifact → run real code to deliver it.</h2>
+    <ul class="points">
+      <li>Because it can <b>run programs</b>, anything you can script, it can do.</li>
+      <li>Anything it can do once, you turn into a <b>one-word command</b>.</li>
+      <li class="m">"The moment an AI can write a file and execute it, it stops being an assistant and becomes a teammate with hands."</li>
+    </ul>
+  </section>
+
+  <!-- 5 — REPO MAP -->
+  <section class="slide">
+    <div class="kicker">How we set it up</div>
+    <h2 style="margin-bottom:8px">Claude Code is only as good as the repo you point it at.</h2>
+    <div class="repotree">
+      <div class="node brain">
+        <div class="name">CLAUDE.md</div>
+        <div class="desc">the always-on brain · read every conversation</div>
+      </div>
+      <div class="stem"></div>
+      <div class="branch-row">
+        <div class="branch">
+          <div class="stem"></div>
+          <div class="col-head proc">Folders by process</div>
+          <div class="col-nodes">
+            <div class="node proc"><div class="name">growth/demos/</div><div class="desc">demo follow-up</div></div>
+            <div class="node proc"><div class="name">growth/linkedin/</div><div class="desc">content + replies</div></div>
+            <div class="node proc"><div class="name">growth/outbound/</div><div class="desc">cold + warm email</div></div>
+          </div>
+        </div>
+        <div class="branch">
+          <div class="stem"></div>
+          <div class="col-head tool">Folders by tool</div>
+          <div class="col-nodes">
+            <div class="node tool"><div class="name">tooling/</div><div class="desc">shared scripts</div></div>
+            <div class="node tool"><div class="name">database-manager/</div><div class="desc">BigQuery creds</div></div>
+            <div class="node tool"><div class="name">creatives/</div><div class="desc">brand + images</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="node non"><div class="name">institucional/ · docs/ · landings/</div><div class="desc">non-core — read on demand</div></div>
+    </div>
+  </section>
+
+  <!-- 5b — REPO, FOR REAL (screenshot) -->
+  <section class="slide">
+    <div class="kicker">The repo, for real</div>
+    <h2 style="margin-bottom:6px">It's just a folder on my laptop.</h2>
+    <div class="repogrid">
+      <div class="repo-shot">
+        <img src="assets/repo-vscode.png" data-cap="growth-panopticon — the repo open in VS Code, with CLAUDE.md" alt="growth-panopticon repo in VS Code">
+      </div>
+      <div>
+        <div class="hl-head">What CLAUDE.md tells Claude — always on</div>
+        <div class="hlcard">
+          <div class="q"># I'm Ignacio, Head of Growth in detrics.io</div>
+          <div class="w">Who I am — so everything it writes is in my context and voice.</div>
+        </div>
+        <div class="hlcard">
+          <div class="q">All product info MUST come from PRODUCT.md</div>
+          <div class="w">One source of truth — it never improvises features, pricing, or positioning.</div>
+        </div>
+        <div class="hlcard">
+          <div class="q">## Spanish voice — READ FIRST for any Spanish copy</div>
+          <div class="w">Argentine voice + a banned→preferred lexicon, applied to every Spanish draft.</div>
+        </div>
+        <p class="lead" style="margin-top:14px">Same files, same folders you'd see in any project — the difference is the instructions sitting next to them.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 — CLAUDE.md -->
+  <section class="slide">
+    <div class="kicker">The brain</div>
+    <h2><span style="color:var(--amber)">CLAUDE.md</span> — read at the start of every conversation.</h2>
+    <ul class="points">
+      <li>Who I am, and where the <b>source of truth</b> lives <span class="m">("all product facts come from PRODUCT.md — never improvise")</span>.</li>
+      <li>API keys, folder paths, the Notion CRM database IDs, Slack / LinkedIn / Google conventions.</li>
+      <li>The rules that span <b>every</b> workflow.</li>
+      <li class="m">It's onboarding docs you write <b>once</b> for an employee who never forgets and never quits.</li>
+    </ul>
+  </section>
+
+  <!-- 7 — PROCESS FOLDERS -->
+  <section class="slide">
+    <div class="kicker">Folders by process</div>
+    <h2>Each process owns its own rule files.</h2>
+    <p class="lead">When Claude works a process, it reads <i>those</i> files — not everything. Real examples:</p>
+    <div class="chips">
+      <span class="chip">growth/demos/DEMO_FOLLOWUP.md</span>
+      <span class="chip">growth/linkedin/post-creator/</span>
+      <span class="chip">growth/linkedin/replier/</span>
+      <span class="chip">growth/linkedin/magnets/</span>
+      <span class="chip">growth/outbound/prompts/cold/</span>
+      <span class="chip">growth/outbound/prompts/warm-upsell/</span>
+    </div>
+  </section>
+
+  <!-- 8 — TOOL + NON-CORE -->
+  <section class="slide">
+    <div class="kicker">Folders by tool · non-core</div>
+    <h2>Capabilities it reaches for on demand.</h2>
+    <div class="chips">
+      <span class="chip green">tooling/ — email builder, Slack sender, sheet writer</span>
+      <span class="chip green">database-manager/ — BigQuery creds + sample queries</span>
+      <span class="chip purple">creatives/ — brand colors, fonts, logo URLs</span>
+      <span class="chip gray">institucional/ — sales deck (non-core)</span>
+      <span class="chip gray">docs/ · landings/ — read when relevant</span>
+    </div>
+    <p class="lead">"Go to BQ" → it knows where the credentials are. The structure <b>is</b> the product. The model is the same one you'd get in a browser — the leverage is what we point it at.</p>
+  </section>
+
+  <!-- 9 — DEEP DIVE 1 INTRO -->
+  <section class="slide">
+    <div class="kicker">Deep dive ① · a "skill"</div>
+    <h2>After every demo there's 20 min of grunt work. We turned it into one word.</h2>
+    <ul class="points">
+      <li><b>/demo-followup</b> → <span class="m">.claude/commands/demo-followup.md</span> (quick summary + rules)</li>
+      <li>→ which points to the full SOP in <span class="m">growth/demos/DEMO_FOLLOWUP.md</span></li>
+      <li>→ which references <b>helper</b> files: <span class="m">EMAIL_BUILDER.md, PRODUCT.md</span>. Claude reads the recipe <i>and</i> the helpers, then executes.</li>
+    </ul>
+  </section>
+
+  <!-- 9b — SKILL ANATOMY (split) -->
+  <section class="slide">
+    <div class="kicker">How I built it · no code, just the recipe</div>
+    <h2 style="margin-bottom:6px">The skill is a markdown file I wrote by hand.</h2>
+    <div class="skillgrid">
+      <div>
+        <p class="lead">A skill = a slash command backed by a plain‑text recipe. I never wrote a program — I <b>wrote down how the job works</b>, and Claude follows it.</p>
+        <ul class="chainlist">
+          <li>I type <code>/demo-followup</code></li>
+          <li>Claude reads the <b>command file</b> → summary + hard rules</li>
+          <li>It opens the full <b>SOP</b> (<code>DEMO_FOLLOWUP.md</code>)</li>
+          <li>It pulls in the <b>helper files</b> it needs →</li>
+        </ul>
+      </div>
+      <div>
+        <div class="filecard">
+          <div class="fbar">.claude/commands/demo-followup.md</div>
+<pre><span class="h">Run the post-demo follow-up workflow. Read</span>
+<span class="p">`growth/demos/DEMO_FOLLOWUP.md`</span> for the full process.
+
+<span class="h">## Quick Summary</span>
+1. Check Calendar (last 48h) for "Demo -" events
+2. Pull the Google Meet transcript from Drive
+3. Read my notes doc, find this meeting's section
+4. Search Notion CRM — if it exists, <span class="neg">STOP</span> and tell me
+5. Draft the follow-up email (show me first)
+6. Propose the CRM card fields
+
+<span class="h">## Rules</span>
+- <span class="neg">NEVER</span> send the email — create a DRAFT only
+- <span class="neg">NEVER</span> create a CRM entry without my approval
+- <span class="neg">NEVER</span> skip the duplicate check
+- Match the language of the call (ES / EN)</pre>
+        </div>
+        <div class="helpers">
+          <div class="ht">Helper files & tools it pulls in</div>
+          <div class="helper"><span class="hn">EMAIL_BUILDER.md</span><span class="hd">how to build the HTML email — bold, bullets, MIME draft (never plain text)</span></div>
+          <div class="helper"><span class="hn">PRODUCT.md</span><span class="hd">the canonical product facts + the exact links to include</span></div>
+          <div class="helper"><span class="hn">DEMO_FOLLOWUP.md</span><span class="hd">the full step-by-step SOP the command points to</span></div>
+          <div class="helper"><span class="hn">Calendar · Drive · Gmail · Notion</span><span class="hd">the live tools it calls to actually do the work</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10 — DEMO-FOLLOWUP STEPS -->
+  <section class="slide">
+    <div class="kicker">What it actually does</div>
+    <h2>The real pipeline</h2>
+    <div class="steps">
+      <div class="step"><div class="n">01</div><h4>Find the meeting</h4><p>Searches my Calendar (48h) for demo + Calendly events.</p></div>
+      <div class="step"><div class="n">02</div><h4>Pull the transcript</h4><p>Finds the Meet transcript in Drive — reads the <b>raw</b> text, not the AI summary.</p></div>
+      <div class="step"><div class="n">03</div><h4>Read my notes</h4><p>Opens the notes doc, finds the section for <i>this</i> meeting.</p></div>
+      <div class="step"><div class="n">04</div><h4>Enrich from pipeline</h4><p>Cross-refs our Pre-CRM sheet; marks "Meeting Booked".</p></div>
+      <div class="step"><div class="n">05</div><h4>Draft the email</h4><p>Gmail <b>draft</b> — language-matched, bold + bullets, signed "Nacho".</p></div>
+      <div class="step"><div class="n">06</div><h4>Create the CRM card</h4><p>Notion page: stage, source, contacts, notes in the body.</p></div>
+    </div>
+  </section>
+
+  <!-- 11 — DESIGN CHOICES -->
+  <section class="slide">
+    <div class="kicker">The "we actually thought about this" part</div>
+    <h2>The guardrails are written into the recipe.</h2>
+    <ul class="points">
+      <li><b>Drafts, never sends.</b> No email sent, no CRM card created, without me.</li>
+      <li><b>Source-of-truth discipline.</b> Links come from PRODUCT.md, not memory.</li>
+      <li><b>Duplicate checks.</b> Searches the CRM first; <i>stops</i> if the contact exists.</li>
+      <li><b>It writes its own rules back.</b> I correct it once → the rule goes into the .md → it's permanent.</li>
+      <li class="m">Every guardrail came from a mistake it made once. We don't retrain a model — we edit a text file.</li>
+    </ul>
+  </section>
+
+  <!-- 12 — LIVE RUN -->
+  <section class="slide">
+    <div class="live-badge"><span class="dot"></span> Live demo</div>
+    <h2>Let's stop describing it. Watch.</h2>
+    <div class="term">
+      <div class="term-bar"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+      <div class="term-body">
+        <span class="prompt">nacho@detrics</span> <span class="cmd">/demo-followup</span><span class="cur"></span>
+        <span class="out">› reading calendar… found the meeting<br>› pulling transcript from Drive…<br>› drafting follow-up in Gmail…<br>✓ draft created — I didn't write a word.</span>
+      </div>
+    </div>
+    <p class="lead">A browser chatbot gives me a template to copy-paste. This read my real transcript and put a real draft in my real inbox. <b>Then switch to Gmail and show it.</b></p>
+  </section>
+
+  <!-- 13 — DEEP DIVE 2 -->
+  <section class="slide">
+    <div class="kicker">Deep dive ② · LinkedIn content</div>
+    <h2>Something a chatbot fundamentally can't do: generate images + run creative tooling.</h2>
+    <div class="steps four">
+      <div class="step"><div class="n">01</div><h4>Idea generator</h4><p>Reads our content calendar + live performance data, picks what to post.</p></div>
+      <div class="step"><div class="n">02</div><h4>Copywriter</h4><p>Two voices — Nacho (ES, Argentine) & Detrics (EN). Rules in pillars.md + angles.md.</p></div>
+      <div class="step"><div class="n">03</div><h4>Assessor</h4><p>QA's the draft against our rules before it ships — won't push below a 4/5.</p></div>
+      <div class="step ship"><div class="n">04</div><h4>Ship to Drive</h4><p>Pushes copy → shared pillar Google Docs + images → Drive, then posts a summary to Slack. The whole team reviews from anywhere.</p></div>
+    </div>
+  </section>
+
+  <!-- 13b — STORYBOARD (real artifacts) -->
+  <section class="slide">
+    <div class="kicker">The same pipeline — real artifacts</div>
+    <h2 style="margin-bottom:4px">Idea → organized in Drive → shipped creative.</h2>
+    <div class="story">
+      <div class="frame">
+        <div class="shot"><span class="num">1</span><img src="assets/li-1-ideas-sheet.png" alt="content calendar"></div>
+        <div class="cap"><div class="t">Ideas</div><div class="d">The content calendar (Google Sheet) — topics, pillar, profile, status.</div></div>
+      </div>
+      <div class="frame">
+        <div class="shot"><span class="num">2</span><img src="assets/li-2-drive-pillars.png" alt="drive pillar folders"></div>
+        <div class="cap"><div class="t">Shared Drive</div><div class="d">Output lands in the team Drive — a folder per content pillar.</div></div>
+      </div>
+      <div class="frame">
+        <div class="shot"><span class="num">3</span><img src="assets/li-3-pillar-folder.png" alt="pillar folder structure"></div>
+        <div class="cap"><div class="t">Folder structure</div><div class="d">Each pillar holds a <b>Posts</b> doc + an <b>Imágenes</b> folder.</div></div>
+      </div>
+      <div class="frame win">
+        <div class="shot"><span class="num">4</span><img src="assets/li-4-output.png" alt="rendered creative"></div>
+        <div class="cap"><div class="t">The output</div><div class="d">A rendered launch creative — real logos, on-brand, ready to post.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 14 — NANO BANANA -->
+  <section class="slide">
+    <div class="kicker">Image generation</div>
+    <h2>It knows <i>when not to</i> use the AI image generator.</h2>
+    <div class="split">
+      <div class="panel code">
+        <div class="tag">No logos · illustration</div>
+        <h3>nano banana (Gemini)</h3>
+        <p>Abstract / conceptual art → generated with <span style="font-family:'DM Mono'">gemini-image.js</span>.</p>
+      </div>
+      <div class="panel web">
+        <div class="tag">Real brand logos</div>
+        <h3>HTML → PNG render</h3>
+        <p>Detrics, Meta, BigQuery… Gemini <b>hallucinates logos</b>, so it builds an HTML template and renders a pixel-perfect PNG via <span style="font-family:'DM Mono'">render.js</span>.</p>
+      </div>
+    </div>
+    <p class="lead">That decision tree lives in <b>CREATIVE_GUIDE.md</b> — learned from a real failure where Gemini drew a fake BigQuery logo.</p>
+  </section>
+
+  <!-- 15 — CREATIVES BRAND -->
+  <section class="slide">
+    <div class="kicker">Why it looks on-brand, not generic-AI</div>
+    <h2><span style="color:var(--purple)">creatives/</span> holds the brand system.</h2>
+    <ul class="points">
+      <li>Exact hex colors <span class="m">(#2563EB primary blue)</span>, Inter as the font, GCS URLs for every <b>real</b> platform logo.</li>
+      <li>So when it builds an image, it pulls the real logos and real brand colors — the creative looks like Detrics made it.</li>
+      <li class="m">Same pattern as the CRM skill: a capability + written-down judgment = output we'd actually ship.</li>
+    </ul>
+  </section>
+
+  <!-- 16 — CLOSE -->
+  <section class="slide">
+    <div class="kicker">Close</div>
+    <h2>Three things to take home.</h2>
+    <ul class="points">
+      <li>The model is the same one you use in a browser. <b>The leverage is that it can act.</b></li>
+      <li>A structured repo + a CLAUDE.md brain turns a chatbot into an operator.</li>
+      <li>Everything it does well, it does because the <b>judgment is written down</b> — in markdown, editable in seconds.</li>
+    </ul>
+    <div class="quote">"If you can write down how your job works, <span class="m">Claude Code can do the rest.</span>"</div>
+  </section>
+
+</div>
+
+<div class="nav">
+  <button id="prev">←</button>
+  <span class="counter"><span id="cur">1</span> / <span id="tot">16</span></span>
+  <button id="next">→</button>
+</div>
+<div class="hint">← → arrows · F fullscreen · click an image to zoom</div>
+
+<div class="lightbox" id="lightbox">
+  <button class="lb-close" id="lbClose">✕</button>
+  <img id="lbImg" src="" alt="">
+  <div class="lb-cap" id="lbCap"></div>
+</div>
+
+<script>
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  let i = 0;
+  const bar = document.getElementById('bar');
+  const cur = document.getElementById('cur');
+  document.getElementById('tot').textContent = slides.length;
+  function show(n) {
+    i = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach((s, k) => s.classList.toggle('active', k === i));
+    bar.style.width = ((i + 1) / slides.length * 100) + '%';
+    cur.textContent = i + 1;
+  }
+  document.getElementById('next').onclick = () => show(i + 1);
+  document.getElementById('prev').onclick = () => show(i - 1);
+
+  // lightbox (click image to zoom)
+  const lb = document.getElementById('lightbox');
+  const lbImg = document.getElementById('lbImg');
+  const lbCap = document.getElementById('lbCap');
+  function lbOpen(src, cap) { lbImg.src = src; lbCap.textContent = cap || ''; lb.classList.add('open'); }
+  function lbClose() { lb.classList.remove('open'); lbImg.src = ''; }
+  const lbIsOpen = () => lb.classList.contains('open');
+  document.querySelectorAll('.story .shot img, .repo-shot img').forEach(img => {
+    img.addEventListener('click', e => {
+      e.stopPropagation();
+      const frameCap = img.closest('.frame') ? img.closest('.frame').querySelector('.cap .t') : null;
+      const cap = img.dataset.cap || (frameCap ? frameCap.textContent : '') || img.alt || '';
+      lbOpen(img.src, cap);
+    });
+  });
+  lb.addEventListener('click', lbClose);
+  document.getElementById('lbClose').addEventListener('click', e => { e.stopPropagation(); lbClose(); });
+
+  document.addEventListener('keydown', e => {
+    if (lbIsOpen()) { if (e.key === 'Escape' || e.key === ' ' || e.key === 'Enter') { lbClose(); e.preventDefault(); } return; }
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { show(i + 1); e.preventDefault(); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { show(i - 1); }
+    else if (e.key === 'Home') show(0);
+    else if (e.key === 'End') show(slides.length - 1);
+    else if (e.key.toLowerCase() === 'f') { if (!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); }
+  });
+  show(0);
+</script>
+
+</body>
+</html>
