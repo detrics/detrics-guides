@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="/favicon.png">
     <link rel="apple-touch-icon" href="/favicon.png">
-    <title>Detrics for BigQuery — Built for high-volume online stores</title>
+    <title>Detrics for BigQuery: Built for high-volume online stores</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
@@ -445,7 +445,8 @@
         .noteam::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 85% 15%, rgba(37,99,235,0.14) 0%, transparent 45%); }
         .noteam .container { position: relative; z-index: 1; }
         .noteam-header { text-align: center; max-width: 660px; margin: 0 auto 56px; }
-        .noteam-header .tag { border-color: rgba(37,99,235,0.3); background: rgba(37,99,235,0.1); margin-bottom: 20px; }
+        .noteam-header .tag { border-color: rgba(147,197,253,0.4); background: rgba(147,197,253,0.12); color: #93c5fd; margin-bottom: 20px; }
+        .noteam-header .tag::before { background: #93c5fd; }
         .noteam-header .section-heading { color: var(--surface); margin-bottom: 16px; }
         .noteam-header p { color: rgba(255,255,255,0.55); font-size: 17px; line-height: 1.7; }
         .noteam-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
@@ -538,24 +539,24 @@
             <div class="challenge-left">
                 <div class="reveal"><span class="tag">The ceiling</span></div>
                 <h2 class="section-heading reveal reveal-d1">You already feel it<br>every <em>Monday</em></h2>
-                <p class="section-sub reveal reveal-d2">A spreadsheet was never built to be a database. It holds up while the data is small — and then the cracks show, usually at the worst moment. If any of these sound like your week, you've hit the ceiling.</p>
+                <p class="section-sub reveal reveal-d2">A spreadsheet was never built to be a database. It holds up while the data is small, then the cracks show, usually at the worst moment. If any of these sound like your week, you've hit the ceiling.</p>
             </div>
             <div class="challenge-cards">
                 <div class="ch-card reveal">
+                    <div class="ch-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 2a4 4 0 0 1 4 4v2a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4z"/><path d="M5 20a7 7 0 0 1 14 0"/></svg></div>
+                    <div><h3>Your AI makes numbers up</h3><p>You ask Claude about your sales and the totals don't add up. The insights sound plausible, but you can't trust them, because a spreadsheet gives AI too little to actually work with.</p></div>
+                </div>
+                <div class="ch-card reveal">
                     <div class="ch-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg></div>
-                    <div><h3>The sync times out overnight</h3><p>The hourly refresh crawls, lags, or fails before morning — too many orders and too many formulas for a sheet to chew through in time.</p></div>
+                    <div><h3>The sync times out overnight</h3><p>The hourly refresh crawls, lags, or fails before morning. Too many orders and too many formulas for a sheet to chew through in time.</p></div>
                 </div>
                 <div class="ch-card reveal">
                     <div class="ch-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg></div>
-                    <div><h3>Your history caps out at ~2 years</h3><p>Ad platforms only hand back about two years of data — so a spreadsheet can never hold more than that. Every year that passes, an older year quietly falls off, and the long-term view is gone for good.</p></div>
+                    <div><h3>Your history caps out at ~2 years</h3><p>Ad platforms only hand back about two years of data, so a spreadsheet can never hold more than that. Every year that passes, an older year quietly falls off, and the long-term view is gone for good.</p></div>
                 </div>
                 <div class="ch-card reveal">
                     <div class="ch-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M9 17H7A5 5 0 0 1 7 7h2M15 7h2a5 5 0 0 1 0 10h-2M8 12h8"/></svg></div>
                     <div><h3>You can't answer across channels</h3><p>"Which channel did this customer come from?" stays unanswerable when Ads, Meta, and Shopify each live in their own separate tab.</p></div>
-                </div>
-                <div class="ch-card reveal">
-                    <div class="ch-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
-                    <div><h3>Reporting eats the week</h3><p>Hours pulling, pasting, and reformatting orders and spend — while the decisions that actually grow the store keep getting pushed to "later."</p></div>
                 </div>
                 <div class="ch-card reveal">
                     <div class="ch-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/></svg></div>
@@ -563,7 +564,7 @@
                 </div>
                 <div class="ch-card reveal">
                     <div class="ch-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 2a4 4 0 0 1 4 4v2a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4z"/><path d="M5 20a7 7 0 0 1 14 0"/></svg></div>
-                    <div><h3>You can't put AI on top of it</h3><p>You want Claude or an agent answering questions about your data — but a spreadsheet isn't something an AI can reliably read and work with.</p></div>
+                    <div><h3>You can't put AI on top of it</h3><p>You want Claude or an agent answering questions about your data, but a spreadsheet isn't something an AI can reliably read and work with.</p></div>
                 </div>
                 <div class="ch-card reveal">
                     <div class="ch-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M14 4 4 14M20 10 10 20M4 4l16 16"/></svg></div>
@@ -573,37 +574,6 @@
                     <div class="ch-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
                     <div><h3>It buckles under the team</h3><p>Ten people in the same heavy sheet means conflicts, accidental edits, and dashboards held together with tape.</p></div>
                 </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- ═══ Reframe (why this keeps happening) ═══ -->
-<section class="solution">
-    <div class="container">
-        <div class="reveal"><span class="tag">The real reason</span></div>
-        <h2 class="section-heading reveal reveal-d1">It's not the spreadsheet.<br>It's the <em>job</em> you gave it.</h2>
-        <p class="section-sub reveal reveal-d2">None of this means you did anything wrong. A spreadsheet is a document — brilliant for a quick view, never meant to be the engine of a growing data operation. The fix isn't a bigger sheet. It's the right foundation underneath.</p>
-        <div class="solution-grid">
-            <div class="sol-card reveal">
-                <div class="sol-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></div>
-                <h3>A document, not a database</h3>
-                <p>A sheet just holds values in cells. A database keeps everything organized and connected — built to grow without breaking.</p>
-            </div>
-            <div class="sol-card reveal reveal-d1">
-                <div class="sol-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5M3 12a9 3 0 0 0 18 0"/></svg></div>
-                <h3>Limits you can't formula your way out of</h3>
-                <p>Row caps, file-size ceilings, and formula timeouts aren't bugs to fix — they're the edges of the tool. You've reached them.</p>
-            </div>
-            <div class="sol-card reveal reveal-d2">
-                <div class="sol-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></svg></div>
-                <h3>The next step already exists</h3>
-                <p>BigQuery is Google's data warehouse — a real database the biggest teams run their whole business on. With Detrics it's just a different destination for the data you already have.</p>
-            </div>
-            <div class="sol-card reveal reveal-d3">
-                <div class="sol-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/></svg></div>
-                <h3>Same data, no rebuild</h3>
-                <p>You keep your sources, your metrics, your reports. What changes is the foundation they sit on — and everything that was breaking stops breaking.</p>
             </div>
         </div>
     </div>
@@ -626,7 +596,7 @@
             <div class="shift-row reveal">
                 <div class="shift-before"><p>Hits row caps as data builds up over time</p></div>
                 <div class="shift-arrow"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
-                <div class="shift-after"><p>No row limits — billions of rows, no ceiling</p></div>
+                <div class="shift-after"><p>No row limits. Billions of rows, no ceiling</p></div>
             </div>
             <div class="shift-row reveal">
                 <div class="shift-before"><p>Slows, freezes, and crashes on heavy data</p></div>
@@ -636,12 +606,12 @@
             <div class="shift-row reveal">
                 <div class="shift-before"><p>Each platform lives in its own isolated tab</p></div>
                 <div class="shift-arrow"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
-                <div class="shift-after"><p>Every platform in one warehouse — combine anything</p></div>
+                <div class="shift-after"><p>Every platform in one warehouse, combine anything</p></div>
             </div>
             <div class="shift-row reveal">
                 <div class="shift-before"><p>Fragile formulas break as complexity grows</p></div>
                 <div class="shift-arrow"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
-                <div class="shift-after"><p>A real database underneath — your dashboards and AI pull from it for you</p></div>
+                <div class="shift-after"><p>A real database underneath. Your dashboards and AI pull from it for you</p></div>
             </div>
             <div class="shift-row reveal">
                 <div class="shift-before"><p>The team trips over each other in one file</p></div>
@@ -651,7 +621,7 @@
             <div class="shift-row reveal">
                 <div class="shift-before"><p>Capped at the ~2 years the platforms hand back</p></div>
                 <div class="shift-arrow"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
-                <div class="shift-after"><p>Accumulates forever — true year-over-year history</p></div>
+                <div class="shift-after"><p>Accumulates forever, with true year-over-year history</p></div>
             </div>
         </div>
     </div>
@@ -663,7 +633,7 @@
         <div class="benefits-header">
             <div class="reveal"><span class="tag">What you get</span></div>
             <h2 class="section-heading reveal reveal-d1">Built for store data,<br>not just <em>storage</em></h2>
-            <p class="section-sub reveal reveal-d2">A warehouse alone is empty. Detrics fills it with every order, every ad, every channel — and adds the features that make it actually run.</p>
+            <p class="section-sub reveal reveal-d2">A warehouse alone is empty. Detrics fills it with every order, every ad, every channel, and adds the features that make it actually run.</p>
         </div>
         <div class="b-grid">
             <div class="b-card reveal">
@@ -674,27 +644,27 @@
             <div class="b-card reveal reveal-d1">
                 <div class="b-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 8v4l3 3M3.05 11a9 9 0 1 1 .5 4"/><path d="M3 4v4h4"/></svg></div>
                 <h3>Permanent Order History</h3>
-                <p>The platforms only keep about two years of data; your warehouse keeps every order forever — years of history to spot trends and compare seasons.</p>
+                <p>The platforms only keep about two years of data; your warehouse keeps every order forever, with years of history to spot trends and compare seasons.</p>
             </div>
             <div class="b-card reveal reveal-d2">
                 <div class="b-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M9 17H7A5 5 0 0 1 7 7h2M15 7h2a5 5 0 0 1 0 10h-2M8 12h8"/></svg></div>
                 <h3>Every Channel, One Place</h3>
-                <p>Orders, ad spend, email, and inventory land side by side — so revenue and cost finally sit together, and true profit per channel is one question away.</p>
+                <p>Orders, ad spend, email, and inventory land side by side, so revenue and cost finally sit together, and true profit per channel is one question away.</p>
             </div>
             <div class="b-card reveal">
                 <div class="b-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/></svg></div>
                 <h3>Creative Image Storage</h3>
-                <p>Your ad and product creatives are stored in your own cloud, so you can compare what actually sold across years — not just before the links expire.</p>
+                <p>Your ad and product creatives are stored in your own cloud, so you can compare what actually sold across years, not just before the links expire.</p>
             </div>
             <div class="b-card reveal reveal-d1">
                 <div class="b-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M3 3v18h18"/><rect x="7" y="9" width="3" height="8"/><rect x="12" y="5" width="3" height="12"/><rect x="17" y="13" width="3" height="4"/></svg></div>
                 <h3>See It Anywhere</h3>
-                <p>Plug Looker Studio, Power BI, or any dashboard straight into your warehouse — and point Claude at it too. Your reports read live data instead of being rebuilt in a sheet.</p>
+                <p>Plug Looker Studio, Power BI, or any dashboard straight into your warehouse, and point Claude at it too. Your reports read live data instead of being rebuilt in a sheet.</p>
             </div>
             <div class="b-card reveal reveal-d2">
                 <div class="b-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M21 12a9 9 0 1 1-9-9M21 3v6h-6"/></svg></div>
                 <h3>Always Fresh, Hands-Off</h3>
-                <p>After the first import, only new orders and spend come in — hourly if you want, done in minutes. New accounts connect on their own; the upkeep is handled, not homework.</p>
+                <p>After the first import, only new orders and spend come in (hourly if you want), done in minutes. New accounts connect on their own, so the upkeep is handled for you.</p>
             </div>
         </div>
     </div>
@@ -707,7 +677,7 @@
         <div class="answers-header">
             <div class="reveal"><span class="tag">The payoff</span></div>
             <h2 class="section-heading reveal reveal-d1">Questions you can<br>finally <em>answer</em></h2>
-            <p class="section-sub reveal reveal-d2">When orders, ad spend, and inventory live in one warehouse, the questions that were impossible across separate tabs are a single question away — for you or your AI.</p>
+            <p class="section-sub reveal reveal-d2">When orders, ad spend, and inventory live in one warehouse, the questions that were impossible across separate tabs are a single question away, for you or your AI.</p>
         </div>
         <div class="answers-grid">
             <div class="answer-card reveal">
@@ -726,6 +696,14 @@
                 <div class="answer-q">"Which campaigns bring repeat buyers, not one-offs?"</div>
                 <div class="answer-join"><span>Ad platforms</span><span>Orders</span><span>LTV</span></div>
             </div>
+            <div class="answer-card reveal">
+                <div class="answer-q">"What product sales is my SEO actually driving?"</div>
+                <div class="answer-join"><span>Web traffic</span><span>Organic keywords</span><span>Orders</span></div>
+            </div>
+            <div class="answer-card reveal reveal-d1">
+                <div class="answer-q">"Which organic posts drive the most sales?"</div>
+                <div class="answer-join"><span>Reels</span><span>Web traffic</span><span>Revenue</span></div>
+            </div>
         </div>
     </div>
 </section>
@@ -738,7 +716,7 @@
             <div class="own-left">
                 <div class="reveal"><span class="tag">It's yours</span></div>
                 <h2 class="section-heading reveal reveal-d1">The data lives in <em>your</em> cloud</h2>
-                <p class="reveal reveal-d2">BigQuery runs inside your own Google Cloud project. Detrics fills it and keeps it fresh — but the warehouse, and everything in it, belongs to you.</p>
+                <p class="reveal reveal-d2">BigQuery runs inside your own Google Cloud project. Detrics fills it and keeps it fresh, but the warehouse, and everything in it, belongs to you.</p>
             </div>
             <div class="own-points">
                 <div class="own-point reveal">
@@ -747,11 +725,11 @@
                 </div>
                 <div class="own-point reveal reveal-d1">
                     <h3>Private, under your control</h3>
-                    <p>Access lives in your own Google Cloud account — you decide who can see what, and nobody else holds your numbers.</p>
+                    <p>Access lives in your own Google Cloud account. You decide who can see what, and nobody else holds your numbers.</p>
                 </div>
                 <div class="own-point reveal reveal-d2">
                     <h3>One number everyone trusts</h3>
-                    <p>Define a metric once and it's the same everywhere — no more arguing over which spreadsheet has the right total.</p>
+                    <p>Define a metric once and it's the same everywhere. No more arguing over which spreadsheet has the right total.</p>
                 </div>
             </div>
         </div>
@@ -764,28 +742,28 @@
         <div class="mcp-header">
             <div class="reveal"><span class="tag">AI-ready</span></div>
             <h2 class="section-heading reveal reveal-d1">An agent is only as good<br>as the data <em>underneath</em> it</h2>
-            <p class="section-sub reveal reveal-d2">Point an AI at a spreadsheet and it gets a messy wall of text to interpret. Point it at a warehouse and it gets clean, organized data it can actually do the math on. That's why AI on BigQuery is faster, cheaper, and far more accurate. Connect Claude, ask in plain language, and let it do the work — you never write code yourself.</p>
+            <p class="section-sub reveal reveal-d2">Point an AI at a spreadsheet and it gets a messy wall of text to interpret. Point it at a warehouse and it gets clean, organized data it can actually do the math on. That's why AI on BigQuery is faster, cheaper, and far more accurate. Connect Claude, ask in plain language, and let it do the work. You never write code yourself.</p>
         </div>
         <div class="mcp-grid">
             <div class="mcp-card reveal">
                 <div class="mcp-card-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
                 <h3>The database does the math</h3>
-                <p>The AI doesn't add up numbers in its head — where it tends to make mistakes. It asks BigQuery to do the adding-up and combining, then reports the exact result. The math goes from "guessed" to "calculated."</p>
+                <p>The AI doesn't add up numbers in its head, where AI models hallucinate. It asks BigQuery to do the adding-up and combining, then reports the exact result. The math goes from "guessed" to "calculated."</p>
             </div>
             <div class="mcp-card reveal reveal-d1">
                 <div class="mcp-card-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5M3 12a9 3 0 0 0 18 0"/></svg></div>
                 <h3>It sees all your data, not a sample</h3>
-                <p>When you paste data into a chat, only a slice fits — the rest gets cut off. Connected to your warehouse, the AI reaches all of it and pulls back just the answer — so it works from everything, not the first thousand rows.</p>
+                <p>When you paste data into a chat, only a slice fits and the rest gets cut off. Connected to your warehouse, the AI reaches all of it and pulls back just the answer, so it works from everything, not the first thousand rows.</p>
             </div>
             <div class="mcp-card reveal reveal-d2">
                 <div class="mcp-card-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M21 12a9 9 0 1 1-9-9M21 3v6h-6"/><circle cx="12" cy="12" r="1"/></svg></div>
                 <h3>Faster, with fewer mistakes</h3>
-                <p>Instant answers let it check its work and refine on the spot. And because your data is neatly organized and labelled, it knows exactly what's there — so it gives the right answer instead of guessing.</p>
+                <p>Instant answers let it check its work and refine on the spot. And because your data is neatly organized and labelled, it knows exactly what's there, so it gives the right answer instead of guessing.</p>
             </div>
             <div class="mcp-card reveal reveal-d3">
                 <div class="mcp-card-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 2a4 4 0 0 1 4 4v2a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4z"/><path d="M5 20a7 7 0 0 1 14 0"/></svg></div>
                 <h3>Answers you can verify and trust</h3>
-                <p>You can see exactly what the agent looked at, scoped to the right store or account. Plain-language questions in, answers you can check — built on current data from every channel.</p>
+                <p>You can see exactly what the agent looked at, scoped to the right store or account. Plain-language questions in, answers you can check, built on current data from every channel.</p>
             </div>
         </div>
     </div>
@@ -797,13 +775,13 @@
         <div class="noteam-header">
             <div class="reveal"><span class="tag">No code required</span></div>
             <h2 class="section-heading reveal reveal-d1">You don't run the warehouse.<br>It runs <em>for</em> you.</h2>
-            <p class="reveal reveal-d2">A warehouse sounds like something you need an analyst for. You don't. The data lands automatically, and you reach it the way you already work — through dashboards and AI, never raw code.</p>
+            <p class="reveal reveal-d2">A warehouse sounds like something you need an analyst for. You don't. The data lands automatically, and you reach it the way you already work: through dashboards and AI, never raw code.</p>
         </div>
         <div class="noteam-grid">
             <div class="noteam-card reveal">
                 <div class="noteam-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 2a4 4 0 0 1 4 4v2a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4z"/><path d="M5 20a7 7 0 0 1 14 0"/></svg></div>
                 <h3>Just ask your AI</h3>
-                <p>Ask Claude in plain language. It does the digging in your warehouse and hands you the answer — no code, nothing to learn.</p>
+                <p>Ask Claude in plain language. It does the digging in your warehouse and gives you the answer in plain words. Nothing to set up, nothing to learn.</p>
             </div>
             <div class="noteam-card reveal reveal-d1">
                 <div class="noteam-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg></div>
@@ -813,7 +791,7 @@
             <div class="noteam-card reveal reveal-d2">
                 <div class="noteam-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 15l2 2 4-4"/></svg></div>
                 <h3>We build the rest</h3>
-                <p>Need a custom dashboard or pipeline you don't have the hands for? Our data team builds it on top of your warehouse for you — done for you, start to finish.</p>
+                <p>Need a custom dashboard or pipeline you don't have the hands for? Our data team builds it on top of your warehouse for you, start to finish.</p>
             </div>
         </div>
     </div>
@@ -830,27 +808,27 @@
         <div class="who-grid">
             <div class="who-card reveal">
                 <div class="who-check"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg></div>
-                <p><strong>Growing stores</strong> — order volume climbing past what a spreadsheet can comfortably hold.</p>
+                <p><strong>Growing stores:</strong> order volume climbing past what a spreadsheet can comfortably hold.</p>
             </div>
             <div class="who-card reveal reveal-d1">
                 <div class="who-check"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg></div>
-                <p><strong>Multi-store or multi-brand operators</strong> — several stores, regions, or brands to compare in one place.</p>
+                <p><strong>Multi-store or multi-brand operators:</strong> several stores, regions, or brands to compare in one place.</p>
             </div>
             <div class="who-card reveal">
                 <div class="who-check"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg></div>
-                <p><strong>Stores running ads on 3+ platforms</strong> — Meta, Google, and TikTok spend that needs to meet real revenue.</p>
+                <p><strong>Stores running ads on 3+ platforms:</strong> Meta, Google, and TikTok spend that needs to meet real revenue.</p>
             </div>
             <div class="who-card reveal reveal-d1">
                 <div class="who-check"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg></div>
-                <p><strong>Anyone hitting the wall</strong> — freezing sheets, failed overnight syncs, the 10M-cell ceiling.</p>
+                <p><strong>Anyone hitting the wall:</strong> freezing sheets, failed overnight syncs, the 10M-cell ceiling.</p>
             </div>
             <div class="who-card reveal">
                 <div class="who-check"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg></div>
-                <p><strong>Owners who run on AI</strong> — you let Claude do the digging and never touch code yourself.</p>
+                <p><strong>Owners who run on AI:</strong> you let Claude do the digging and never touch code yourself.</p>
             </div>
             <div class="who-card reveal reveal-d1">
                 <div class="who-check"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg></div>
-                <p><strong>Anyone who wants their history back</strong> — years of orders and creative, kept forever instead of expiring.</p>
+                <p><strong>Anyone who wants their history back:</strong> years of orders and creative, kept forever instead of expiring.</p>
             </div>
         </div>
     </div>
@@ -862,7 +840,7 @@
         <div class="switch-header">
             <div class="reveal"><span class="tag">The move</span></div>
             <h2 class="section-heading reveal reveal-d1">It's a destination switch,<br>not a <em>rebuild</em></h2>
-            <p class="section-sub reveal reveal-d2">The hard part sounds like the migration. It isn't. Your sources and reports stay the same — the data just flows somewhere stronger.</p>
+            <p class="section-sub reveal reveal-d2">The hard part sounds like the migration. It isn't. Your sources and reports stay the same, and the data just flows somewhere stronger.</p>
         </div>
         <div class="steps-row">
             <div class="step-card reveal">
@@ -881,11 +859,11 @@
                 <div class="step-num">3</div>
                 <div class="step-line"></div>
                 <h3>We handle the move</h3>
-                <p>Our team sets it up with you — historical load included — so the warehouse is live with your data, no work on your side.</p>
+                <p>Our team sets it up with you, historical load included, so the warehouse goes live with your data and there's no work on your side.</p>
             </div>
         </div>
         <div class="switch-note-wrap reveal reveal-d3">
-            <span class="switch-note"><strong>Done-for-you setup</strong> — guided onboarding and historical migration, handled by the team.</span>
+            <span class="switch-note"><strong>Done-for-you setup.</strong> Guided onboarding and historical migration, handled by the team.</span>
         </div>
     </div>
 </section>
@@ -904,15 +882,15 @@
             </details>
             <details class="faq-item reveal">
                 <summary>Can I keep all my orders synced every hour?</summary>
-                <div class="faq-a">Yes. After the first historical load, every new order and refund syncs on the schedule you choose — <strong>hourly if you want</strong>, with no row caps. Your full order history stays in the warehouse, all of it.</div>
+                <div class="faq-a">Yes. After the first historical load, every new order and refund syncs on the schedule you choose, <strong>hourly if you want</strong>, with no row caps. Your full order history stays in the warehouse, all of it.</div>
             </details>
             <details class="faq-item reveal">
                 <summary>Does BigQuery cost a lot to run?</summary>
-                <div class="faq-a">No. BigQuery only charges for what you use — and at a single store's size that's usually <strong>a few cents a month, often nothing at all</strong> (it sits inside Google's free tier). There's no big fixed fee.</div>
+                <div class="faq-a">No. BigQuery only charges for what you use, and at a single store's size that's usually <strong>a few cents a month, often nothing at all</strong> (it sits inside Google's free tier). There's no big fixed fee.</div>
             </details>
             <details class="faq-item reveal">
                 <summary>Who owns the data?</summary>
-                <div class="faq-a">You do. BigQuery runs inside <strong>your own Google Cloud project</strong> — the warehouse and everything in it belongs to you. If you ever stop using Detrics, you keep every row.</div>
+                <div class="faq-a">You do. BigQuery runs inside <strong>your own Google Cloud project</strong>. The warehouse and everything in it belongs to you. If you ever stop using Detrics, you keep every row.</div>
             </details>
             <details class="faq-item reveal">
                 <summary>How hard is the migration?</summary>
@@ -920,11 +898,11 @@
             </details>
             <details class="faq-item reveal">
                 <summary>What happens when the trial ends?</summary>
-                <div class="faq-a">Your transfers pause automatically — nothing is charged and nothing breaks. To keep your data flowing, you move to a plan and the syncs resume right where they left off.</div>
+                <div class="faq-a">Your transfers pause automatically, so nothing is charged and nothing breaks. To keep your data flowing, you move to a plan and the syncs resume right where they left off.</div>
             </details>
             <details class="faq-item reveal">
                 <summary>How is this different from my current Sheets plan?</summary>
-                <div class="faq-a">BigQuery is a separate destination on its own plan. It's the <strong>same data and the same refreshes</strong> — just landing in a real database instead of a spreadsheet, so it stops freezing, keeps full history, and feeds your AI.</div>
+                <div class="faq-a">BigQuery is a separate destination on its own plan. It's the <strong>same data and the same refreshes</strong>, just landing in a real database instead of a spreadsheet, so it stops freezing, keeps full history, and feeds your AI.</div>
             </details>
         </div>
     </div>
@@ -934,7 +912,7 @@
 <section class="cta-final">
     <div class="container">
         <h2 class="reveal">Let's look at <em>your</em> setup</h2>
-        <p class="cta-final-sub reveal reveal-d1">Tell us what you're running today and where it breaks. We'll show you exactly what changes on a warehouse — and whether it's even the right move for your store.</p>
+        <p class="cta-final-sub reveal reveal-d1">Tell us what you're running today and where it breaks. We'll show you exactly what changes on a warehouse, and whether it's even the right move for your store.</p>
         <div class="cta-actions reveal reveal-d2">
             <a href="https://detrics.io/demo/book/" class="btn-white">Talk to the team &rarr;</a>
             <a href="https://support.detrics.io/bigquery/connect-to-claude" class="btn-outline-white">Read the setup guide</a>
