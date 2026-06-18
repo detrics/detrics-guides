@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <link rel="apple-touch-icon" href="/favicon.png">
+    <title>Detrics for BigQuery: When the spreadsheet stops keeping up</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --ink: #0a0a0f;
+            --ink-90: #1a1a2e;
+            --ink-70: #2d2d44;
+            --ink-50: #6b6b8a;
+            --ink-30: #9e9eb8;
+            --ink-15: #d4d4e0;
+            --ink-08: #ebebf0;
+            --ink-04: #f5f5f8;
+            --ink-02: #fafafc;
+            --surface: #ffffff;
+            --accent: #2563EB;
+            --accent-dark: #1d4ed8;
+            --accent-glow: rgba(37, 99, 235, 0.12);
+            --accent-wash: rgba(37, 99, 235, 0.04);
+            --warm: #f7f5f2;
+            --serif: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            --sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+            --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: var(--sans);
+            color: var(--ink);
+            background: var(--surface);
+            line-height: 1.6;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.025;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-size: 200px;
+        }
+
+        .container { max-width: 1280px; margin: 0 auto; padding: 0 clamp(20px, 4vw, 48px); }
+
+        /* ── Reveal animations ── */
+        .reveal {
+            opacity: 0;
+            transform: translateY(32px);
+            transition: opacity 0.8s var(--ease-out), transform 0.8s var(--ease-out);
+        }
+        .reveal.visible { opacity: 1; transform: none; }
+        .reveal-d1 { transition-delay: 0.08s; }
+        .reveal-d2 { transition-delay: 0.16s; }
+        .reveal-d3 { transition-delay: 0.24s; }
+        .reveal-d4 { transition-delay: 0.32s; }
+        .reveal-d5 { transition-delay: 0.40s; }
+
+        /* ── Tag / Label ── */
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: var(--sans);
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--accent);
+            padding: 6px 14px;
+            border: 1px solid var(--accent-glow);
+            border-radius: 100px;
+            background: var(--accent-wash);
+        }
+        .tag::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--accent);
+            flex-shrink: 0;
+        }
+
+        .section-heading {
+            font-family: var(--serif);
+            font-size: clamp(36px, 5.5vw, 64px);
+            font-weight: 400;
+            line-height: 1.08;
+            letter-spacing: -0.02em;
+            color: var(--ink);
+        }
+        .section-heading em { font-style: italic; color: var(--accent); }
+
+        .section-sub {
+            font-size: 17px;
+            color: var(--ink-50);
+            line-height: 1.7;
+            max-width: 520px;
+        }
+
+        /* ── Nav ── */
+        nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+            padding: 0 clamp(20px, 4vw, 48px); height: 64px;
+            display: flex; align-items: center;
+            background: rgba(255,255,255,0.8);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border-bottom: 1px solid transparent;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        nav.scrolled { border-bottom-color: var(--ink-08); box-shadow: 0 1px 12px rgba(0,0,0,0.04); }
+        nav .nav-inner { max-width: 1280px; width: 100%; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
+        .nav-logo img { height: 26px; display: block; }
+        .nav-cta {
+            font-family: var(--sans); font-size: 13px; font-weight: 600;
+            color: var(--surface); background: var(--accent);
+            padding: 10px 22px; border-radius: 100px; text-decoration: none;
+            transition: transform 0.25s var(--ease-spring), box-shadow 0.3s, background 0.25s;
+        }
+        .nav-cta:hover { background: var(--accent-dark); transform: translateY(-1px); box-shadow: 0 6px 20px var(--accent-glow); }
+
+        /* ── Hero ── */
+        .hero { padding: 160px 0 100px; position: relative; overflow: hidden; }
+        .hero-bg {
+            position: absolute; inset: 0;
+            background:
+                radial-gradient(ellipse 80% 60% at 70% 20%, var(--accent-glow) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 50% at 20% 80%, rgba(37,99,235,0.06) 0%, transparent 50%);
+        }
+        .hero-grid {
+            position: absolute; inset: 0;
+            background-image:
+                linear-gradient(var(--ink-08) 1px, transparent 1px),
+                linear-gradient(90deg, var(--ink-08) 1px, transparent 1px);
+            background-size: 80px 80px;
+            mask-image: radial-gradient(ellipse 70% 50% at 50% 40%, black 10%, transparent 70%);
+            -webkit-mask-image: radial-gradient(ellipse 70% 50% at 50% 40%, black 10%, transparent 70%);
+            opacity: 0.5;
+        }
+        .hero .container { position: relative; z-index: 1; }
+        .hero-content { max-width: 840px; }
+        .hero .hero-badge { margin-bottom: 28px; display: inline-flex; align-items: center; gap: 9px; }
+        .hero-badge img { height: 22px; width: 22px; }
+        .hero h1 {
+            font-family: var(--serif); font-size: clamp(48px, 7vw, 88px); font-weight: 400;
+            line-height: 1.02; letter-spacing: -0.03em; color: var(--ink); margin-bottom: 28px;
+        }
+        .hero h1 em {
+            font-style: italic;
+            background: linear-gradient(135deg, var(--accent) 0%, #6366f1 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .hero-sub { font-size: clamp(17px, 2vw, 21px); color: var(--ink-50); max-width: 600px; line-height: 1.6; margin-bottom: 44px; }
+        .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; }
+        .btn-main {
+            display: inline-flex; align-items: center; gap: 8px;
+            font-family: var(--sans); font-size: 15px; font-weight: 600;
+            color: var(--surface); background: var(--accent);
+            padding: 16px 32px; border-radius: 100px; text-decoration: none;
+            transition: transform 0.25s var(--ease-spring), box-shadow 0.3s, background 0.25s;
+        }
+        .btn-main:hover { background: var(--accent-dark); transform: translateY(-2px); box-shadow: 0 8px 30px var(--accent-glow); }
+        .btn-ghost {
+            display: inline-flex; align-items: center; gap: 8px;
+            font-family: var(--sans); font-size: 15px; font-weight: 600;
+            color: var(--ink-70); background: transparent;
+            padding: 16px 32px; border-radius: 100px; text-decoration: none;
+            border: 1.5px solid var(--ink-15); transition: all 0.25s var(--ease-out);
+        }
+        .btn-ghost:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); }
+
+        /* ── Challenge (the pain) ── */
+        .challenge { padding: 140px 0; }
+        .challenge-layout { display: grid; grid-template-columns: 1fr 1.2fr; gap: 80px; align-items: start; }
+        .challenge-left { position: sticky; top: 120px; }
+        .challenge-left .tag { margin-bottom: 20px; }
+        .challenge-left .section-heading { margin-bottom: 20px; }
+        .challenge-left .section-sub { color: var(--ink-50); }
+        .challenge-cards { display: flex; flex-direction: column; gap: 16px; }
+        .ch-card {
+            padding: 28px 32px; border-radius: 16px; background: var(--ink-02);
+            border: 1px solid var(--ink-08); display: flex; gap: 20px; align-items: flex-start;
+            transition: all 0.3s var(--ease-out); cursor: default;
+        }
+        .ch-card:hover { background: var(--surface); border-color: var(--accent); box-shadow: 0 8px 40px rgba(37,99,235,0.08); transform: translateX(8px); }
+        .ch-icon {
+            width: 44px; height: 44px; border-radius: 12px; background: var(--accent-wash);
+            border: 1px solid var(--accent-glow); display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; transition: all 0.3s var(--ease-out);
+        }
+        .ch-card:hover .ch-icon { background: var(--accent); border-color: var(--accent); }
+        .ch-card:hover .ch-icon svg { stroke: white; }
+        .ch-icon svg { stroke: var(--accent); }
+        .ch-card h3 { font-size: 16px; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
+        .ch-card p { font-size: 14px; color: var(--ink-50); line-height: 1.5; }
+
+        /* ── Reframe (dark) ── */
+        .solution { padding: 140px 0; background: var(--ink); color: var(--surface); position: relative; overflow: hidden; }
+        .solution::before {
+            content: ''; position: absolute; inset: 0;
+            background-image:
+                radial-gradient(circle at 80% 20%, rgba(37,99,235,0.12) 0%, transparent 40%),
+                radial-gradient(circle at 10% 80%, rgba(99,102,241,0.08) 0%, transparent 40%);
+        }
+        .solution .container { position: relative; z-index: 1; }
+        .solution .tag { border-color: rgba(37,99,235,0.3); background: rgba(37,99,235,0.1); }
+        .solution .section-heading { color: var(--surface); margin: 20px 0; }
+        .solution .section-sub { color: rgba(255,255,255,0.5); margin-bottom: 64px; }
+        .solution-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+        .sol-card {
+            padding: 36px 32px; border-radius: 20px; background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08); transition: all 0.3s var(--ease-out);
+            position: relative; overflow: hidden;
+        }
+        .sol-card::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%;
+            background: linear-gradient(180deg, var(--accent) 0%, #6366f1 100%); opacity: 0; transition: opacity 0.3s;
+        }
+        .sol-card:hover { background: rgba(255,255,255,0.07); border-color: rgba(37,99,235,0.3); }
+        .sol-card:hover::before { opacity: 1; }
+        .sol-icon {
+            width: 44px; height: 44px; border-radius: 12px; background: rgba(37,99,235,0.15);
+            border: 1px solid rgba(37,99,235,0.3); display: flex; align-items: center; justify-content: center;
+            margin-bottom: 16px; transition: all 0.3s var(--ease-out);
+        }
+        .sol-icon svg { stroke: #93c5fd; }
+        .sol-card:hover .sol-icon { background: var(--accent); border-color: var(--accent); }
+        .sol-card:hover .sol-icon svg { stroke: white; }
+        .sol-card h3 { font-size: 18px; font-weight: 600; color: var(--surface); margin-bottom: 8px; }
+        .sol-card p { font-size: 14px; color: rgba(255,255,255,0.5); line-height: 1.6; }
+
+        /* ── The shift (before → after) ── */
+        .shift { padding: 140px 0; background: var(--warm); }
+        .shift-header { text-align: center; margin-bottom: 56px; }
+        .shift-header .tag { margin-bottom: 20px; }
+        .shift-header .section-heading { margin-bottom: 16px; }
+        .shift-header .section-sub { margin: 0 auto; }
+        .shift-table { display: flex; flex-direction: column; gap: 12px; max-width: 980px; margin: 0 auto; }
+        .shift-row {
+            display: grid; grid-template-columns: 1fr auto 1fr; align-items: stretch; gap: 0;
+            border-radius: 16px; overflow: hidden; border: 1px solid var(--ink-08); background: var(--surface);
+            transition: all 0.3s var(--ease-out);
+        }
+        .shift-row:hover { border-color: var(--accent); box-shadow: 0 10px 40px rgba(37,99,235,0.08); }
+        .shift-before, .shift-after { padding: 22px 26px; display: flex; flex-direction: column; justify-content: center; }
+        .shift-before { background: rgba(15,157,88,0.06); border-left: 3px solid #0f9d58; }
+        .shift-after { background: rgba(37,99,235,0.05); border-right: 3px solid var(--accent); }
+        .shift-arrow {
+            display: flex; align-items: center; justify-content: center; width: 56px;
+            color: var(--accent); background: var(--accent-wash); border-left: 1px solid var(--ink-08); border-right: 1px solid var(--ink-08);
+        }
+        .shift-logo { display: flex; align-items: center; gap: 8px; margin-bottom: 9px; }
+        .shift-logo img { height: 22px; width: 22px; object-fit: contain; }
+        .shift-logo span { font-size: 12px; font-weight: 700; letter-spacing: 0.03em; }
+        .shift-before .shift-logo span { color: #0f9d58; }
+        .shift-after .shift-logo span { color: var(--accent); }
+        .shift-before p { font-size: 15px; color: var(--ink-70); line-height: 1.45; }
+        .shift-after p { font-size: 15px; color: var(--ink); font-weight: 500; line-height: 1.45; }
+        .shift-head { display: grid; grid-template-columns: 1fr 56px 1fr; max-width: 980px; margin: 0 auto 14px; }
+        .shift-head-col { display: flex; align-items: center; gap: 9px; padding: 0 29px; }
+        .shift-head-col img { height: 24px; width: 24px; object-fit: contain; }
+        .shift-head-col span { font-size: 15px; font-weight: 700; letter-spacing: 0.02em; }
+        .shift-head-col.sheets span { color: #0f9d58; }
+        .shift-head-col.bq span { color: var(--accent); }
+
+        /* ── Benefits (what you get) ── */
+        .benefits { padding: 140px 0; }
+        .benefits-header { margin-bottom: 64px; }
+        .benefits-header .tag { margin-bottom: 20px; }
+        .benefits-header .section-heading { margin-bottom: 16px; }
+        .b-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+        .b-card { padding: 32px 28px; border-radius: 20px; background: var(--ink-02); border: 1px solid var(--ink-08); transition: all 0.3s var(--ease-out); }
+        .b-card:hover { background: var(--surface); border-color: var(--accent); box-shadow: 0 12px 40px rgba(37,99,235,0.08); transform: translateY(-4px); }
+        .b-icon {
+            width: 48px; height: 48px; border-radius: 14px; background: var(--accent-wash);
+            border: 1px solid var(--accent-glow); display: flex; align-items: center; justify-content: center;
+            margin-bottom: 18px; transition: all 0.3s var(--ease-out);
+        }
+        .b-icon svg { stroke: var(--accent); }
+        .b-card:hover .b-icon { background: var(--accent); border-color: var(--accent); }
+        .b-card:hover .b-icon svg { stroke: white; }
+        .b-card h3 { font-size: 16px; font-weight: 600; color: var(--ink); margin-bottom: 6px; }
+        .b-card p { font-size: 14px; color: var(--ink-50); line-height: 1.5; }
+
+        /* ── Ownership (dark band) ── */
+        .own { padding: 140px 0; background: var(--ink); position: relative; overflow: hidden; }
+        .own::before {
+            content: ''; position: absolute; inset: 0;
+            background:
+                radial-gradient(ellipse at 70% 0%, rgba(37,99,235,0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 20% 100%, rgba(99,102,241,0.1) 0%, transparent 50%);
+        }
+        .own .container { position: relative; z-index: 1; }
+        .own-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+        .own-left .tag { border-color: rgba(99,102,241,0.3); background: rgba(99,102,241,0.12); color: #a5b4fc; margin-bottom: 20px; }
+        .own-left .tag::before { background: #a5b4fc; }
+        .own-left .section-heading { color: var(--surface); margin-bottom: 20px; }
+        .own-left p { font-size: 16px; color: rgba(255,255,255,0.55); line-height: 1.7; }
+        .own-points { display: flex; flex-direction: column; gap: 14px; }
+        .own-point {
+            padding: 24px 28px; border-radius: 16px; background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08); transition: all 0.3s var(--ease-out);
+        }
+        .own-point:hover { background: rgba(255,255,255,0.07); border-color: rgba(37,99,235,0.3); }
+        .own-point h3 { font-size: 16px; font-weight: 600; color: var(--surface); margin-bottom: 6px; }
+        .own-point p { font-size: 14px; color: rgba(255,255,255,0.5); line-height: 1.55; }
+
+        /* ── MCP (AI on top) ── */
+        .mcp { padding: 140px 0; background: var(--ink-02); position: relative; }
+        .mcp::before {
+            content: ''; position: absolute; inset: 0;
+            background-image:
+                linear-gradient(rgba(37,99,235,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(37,99,235,0.03) 1px, transparent 1px);
+            background-size: 48px 48px;
+            mask-image: radial-gradient(ellipse at center, black 20%, transparent 70%);
+            -webkit-mask-image: radial-gradient(ellipse at center, black 20%, transparent 70%);
+        }
+        .mcp .container { position: relative; z-index: 1; }
+        .mcp-header { margin-bottom: 64px; }
+        .mcp-header .tag { margin-bottom: 20px; }
+        .mcp-header .section-heading { margin-bottom: 16px; }
+        .mcp-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+        .mcp-card { padding: 32px 28px; border-radius: 20px; background: var(--surface); border: 1px solid var(--ink-08); transition: all 0.3s var(--ease-out); }
+        .mcp-card:hover { border-color: var(--accent); box-shadow: 0 8px 32px var(--accent-glow); transform: translateY(-4px); }
+        .mcp-card-icon {
+            width: 40px; height: 40px; border-radius: 10px; background: var(--accent-wash);
+            border: 1px solid var(--accent-glow); display: flex; align-items: center; justify-content: center; margin-bottom: 16px;
+        }
+        .mcp-card-icon svg { stroke: var(--accent); }
+        .mcp-card h3 { font-size: 16px; font-weight: 600; color: var(--ink); margin-bottom: 6px; }
+        .mcp-card p { font-size: 14px; color: var(--ink-50); line-height: 1.5; }
+
+        /* ── Who this is for ── */
+        .who { padding: 140px 0; }
+        .who-header { text-align: center; margin-bottom: 56px; }
+        .who-header .tag { margin-bottom: 20px; }
+        .who-header .section-heading { margin-bottom: 16px; }
+        .who-header .section-sub { margin: 0 auto; }
+        .who-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; max-width: 980px; margin: 0 auto; }
+        .who-card {
+            padding: 26px 30px; border-radius: 16px; border: 1px solid var(--ink-08); background: var(--ink-02);
+            display: flex; gap: 18px; align-items: flex-start; transition: all 0.3s var(--ease-out);
+        }
+        .who-card:hover { border-color: var(--accent); background: var(--surface); box-shadow: 0 8px 32px rgba(37,99,235,0.06); }
+        .who-check {
+            flex-shrink: 0; width: 26px; height: 26px; border-radius: 50%; background: var(--accent-wash);
+            border: 1px solid var(--accent-glow); display: flex; align-items: center; justify-content: center; margin-top: 2px;
+        }
+        .who-check svg { stroke: var(--accent); }
+        .who-card p { font-size: 15px; color: var(--ink-70); line-height: 1.5; }
+        .who-card strong { color: var(--ink); font-weight: 600; }
+
+        /* ── Switch (migration steps) ── */
+        .switch { padding: 140px 0; background: var(--warm); }
+        .switch-header { text-align: center; margin-bottom: 64px; }
+        .switch-header .tag { margin-bottom: 20px; }
+        .switch-header .section-heading { margin-bottom: 16px; }
+        .switch-header .section-sub { margin: 0 auto; }
+        .steps-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+        .step-card { padding: 36px 28px; border-radius: 20px; background: var(--surface); border: 1px solid var(--ink-08); transition: all 0.3s var(--ease-out); }
+        .step-card:hover { border-color: var(--accent); transform: translateY(-4px); box-shadow: 0 12px 40px rgba(37,99,235,0.08); }
+        .step-num { font-family: var(--serif); font-size: 56px; font-style: italic; color: var(--ink-08); line-height: 1; margin-bottom: 8px; }
+        .step-card:hover .step-num { color: var(--accent-glow); }
+        .step-line { width: 36px; height: 2px; background: linear-gradient(90deg, var(--accent), #818cf8); border-radius: 2px; margin-bottom: 16px; }
+        .step-card h3 { font-size: 17px; font-weight: 600; color: var(--ink); margin-bottom: 6px; }
+        .step-card p { font-size: 14px; color: var(--ink-50); line-height: 1.5; }
+        .switch-note {
+            display: inline-flex; align-items: center; gap: 10px; margin: 44px auto 0;
+            padding: 12px 22px; border-radius: 100px; background: var(--accent-wash); border: 1px solid var(--accent-glow);
+            font-size: 14px; color: var(--ink-70);
+        }
+        .switch-note strong { color: var(--accent); font-weight: 700; }
+        .switch-note-wrap { text-align: center; }
+
+        /* ── CTA Final ── */
+        .cta-final { padding: 140px 0; background: var(--accent); position: relative; overflow: hidden; text-align: center; }
+        .cta-final::before {
+            content: ''; position: absolute; inset: 0;
+            background:
+                radial-gradient(ellipse at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 50%, rgba(0,0,0,0.05) 0%, transparent 50%);
+        }
+        .cta-final .container { position: relative; z-index: 1; }
+        .cta-final h2 { font-family: var(--serif); font-size: clamp(40px, 6vw, 72px); font-weight: 400; color: white; letter-spacing: -0.02em; margin-bottom: 20px; }
+        .cta-final h2 em { font-style: italic; }
+        .cta-final-sub { font-size: 18px; color: rgba(255,255,255,0.78); margin: 0 auto 48px; max-width: 520px; }
+        .cta-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+        .btn-white {
+            display: inline-flex; align-items: center; gap: 10px;
+            font-family: var(--sans); font-size: 16px; font-weight: 700; color: var(--accent);
+            background: white; padding: 18px 48px; border-radius: 100px; text-decoration: none;
+            transition: transform 0.25s var(--ease-spring), box-shadow 0.3s;
+        }
+        .btn-white:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(0,0,0,0.2); }
+        .btn-outline-white {
+            display: inline-flex; align-items: center; gap: 10px;
+            font-family: var(--sans); font-size: 16px; font-weight: 600; color: white;
+            background: transparent; border: 1.5px solid rgba(255,255,255,0.5);
+            padding: 18px 40px; border-radius: 100px; text-decoration: none;
+            transition: all 0.25s var(--ease-out);
+        }
+        .btn-outline-white:hover { border-color: white; background: rgba(255,255,255,0.1); transform: translateY(-2px); }
+
+        /* ── Footer ── */
+        footer { padding: 40px 0; background: var(--ink); text-align: center; }
+        footer img { height: 20px; margin-bottom: 8px; }
+        footer p { font-size: 13px; color: var(--ink-50); }
+        footer a { color: #93c5fd; text-decoration: none; }
+
+        /* ── Answers (what you can finally answer) ── */
+        .answers { padding: 140px 0; }
+        .answers-header { margin-bottom: 56px; max-width: 660px; }
+        .answers-header .tag { margin-bottom: 20px; }
+        .answers-header .section-heading { margin-bottom: 16px; }
+        .answers-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+        .answer-card {
+            padding: 34px 32px; border-radius: 20px; background: var(--ink-02); border: 1px solid var(--ink-08);
+            transition: all 0.3s var(--ease-out); display: flex; flex-direction: column; gap: 18px;
+        }
+        .answer-card:hover { background: var(--surface); border-color: var(--accent); box-shadow: 0 12px 40px rgba(37,99,235,0.08); transform: translateY(-4px); }
+        .answer-q { font-family: var(--serif); font-size: 23px; font-style: italic; color: var(--ink); line-height: 1.3; }
+        .answer-join { display: flex; flex-wrap: wrap; gap: 8px; margin-top: auto; }
+        .answer-join span { font-size: 12px; font-weight: 600; color: var(--accent); background: var(--accent-wash); border: 1px solid var(--accent-glow); padding: 5px 12px; border-radius: 100px; }
+
+        /* ── No team ── */
+        .noteam { padding: 140px 0; background: var(--ink); color: var(--surface); position: relative; overflow: hidden; }
+        .noteam::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 85% 15%, rgba(37,99,235,0.14) 0%, transparent 45%); }
+        .noteam .container { position: relative; z-index: 1; }
+        .noteam-header { text-align: center; max-width: 660px; margin: 0 auto 56px; }
+        .noteam-header .tag { border-color: rgba(147,197,253,0.4); background: rgba(147,197,253,0.12); color: #93c5fd; margin-bottom: 20px; }
+        .noteam-header .tag::before { background: #93c5fd; }
+        .noteam-header .section-heading { color: var(--surface); margin-bottom: 16px; }
+        .noteam-header p { color: rgba(255,255,255,0.55); font-size: 17px; line-height: 1.7; }
+        .noteam-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+        .noteam-card { padding: 36px 30px; border-radius: 20px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); transition: all 0.3s var(--ease-out); }
+        .noteam-card:hover { background: rgba(255,255,255,0.07); border-color: rgba(37,99,235,0.3); transform: translateY(-4px); }
+        .noteam-icon { width: 44px; height: 44px; border-radius: 12px; background: rgba(37,99,235,0.15); border: 1px solid rgba(37,99,235,0.3); display: flex; align-items: center; justify-content: center; margin-bottom: 18px; }
+        .noteam-icon svg { stroke: #93c5fd; }
+        .noteam-card h3 { font-size: 17px; font-weight: 600; color: var(--surface); margin-bottom: 8px; }
+        .noteam-card p { font-size: 14px; color: rgba(255,255,255,0.55); line-height: 1.6; }
+
+        /* ── FAQ ── */
+        .faq { padding: 140px 0; background: var(--ink-02); }
+        .faq-header { text-align: center; margin-bottom: 56px; }
+        .faq-header .tag { margin-bottom: 20px; }
+        .faq-list { max-width: 820px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+        .faq-item { border: 1px solid var(--ink-08); border-radius: 16px; background: var(--surface); overflow: hidden; transition: border-color 0.25s; }
+        .faq-item[open] { border-color: var(--accent); }
+        .faq-item summary { list-style: none; cursor: pointer; padding: 24px 28px; font-size: 16px; font-weight: 600; color: var(--ink); display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+        .faq-item summary::-webkit-details-marker { display: none; }
+        .faq-item summary::after { content: '+'; font-size: 24px; line-height: 1; color: var(--accent); font-weight: 400; transition: transform 0.25s var(--ease-out); flex-shrink: 0; }
+        .faq-item[open] summary::after { transform: rotate(45deg); }
+        .faq-a { padding: 0 28px 26px; font-size: 15px; color: var(--ink-50); line-height: 1.65; }
+        .faq-a strong { color: var(--ink-70); font-weight: 600; }
+
+        /* ── Responsive ── */
+        @media (max-width: 1024px) {
+            .challenge-layout { grid-template-columns: 1fr; gap: 48px; }
+            .challenge-left { position: static; }
+            .own-layout { grid-template-columns: 1fr; gap: 48px; }
+        }
+        @media (max-width: 768px) {
+            .solution-grid, .mcp-grid, .who-grid { grid-template-columns: 1fr; }
+            .b-grid, .steps-row, .answers-grid, .noteam-grid { grid-template-columns: 1fr; }
+            .shift-row { grid-template-columns: 1fr; }
+            .shift-arrow { width: 100%; height: 40px; transform: rotate(90deg); }
+            .shift-head { display: flex; justify-content: space-around; }
+            .hero { padding: 130px 0 80px; }
+        }
+        .icon-sm { width: 20px; height: 20px; }
+    </style>
+</head>
+<body>
+<!--
+  ╔══════════════════════════════════════════════════════════════════════╗
+  ║  DETRICS · BIGQUERY PAGE — MASTER TEMPLATE (generic / all-industries)  ║
+  ║  Clone this file per vertical, then tune the SWAP ZONES below:         ║
+  ║    1. Hero headline + sub        (industry framing)                    ║
+  ║    2. "What you can finally answer" questions + joins  (per vertical)  ║
+  ║    3. Featured-benefit ordering  (lead with what that segment feels)   ║
+  ║  Everything else is shared. See README.md (this folder) for the recipe.║
+  ╚══════════════════════════════════════════════════════════════════════╝
+-->
+
+<!-- ═══ Nav ═══ -->
+<nav id="topnav">
+    <div class="nav-inner">
+        <a href="https://detrics.io" class="nav-logo">
+            <img src="https://detrics.io/_astro/detrics-logo.C-sT4k0h_ZovnhR.svg" alt="Detrics">
+        </a>
+        <a href="https://detrics.io/demo/book/" class="nav-cta">Talk to us &rarr;</a>
+    </div>
+</nav>
+
+<!-- ═══ Hero ═══ -->
+<section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-grid"></div>
+    <div class="container">
+        <div class="hero-content">
+            <div class="reveal hero-badge">
+                <img src="https://storage.googleapis.com/detrics-static/public/img/big-query-icon.png" alt="BigQuery">
+                <span class="tag" style="border:none;background:none;padding:0;">Detrics for BigQuery</span>
+            </div>
+            <!-- ╔══ SWAP ZONE: hero headline + sub (industry framing) ══╗ -->
+            <h1 class="reveal reveal-d1">When the spreadsheet<br><em>stops keeping up</em></h1>
+            <p class="hero-sub reveal reveal-d2">Every marketing team starts in a spreadsheet. It works until the data outgrows it. This is what changes when your marketing data lives in a real database.</p>
+            <!-- ╚══ END SWAP ZONE: hero ══╝ -->
+            <div class="hero-actions reveal reveal-d3">
+                <a href="#ceiling" class="btn-main">See if this is you &darr;</a>
+                <a href="https://detrics.io/demo/book/" class="btn-ghost">Talk to the team &rarr;</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══ The Ceiling (the pain) ═══ -->
+<section class="challenge" id="ceiling">
+    <div class="container">
+        <div class="challenge-layout">
+            <div class="challenge-left">
+                <div class="reveal"><span class="tag">The ceiling</span></div>
+                <h2 class="section-heading reveal reveal-d1">You already feel it<br>every <em>Monday</em></h2>
+                <p class="section-sub reveal reveal-d2">A spreadsheet was never built to be a database. It holds up while the data is small, then the cracks show, usually at the worst moment. If any of these sound like your week, you've hit the ceiling.</p>
+            </div>
+            <div class="challenge-cards">
+                <div class="ch-card reveal">
+                    <div class="ch-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 2a4 4 0 0 1 4 4v2a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4z"/><path d="M5 20a7 7 0 0 1 14 0"/></svg></div>
+                    <div><h3>Your AI makes numbers up</h3><p>You ask Claude about your data and the totals don't add up. The insights sound plausible, but you can't trust them, because a spreadsheet gives AI too little to actually work with.</p></div>
+                </div>
+                <div class="ch-card reveal">
+                    <div class="ch-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg></div>
+                    <div><h3>It freezes when it matters most</h3><p>The report crawls, lags, or crashes the morning of a client meeting. Too many rows, too many formulas, all at once.</p></div>
+                </div>
+                <div class="ch-card reveal">
+                    <div class="ch-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg></div>
+                    <div><h3>Your history caps out at ~2 years</h3><p>Ad platforms only hand back about two years of data, so a spreadsheet can never hold more than that. Every year that passes, an older year quietly falls off, and the long-term view is gone for good.</p></div>
+                </div>
+                <div class="ch-card reveal">
+                    <div class="ch-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M9 17H7A5 5 0 0 1 7 7h2M15 7h2a5 5 0 0 1 0 10h-2M8 12h8"/></svg></div>
+                    <div><h3>You can't answer across channels</h3><p>"Which channel did this customer come from?" stays unanswerable when Ads, Meta, and Shopify each live in their own separate tab.</p></div>
+                </div>
+                <div class="ch-card reveal">
+                    <div class="ch-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+                    <div><h3>Reporting eats the week</h3><p>Hours pulling, pasting, and reformatting, while the analysis you're actually paid for keeps getting pushed to "later." Agencies multiply this across every client.</p></div>
+                </div>
+                <div class="ch-card reveal">
+                    <div class="ch-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/></svg></div>
+                    <div><h3>Broken creative links everywhere</h3><p>Old reports fill up with dead image thumbnails. The creative that drove last year's results is impossible to look back at.</p></div>
+                </div>
+                <div class="ch-card reveal">
+                    <div class="ch-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 2a4 4 0 0 1 4 4v2a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4z"/><path d="M5 20a7 7 0 0 1 14 0"/></svg></div>
+                    <div><h3>You can't put AI on top of it</h3><p>You want Claude or an agent answering questions about your data, but a spreadsheet isn't something an AI can reliably read and work with.</p></div>
+                </div>
+                <div class="ch-card reveal">
+                    <div class="ch-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M14 4 4 14M20 10 10 20M4 4l16 16"/></svg></div>
+                    <div><h3>One change, ten places to fix</h3><p>Adjust a single metric definition and you're hunting through scattered tabs and formulas, hoping you caught every one.</p></div>
+                </div>
+                <div class="ch-card reveal">
+                    <div class="ch-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+                    <div><h3>It buckles under the team</h3><p>Ten people in the same heavy sheet means conflicts, accidental edits, and dashboards held together with tape.</p></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══ The Shift (before → after) ═══ -->
+<section class="shift">
+    <div class="container">
+        <div class="shift-header">
+            <div class="reveal"><span class="tag">The shift</span></div>
+            <h2 class="section-heading reveal reveal-d1">Every ceiling, <em>lifted</em></h2>
+            <p class="section-sub reveal reveal-d2">The same workflow, on a real warehouse. Each limit you live with today has a clean answer on the other side.</p>
+        </div>
+        <div class="shift-head reveal">
+            <div class="shift-head-col sheets"><img src="https://storage.googleapis.com/detrics-static/public/img/sheets-logo.png" alt="Google Sheets"><span>Sheets</span></div>
+            <div></div>
+            <div class="shift-head-col bq"><img src="https://storage.googleapis.com/detrics-static/public/img/big-query-icon.png" alt="BigQuery"><span>BigQuery</span></div>
+        </div>
+        <div class="shift-table">
+            <div class="shift-row reveal">
+                <div class="shift-before"><p>Hits row caps as data builds up over time</p></div>
+                <div class="shift-arrow"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+                <div class="shift-after"><p>No row limits. Billions of rows, no ceiling</p></div>
+            </div>
+            <div class="shift-row reveal">
+                <div class="shift-before"><p>Slows, freezes, and crashes on heavy data</p></div>
+                <div class="shift-arrow"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+                <div class="shift-after"><p>Always fast, no matter how much data you have</p></div>
+            </div>
+            <div class="shift-row reveal">
+                <div class="shift-before"><p>Each platform lives in its own isolated tab</p></div>
+                <div class="shift-arrow"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+                <div class="shift-after"><p>Every platform in one warehouse, combine anything</p></div>
+            </div>
+            <div class="shift-row reveal">
+                <div class="shift-before"><p>Fragile formulas break as complexity grows</p></div>
+                <div class="shift-arrow"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+                <div class="shift-after"><p>A real database underneath. Your dashboards and AI pull from it for you</p></div>
+            </div>
+            <div class="shift-row reveal">
+                <div class="shift-before"><p>The team trips over each other in one file</p></div>
+                <div class="shift-arrow"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+                <div class="shift-after"><p>Everyone can use it at once, no conflicts</p></div>
+            </div>
+            <div class="shift-row reveal">
+                <div class="shift-before"><p>Capped at the ~2 years the platforms hand back</p></div>
+                <div class="shift-arrow"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+                <div class="shift-after"><p>Accumulates forever, with true year-over-year history</p></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══ Benefits (what you actually get) ═══ -->
+<section class="benefits">
+    <div class="container">
+        <div class="benefits-header">
+            <div class="reveal"><span class="tag">What you get</span></div>
+            <h2 class="section-heading reveal reveal-d1">Built for marketing data,<br>not just <em>storage</em></h2>
+            <p class="section-sub reveal reveal-d2">A warehouse alone is empty. Detrics fills it with your marketing data, and adds the features that make it actually run.</p>
+        </div>
+        <div class="b-grid">
+            <div class="b-card reveal">
+                <div class="b-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M21 12a9 9 0 1 1-9-9M21 3v6h-6"/></svg></div>
+                <h3>Incremental Sync</h3>
+                <p>After the first load, only new data is fetched. Runs take 30–40 minutes instead of hours, with fewer API failures and lower cost.</p>
+            </div>
+            <div class="b-card reveal reveal-d1">
+                <div class="b-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 8v4l3 3M3.05 11a9 9 0 1 1 .5 4"/><path d="M3 4v4h4"/></svg></div>
+                <h3>Permanent History</h3>
+                <p>Platforms only serve ~2 years through their API; your warehouse keeps everything, forever. For an owner that's years of real trend data. For an agency it's a moat no client can rebuild elsewhere.</p>
+            </div>
+            <div class="b-card reveal reveal-d2">
+                <div class="b-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/></svg></div>
+                <h3>Creative Image Storage</h3>
+                <p>Ad creatives are stored in your own cloud, so you can compare creative performance across years, not just the days before the links expire.</p>
+            </div>
+            <div class="b-card reveal">
+                <div class="b-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M9 16l2 2 4-4"/></svg></div>
+                <h3>Smart Refresh Windows</h3>
+                <p>Refreshes align with each platform's attribution window, so you get fresh, accurate data with the fewest API calls.</p>
+            </div>
+            <div class="b-card reveal reveal-d1">
+                <div class="b-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div>
+                <h3>Table Groups</h3>
+                <p>Business logic lives in one place. Define and preview your data sets, then let them land in BigQuery the same way every time.</p>
+            </div>
+            <div class="b-card reveal reveal-d2">
+                <div class="b-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
+                <h3>Monitoring &amp; Logs</h3>
+                <p>Execution history, event logs, schedules, and alerts give you full visibility into how your data warehouse is running.</p>
+            </div>
+            <div class="b-card reveal">
+                <div class="b-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 11l-3 3-1.5-1.5"/></svg></div>
+                <h3>Auto-Onboarding</h3>
+                <p>New accounts in a source are detected and connected automatically, so your data keeps flowing as you grow, with no manual setup per account.</p>
+            </div>
+            <div class="b-card reveal reveal-d1">
+                <div class="b-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16"/></svg></div>
+                <h3>Smart Sync Modes</h3>
+                <p>Each table syncs the right way out of the box: incremental where it should be, full refresh where it matters. Best practices built in.</p>
+            </div>
+            <div class="b-card reveal reveal-d2">
+                <div class="b-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 14a4 4 0 0 0 4-4M12 14v6M12 2a10 10 0 1 0 10 10"/><path d="M12 10l4-4"/></svg></div>
+                <h3>No Limits, Real Speed</h3>
+                <p>Billions of rows, sub-second queries, no file caps. The ceiling that broke your spreadsheet simply isn't there anymore.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ╔═══════════ SWAP ZONE: industry use-cases — retune the questions + joins per vertical ═══════════╗ -->
+<!-- ═══ What you can finally answer ═══ -->
+<section class="answers">
+    <div class="container">
+        <div class="answers-header">
+            <div class="reveal"><span class="tag">The payoff</span></div>
+            <h2 class="section-heading reveal reveal-d1">Questions you can<br>finally <em>answer</em></h2>
+            <p class="section-sub reveal reveal-d2">When every platform lives in one warehouse, the questions that were impossible in separate tabs become a single query, or a single question to your AI.</p>
+        </div>
+        <div class="answers-grid">
+            <div class="answer-card reveal">
+                <div class="answer-q">"Which channel actually drove revenue last quarter?"</div>
+                <div class="answer-join"><span>Google Ads</span><span>Meta</span><span>Stripe</span></div>
+            </div>
+            <div class="answer-card reveal reveal-d1">
+                <div class="answer-q">"What's our true blended ROAS across every platform?"</div>
+                <div class="answer-join"><span>All ad platforms</span><span>Sales data</span></div>
+            </div>
+            <div class="answer-card reveal">
+                <div class="answer-q">"How does this year compare to three years ago?"</div>
+                <div class="answer-join"><span>Permanent history</span><span>Year-over-year</span></div>
+            </div>
+            <div class="answer-card reveal reveal-d1">
+                <div class="answer-q">"Which campaigns bring customers who actually stay?"</div>
+                <div class="answer-join"><span>Ad platforms</span><span>CRM</span><span>GA4</span></div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- ╚═══════════ END SWAP ZONE: industry use-cases ═══════════╝ -->
+
+<!-- ═══ Ownership (dark band) ═══ -->
+<section class="own">
+    <div class="container">
+        <div class="own-layout">
+            <div class="own-left">
+                <div class="reveal"><span class="tag">It's yours</span></div>
+                <h2 class="section-heading reveal reveal-d1">The data lives in <em>your</em> cloud</h2>
+                <p class="reveal reveal-d2">BigQuery runs inside your own Google Cloud project. Detrics fills it and keeps it fresh, but the warehouse, and everything in it, belongs to you.</p>
+            </div>
+            <div class="own-points">
+                <div class="own-point reveal">
+                    <h3>No vendor lock-in</h3>
+                    <p>Stop using Detrics whenever you choose and keep every row of your data. It never sat on our servers to begin with.</p>
+                </div>
+                <div class="own-point reveal reveal-d1">
+                    <h3>Governance built in</h3>
+                    <p>Access control, version history, and a single source of truth: the data foundation IT and finance teams expect.</p>
+                </div>
+                <div class="own-point reveal reveal-d2">
+                    <h3>One source of truth</h3>
+                    <p>Define a metric once and it propagates everywhere. No more reconciling five versions of the same number.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══ MCP (AI on top) ═══ -->
+<section class="mcp">
+    <div class="container">
+        <div class="mcp-header">
+            <div class="reveal"><span class="tag">AI-ready</span></div>
+            <h2 class="section-heading reveal reveal-d1">An agent is only as good<br>as the data <em>underneath</em> it</h2>
+            <p class="section-sub reveal reveal-d2">Point an AI at a spreadsheet and it gets a messy wall of text to interpret. Point it at a warehouse and it gets clean, organized data it can actually do the math on. That's why AI on BigQuery is faster, cheaper, and far more accurate. Connect Claude, ask in plain language, and let it do the work. You never write code yourself.</p>
+        </div>
+        <div class="mcp-grid">
+            <div class="mcp-card reveal">
+                <div class="mcp-card-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+                <h3>The database does the math</h3>
+                <p>The AI doesn't add up numbers in its head, where AI models hallucinate. It asks BigQuery to do the adding-up and combining, then reports the exact result. The math goes from "guessed" to "calculated."</p>
+            </div>
+            <div class="mcp-card reveal reveal-d1">
+                <div class="mcp-card-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5M3 12a9 3 0 0 0 18 0"/></svg></div>
+                <h3>It sees all your data, not a sample</h3>
+                <p>When you paste data into a chat, only a slice fits and the rest gets cut off. Connected to your warehouse, the AI reaches all of it and pulls back just the answer, so it works from everything, not the first thousand rows.</p>
+            </div>
+            <div class="mcp-card reveal reveal-d2">
+                <div class="mcp-card-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M21 12a9 9 0 1 1-9-9M21 3v6h-6"/><circle cx="12" cy="12" r="1"/></svg></div>
+                <h3>Faster, with fewer mistakes</h3>
+                <p>Instant answers let it check its work and refine on the spot. And because your data is neatly organized and labelled, it knows exactly what's there, so it gives the right answer instead of guessing.</p>
+            </div>
+            <div class="mcp-card reveal reveal-d3">
+                <div class="mcp-card-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 2a4 4 0 0 1 4 4v2a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4z"/><path d="M5 20a7 7 0 0 1 14 0"/></svg></div>
+                <h3>Answers you can verify and trust</h3>
+                <p>You can see exactly what the agent looked at, scoped to the right account. Plain-language questions in, answers you can check, built on current data from every channel.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══ No data team? You're covered ═══ -->
+<section class="noteam">
+    <div class="container">
+        <div class="noteam-header">
+            <div class="reveal"><span class="tag">No code required</span></div>
+            <h2 class="section-heading reveal reveal-d1">You don't run the warehouse.<br>It runs <em>for</em> you.</h2>
+            <p class="reveal reveal-d2">A warehouse sounds like something you need an analyst for. You don't. The data lands automatically, and you reach it the way you already work: through dashboards and AI, never raw code.</p>
+        </div>
+        <div class="noteam-grid">
+            <div class="noteam-card reveal">
+                <div class="noteam-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 2a4 4 0 0 1 4 4v2a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4z"/><path d="M5 20a7 7 0 0 1 14 0"/></svg></div>
+                <h3>Just ask your AI</h3>
+                <p>Ask Claude in plain language. It does the digging in your warehouse and gives you the answer in plain words. Nothing to set up, nothing to learn.</p>
+            </div>
+            <div class="noteam-card reveal reveal-d1">
+                <div class="noteam-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg></div>
+                <h3>We set it up for you</h3>
+                <p>Guided onboarding and the full historical load are handled by our team. Your warehouse is live with your data before you touch a setting.</p>
+            </div>
+            <div class="noteam-card reveal reveal-d2">
+                <div class="noteam-icon"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 15l2 2 4-4"/></svg></div>
+                <h3>We build the rest</h3>
+                <p>Need a custom dashboard or pipeline you don't have the hands for? Our data team builds it on top of your warehouse for you, start to finish.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══ Who this is for ═══ -->
+<section class="who">
+    <div class="container">
+        <div class="who-header">
+            <div class="reveal"><span class="tag">Is this you?</span></div>
+            <h2 class="section-heading reveal reveal-d1">Who outgrows the <em>spreadsheet</em></h2>
+            <p class="section-sub reveal reveal-d2">If you see yourself in two or more of these, the warehouse conversation is worth having.</p>
+        </div>
+        <div class="who-grid">
+            <div class="who-card reveal">
+                <div class="who-check"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg></div>
+                <p><strong>Agencies at scale:</strong> managing 40+ clients or heavy data volume across many accounts.</p>
+            </div>
+            <div class="who-card reveal reveal-d1">
+                <div class="who-check"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg></div>
+                <p><strong>Multi-platform teams:</strong> running 5+ platforms and needing to analyze across them.</p>
+            </div>
+            <div class="who-card reveal">
+                <div class="who-check"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg></div>
+                <p><strong>Data &amp; BI teams:</strong> who already know SQL or use BigQuery elsewhere in the business.</p>
+            </div>
+            <div class="who-card reveal reveal-d1">
+                <div class="who-check"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg></div>
+                <p><strong>Anyone hitting the wall:</strong> freezing sheets, the 10M-cell ceiling, slow formulas, broken dashboards.</p>
+            </div>
+            <div class="who-card reveal">
+                <div class="who-check"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg></div>
+                <p><strong>Governance-minded orgs:</strong> that need access control, ownership, and an audit trail.</p>
+            </div>
+            <div class="who-card reveal reveal-d1">
+                <div class="who-check"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg></div>
+                <p><strong>Run on AI, not SQL:</strong> you let Claude do the querying and never touch the warehouse by hand.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══ Switch (it's just a destination) ═══ -->
+<section class="switch">
+    <div class="container">
+        <div class="switch-header">
+            <div class="reveal"><span class="tag">The move</span></div>
+            <h2 class="section-heading reveal reveal-d1">It's a destination switch,<br>not a <em>rebuild</em></h2>
+            <p class="section-sub reveal reveal-d2">The hard part sounds like the migration. It isn't. Your sources and reports stay the same, and the data just flows somewhere stronger.</p>
+        </div>
+        <div class="steps-row">
+            <div class="step-card reveal">
+                <div class="step-num">1</div>
+                <div class="step-line"></div>
+                <h3>Keep your sources</h3>
+                <p>The platforms you already connect to Detrics stay exactly as they are. Nothing to reconnect.</p>
+            </div>
+            <div class="step-card reveal reveal-d1">
+                <div class="step-num">2</div>
+                <div class="step-line"></div>
+                <h3>Point them at BigQuery</h3>
+                <p>Choose BigQuery as the destination. We help you set up the Google Cloud project step by step.</p>
+            </div>
+            <div class="step-card reveal reveal-d2">
+                <div class="step-num">3</div>
+                <div class="step-line"></div>
+                <h3>We handle the move</h3>
+                <p>Our team sets it up with you, historical load included, so the warehouse goes live with your data and there's no work on your side.</p>
+            </div>
+        </div>
+        <div class="switch-note-wrap reveal reveal-d3">
+            <span class="switch-note"><strong>Done-for-you setup.</strong> Guided onboarding and historical migration, handled by the team.</span>
+        </div>
+    </div>
+</section>
+
+<!-- ═══ FAQ ═══ -->
+<section class="faq">
+    <div class="container">
+        <div class="faq-header">
+            <div class="reveal"><span class="tag">Good to know</span></div>
+            <h2 class="section-heading reveal reveal-d1">The questions<br>everyone <em>asks</em></h2>
+        </div>
+        <div class="faq-list">
+            <details class="faq-item reveal">
+                <summary>Do I need to know SQL or BigQuery?</summary>
+                <div class="faq-a">No. Your dashboards and your AI query the warehouse for you. You connect your sources once, we handle the setup, and from then on you ask questions in plain language or look at the dashboard you already use. <strong>You never write a query by hand.</strong></div>
+            </details>
+            <details class="faq-item reveal">
+                <summary>Who owns the data?</summary>
+                <div class="faq-a">You do. BigQuery runs inside <strong>your own Google Cloud project</strong>. The warehouse and everything in it belongs to you. If you ever stop using Detrics, you keep every row.</div>
+            </details>
+            <details class="faq-item reveal">
+                <summary>How hard is the migration?</summary>
+                <div class="faq-a">It's a destination switch, not a rebuild. Your existing sources stay connected; you point them at BigQuery and <strong>our team handles the setup and the full historical load with you.</strong> Zero downtime, and nothing to re-create.</div>
+            </details>
+            <details class="faq-item reveal">
+                <summary>What happens when the trial ends?</summary>
+                <div class="faq-a">Your transfers pause automatically, so nothing is charged and nothing breaks. To keep your data flowing, you move to a plan and the syncs resume right where they left off.</div>
+            </details>
+            <details class="faq-item reveal">
+                <summary>How is this different from my current Sheets plan?</summary>
+                <div class="faq-a">BigQuery is a separate destination on its own plan. It's the <strong>same data and the same refreshes</strong>, just landing in a real database instead of a spreadsheet, so it stops freezing, keeps full history, and feeds your AI.</div>
+            </details>
+        </div>
+    </div>
+</section>
+
+<!-- ═══ Soft CTA ═══ -->
+<section class="cta-final">
+    <div class="container">
+        <h2 class="reveal">Let's look at <em>your</em> setup</h2>
+        <p class="cta-final-sub reveal reveal-d1">Tell us what you're running today and where it breaks. We'll show you exactly what changes on a warehouse, and whether it's even the right move for you.</p>
+        <div class="cta-actions reveal reveal-d2">
+            <a href="https://detrics.io/demo/book/" class="btn-white">Talk to the team &rarr;</a>
+            <a href="https://app.detrics.io/bigquery/destinations" class="btn-outline-white">Explore BigQuery in-app</a>
+        </div>
+    </div>
+</section>
+
+<!-- ═══ Footer ═══ -->
+<footer>
+    <div class="container">
+        <p style="margin-bottom: 8px;"><a href="https://detrics.io"><img src="https://detrics.io/_astro/detrics-logo.C-sT4k0h_ZovnhR.svg" alt="Detrics"></a></p>
+        <p><a href="https://detrics.io">detrics.io</a></p>
+    </div>
+</footer>
+
+<script>
+// Reveal on scroll
+const revealObs = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.08, rootMargin: '0px 0px -32px 0px' });
+document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+
+// Nav scroll effect
+const nav = document.getElementById('topnav');
+window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 24);
+}, { passive: true });
+</script>
+
+</body>
+</html>
