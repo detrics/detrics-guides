@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Detrics — Build a spend-alarm system to reduce churn</title>
+<title>Detrics: Build a spend-alarm system to reduce churn</title>
 <link rel="icon" type="image/png" href="/favicon.png">
 <link rel="apple-touch-icon" href="/favicon.png">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -69,7 +69,7 @@
   .screenshot img { width: 100%; display: block; object-fit: contain; }
   .screenshot-caption { padding: 10px 16px; font-size: 12px; color: var(--gray-400); text-align: center; border-top: 1px solid var(--gray-100); font-style: italic; background: var(--surface); }
 
-  /* Image placeholder — replace with a .screenshot block when the screenshot is ready */
+  /* Image placeholder, replace with a .screenshot block when the screenshot is ready */
   .img-ph { border: 2px dashed var(--gray-300); border-radius: 12px; padding: 30px 20px; margin: 20px 0; text-align: center; background: repeating-linear-gradient(45deg, var(--gray-50), var(--gray-50) 12px, #F3F6FA 12px, #F3F6FA 24px); color: var(--gray-500); }
   .img-ph .ph-icon { font-size: 26px; display: block; margin-bottom: 6px; opacity: 0.6; }
   .img-ph strong { display: block; color: var(--gray-600); font-size: 14px; margin-bottom: 2px; }
@@ -162,7 +162,7 @@
   <div class="hero-content">
     <div class="hero-badge">Step-by-step guide</div>
     <h1>Catch a dying campaign <span>before the client churns</span></h1>
-    <p>When you run many clients, spend drifts silently — a campaign dies, a budget overshoots — and you find out once the client already has one foot out the door. This guide builds a spend-alarm system on your own BigQuery warehouse that pings Slack and email the moment a client or campaign moves.</p>
+    <p>When you run many clients, ad spend is hard to control with data scattered across dozens of spreadsheets. This guide shows you how to build alarms so your team stays proactive and your agency churns 25% less.</p>
     <div class="hero-logos">
       <img src="https://storage.googleapis.com/detrics-static/public/img/meta-ads-logo.png" alt="Meta Ads">
       <img src="https://storage.googleapis.com/detrics-static/public/img/tiktok-logo.png" alt="TikTok Ads">
@@ -179,7 +179,7 @@
 
 <!-- ============ INTRO ============ -->
 <div class="intro fade-up">
-  <p>By the end of this guide you'll have: every client's ad data flowing into BigQuery through Detrics, one consolidated table tagged by <strong>client</strong>, and a script that each morning checks every client's spend — day-over-day, month-to-date vs budget, and campaign by campaign — then drops a Slack + email alert the moment something drifts. No new tools: it runs on Google Sheets, Apps Script, and your warehouse.</p>
+  <p>By the end you'll have an alarm system that catches spend drift against your monthly budgets and goals, before it turns into churn. It runs on tools you already have: Google Sheets, Apps Script, and your warehouse.</p>
 </div>
 
 <!-- ============ WHAT YOU GET ============ -->
@@ -190,17 +190,17 @@
 <div class="fade-up">
   <div class="img-ph">
     <span class="ph-icon">&#128266;</span>
-    <strong>Screenshot — daily Slack alarm</strong>
+    <strong>Screenshot:daily Slack alarm</strong>
     <span>Per-client spend: yesterday + DoD, MTD vs budget pace, and the campaign outliers (dying &amp; runaway)</span>
   </div>
   <div class="img-ph">
     <span class="ph-icon">&#128231;</span>
-    <strong>Screenshot — daily email</strong>
+    <strong>Screenshot:daily email</strong>
     <span>The same digest as a clean HTML table, delivered to whoever owns the accounts</span>
   </div>
   <div class="screenshot" onclick="openLightbox(this)">
     <img src="images/alarm-weekly-slack.png" alt="Weekly spend summary posted to Slack">
-    <div class="screenshot-caption">Monday weekly summary in Slack — last 7 days vs prior 7 days per client, plus the week's biggest campaign movers (🟢 up / 🔴 down)</div>
+    <div class="screenshot-caption">Monday weekly summary in Slack: last 7 days vs prior 7 days per client, plus the week's biggest campaign movers (🟢 up / 🔴 down)</div>
   </div>
   <div class="screenshot" onclick="openLightbox(this)">
     <img src="images/alarm-weekly-email.png" alt="Weekly spend summary email">
@@ -214,10 +214,10 @@
 <div class="step fade-up">
   <div class="step-header">
     <div class="step-number">1</div>
-    <h2>Get your ad data into BigQuery <small>with Detrics — no pipeline to build</small></h2>
+    <h2>Get your ad data into BigQuery <small>with Detrics</small></h2>
   </div>
   <div class="step-body">
-    <p>The alarm reads from your <strong>own BigQuery warehouse</strong>. Detrics is what fills it: connect each client's ad accounts once, point Detrics at BigQuery as the destination, and it syncs the data in every day — no ETL, no engineer.</p>
+    <p>The alarm reads from your <strong>own BigQuery warehouse</strong>. Detrics is what fills it: connect each client's ad accounts once, point Detrics at BigQuery as the destination, and it syncs the data in every day, automatically.</p>
 
     <div class="url-box">
       <div class="url-icon"><svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg></div>
@@ -239,13 +239,13 @@
 
     <div class="img-ph">
       <span class="ph-icon">&#128247;</span>
-      <strong>Screenshot — connect accounts &amp; pick BigQuery as destination</strong>
+      <strong>Screenshot:connect accounts &amp; pick BigQuery as destination</strong>
       <span>Detrics data-sources + BigQuery destination setup</span>
     </div>
 
     <div class="tip green">
       <span class="tip-icon">&#10003;</span>
-      <span>Already a Detrics user with BigQuery connected? Your platform tables are already syncing — skip to Step 2.</span>
+      <span>Already a Detrics user with BigQuery connected? Your platform tables are already syncing. Skip to Step 2.</span>
     </div>
   </div>
 </div>
@@ -254,12 +254,12 @@
 <div class="step fade-up">
   <div class="step-header">
     <div class="step-number">2</div>
-    <h2>Create the mapping Google Sheet <small>your control panel: which accounts belong to which client, and their budgets</small></h2>
+    <h2>Create the mapping Google Sheet <small>map accounts to clients, set budgets</small></h2>
   </div>
   <div class="step-body">
-    <p>Raw ad accounts don't know who the "client" is — one client can have five accounts across two channels. A tiny Google Sheet fixes that. Create a new spreadsheet with <strong>two tabs</strong>. The alarm reads it live, so you edit budgets or thresholds anytime and the next run picks them up.</p>
+    <p>Raw ad accounts don't know who the "client" is. One client can have five accounts across two channels. A tiny Google Sheet fixes that. Create a new spreadsheet with <strong>two tabs</strong>. The alarm reads it live, so you edit budgets or thresholds anytime and the next run picks them up.</p>
 
-    <div class="tab-label">Tab 1 &mdash; <code>client_map</code></div>
+    <div class="tab-label">Tab 1 &middot; <code>client_map</code></div>
     <p style="margin-bottom:8px">Map each real ad account to the client you report on. Column headers, exactly:</p>
     <table class="data-table">
       <tr><th>channel</th><th>account_name</th><th>client</th></tr>
@@ -273,7 +273,7 @@
       <button class="copy-btn-light" onclick="copyText('channel\taccount_name\tclient',this)">Copy</button>
     </div>
 
-    <div class="tab-label">Tab 2 &mdash; <code>targets</code></div>
+    <div class="tab-label">Tab 2 &middot; <code>targets</code></div>
     <p style="margin-bottom:8px">One row per client, with the budget and how sensitive the alarm should be:</p>
     <table class="data-table">
       <tr><th>client</th><th>daily_budget</th><th>monthly_budget</th><th>swing_threshold_pct</th><th>aov</th></tr>
@@ -286,20 +286,20 @@
     </div>
 
     <ul>
-      <li><strong>swing_threshold_pct</strong> — how big a move (%) triggers an alert. 30 = flag anything that moves 30%+</li>
-      <li><strong>monthly_budget</strong> — drives the "month-to-date pace" check (are we over/under budget for the month so far)</li>
-      <li><strong>aov</strong> — leave blank for now; it's the hook to switch on ROAS later</li>
+      <li><strong>swing_threshold_pct</strong> sets how big a move (%) triggers an alert. Set it to 30 and anything that moves 30% or more gets flagged.</li>
+      <li><strong>monthly_budget</strong> drives the month-to-date pace check: whether you're over or under budget for the month so far.</li>
+      <li><strong>aov</strong> stays blank for now. It's the hook to switch on ROAS later.</li>
     </ul>
 
     <div class="img-ph">
       <span class="ph-icon">&#128247;</span>
-      <strong>Screenshot — the two-tab mapping Sheet</strong>
+      <strong>Screenshot:the two-tab mapping Sheet</strong>
       <span>client_map + targets tabs</span>
     </div>
 
     <div class="tip amber">
       <span class="tip-icon">&#9733;</span>
-      <span>This Sheet is your control panel. Change a budget or a threshold whenever the plan changes — the alarm reads it on the very next run, no code edits.</span>
+      <span>This Sheet is your control panel. Change a budget or a threshold whenever the plan changes, and the alarm reads it on the very next run, without touching code.</span>
     </div>
   </div>
 </div>
@@ -317,7 +317,7 @@
 
     <div class="code-block">
       <div class="code-header">
-        <span>consolidated_ad_performance — scheduled query</span>
+        <span>consolidated_ad_performance &middot; scheduled query</span>
         <button class="copy-btn" onclick="copyText(document.getElementById('sql-src').textContent.trim(),this)">Copy</button>
       </div>
       <pre class="code-body" id="sql-display"></pre>
@@ -327,18 +327,18 @@
     <ol class="substeps">
       <li>In the BigQuery Console, paste the query into a new editor tab and run it once to create the table.</li>
       <li>Click <strong>Schedule</strong> &rarr; <strong>Create new scheduled query</strong>, set it to run <strong>daily</strong> (a couple of hours after Detrics syncs).</li>
-      <li>Leave the "destination table" fields <strong>blank</strong> — the <code>CREATE OR REPLACE TABLE</code> already names its own destination.</li>
+      <li>Leave the "destination table" fields <strong>blank</strong>. The <code>CREATE OR REPLACE TABLE</code> already names its own destination.</li>
     </ol>
 
     <div class="img-ph">
       <span class="ph-icon">&#128247;</span>
-      <strong>Screenshot — schedule the query (daily)</strong>
+      <strong>Screenshot:schedule the query (daily)</strong>
       <span>BigQuery scheduled-query setup</span>
     </div>
 
     <div class="tip green">
       <span class="tip-icon">&#10003;</span>
-      <span>The <code>client</code> column now lives in your table. Anything that reads it — the alarm, or a Looker dashboard — can slice by client instantly.</span>
+      <span>The <code>client</code> column now lives in your table. Anything that reads it, whether the alarm or a Looker dashboard, can slice by client instantly.</span>
     </div>
   </div>
 </div>
@@ -347,7 +347,7 @@
 <div class="step fade-up">
   <div class="step-header">
     <div class="step-number">4</div>
-    <h2>Create the Slack webhook <small>where the alarm posts — 2 minutes</small></h2>
+    <h2>Create the Slack webhook <small>where the alarm posts</small></h2>
   </div>
   <div class="step-body">
     <p>A webhook is just a URL you send a message to and it appears in Slack. You make one once and paste it into the script.</p>
@@ -357,10 +357,10 @@
       <li>Go to <a href="https://api.slack.com/apps" target="_blank" rel="noopener"><strong>api.slack.com/apps</strong></a> &rarr; <strong>Create New App</strong> &rarr; <em>From scratch</em>, and pick your workspace.</li>
       <li>Open <strong>Incoming Webhooks</strong> in the left menu and toggle it <strong>On</strong>.</li>
       <li>Click <strong>Add New Webhook to Workspace</strong>, choose your alerts channel, and <strong>Allow</strong>.</li>
-      <li>Copy the webhook URL — it looks like <code>https://hooks.slack.com/services/T…/B…/…</code>
+      <li>Copy the webhook URL. It looks like <code>https://hooks.slack.com/services/T…/B…/…</code>
         <div class="img-ph" style="margin-top:12px">
           <span class="ph-icon">&#128247;</span>
-          <strong>Screenshot — copy the webhook URL</strong>
+          <strong>Screenshot:copy the webhook URL</strong>
           <span>the "Copy" button next to your new webhook</span>
         </div>
       </li>
@@ -368,7 +368,7 @@
 
     <div class="tip amber">
       <span class="tip-icon">&#9733;</span>
-      <span>Keep this URL private — anyone who has it can post to your channel. You'll paste it into the script in the next step.</span>
+      <span>Keep this URL private. Anyone who has it can post to your channel, so you'll paste it into the script in the next step.</span>
     </div>
   </div>
 </div>
@@ -392,20 +392,20 @@
           <button class="copy-btn-light" onclick="copyText('WEEKLY_EMAIL_TO',this)">Copy</button>
         </div>
       </li>
-      <li>Run <code>dryRunDaily</code> once — authorize when asked. It only prints to the log, nothing posts. Confirm you see your clients + outliers.</li>
+      <li>Run <code>dryRunDaily</code> once and authorize when asked. It only prints to the log, nothing posts. Confirm you see your clients and outliers.</li>
       <li>Run <code>runDailySpendAlarm</code> once to post live to Slack, and <code>previewEmails</code> to see the email.</li>
       <li>Add three time-based <strong>Triggers</strong> (clock icon):
         <ul style="margin-top:8px">
-          <li><code>syncClientMapToBigQuery</code> — daily, before the table rebuild</li>
-          <li><code>runDailySpendAlarm</code> — daily, after the table rebuild</li>
-          <li><code>runWeeklySpendSummary</code> — weekly, Monday morning</li>
+          <li><code>syncClientMapToBigQuery</code>: daily, before the table rebuild</li>
+          <li><code>runDailySpendAlarm</code>: daily, after the table rebuild</li>
+          <li><code>runWeeklySpendSummary</code>: weekly, Monday morning</li>
         </ul>
       </li>
     </ol>
 
     <div class="img-ph">
       <span class="ph-icon">&#128247;</span>
-      <strong>Screenshot — Apps Script editor, Services, Script Properties &amp; Triggers</strong>
+      <strong>Screenshot:Apps Script editor, Services, Script Properties &amp; Triggers</strong>
       <span>paste code + enable BigQuery + set properties + add triggers</span>
     </div>
 
@@ -422,7 +422,7 @@
 
     <div class="tip green">
       <span class="tip-icon">&#10003;</span>
-      <span>Budgets and sensitivity all live in the Sheet's <code>targets</code> tab — the script reads them live, so you never touch the code again once it's running.</span>
+      <span>Budgets and sensitivity live in the Sheet's <code>targets</code> tab. The script reads them live, so you never touch the code again once it's running.</span>
     </div>
   </div>
 </div>
@@ -431,13 +431,13 @@
 <div class="step fade-up">
   <div class="step-header">
     <div class="opt step-number">6</div>
-    <h2>Visualize in Looker <small>optional — a per-client dashboard on the same table</small></h2>
+    <h2>Visualize in Looker <small>optional, on the same table</small></h2>
   </div>
   <div class="step-body">
     <p>Because the consolidated table already carries the <code>client</code> column, a dashboard is a five-minute add: connect Looker Studio to <code>consolidated_ad_performance</code> and drop a <strong>client filter</strong>. Same source as the alarm, so the numbers always agree.</p>
     <div class="img-ph">
       <span class="ph-icon">&#128247;</span>
-      <strong>Screenshot — Looker dashboard with a client filter</strong>
+      <strong>Screenshot:Looker dashboard with a client filter</strong>
       <span>spend trends per client on the consolidated table</span>
     </div>
   </div>
@@ -471,7 +471,7 @@
 
 <!-- ============ FOOTER ============ -->
 <div class="footer">
-  <p><a href="https://detrics.io" target="_blank" rel="noopener">detrics.io</a> &mdash; Automate your marketing data pipeline</p>
+  <p><a href="https://detrics.io" target="_blank" rel="noopener">detrics.io</a> &middot; Automate your marketing data pipeline</p>
 </div>
 
 <!-- ===== Raw code sources (not rendered; used for display + copy) ===== -->

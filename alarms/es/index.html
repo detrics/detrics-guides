@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Detrics — Armá un sistema de alarmas de gasto para reducir el churn</title>
+<title>Detrics: Armá un sistema de alarmas de gasto para reducir el churn</title>
 <link rel="icon" type="image/png" href="/favicon.png">
 <link rel="apple-touch-icon" href="/favicon.png">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -160,7 +160,7 @@
   <div class="hero-content">
     <div class="hero-badge">Guía paso a paso</div>
     <h1>Detectá una campaña que se muere <span>antes de que el cliente se vaya</span></h1>
-    <p>Cuando manejás muchos clientes, el gasto se desvía en silencio — una campaña se muere, un presupuesto se dispara — y te enterás cuando el cliente ya tiene un pie afuera. Esta guía arma un sistema de alarmas de gasto sobre tu propio warehouse en BigQuery que te avisa por Slack y mail apenas un cliente o una campaña se mueve.</p>
+    <p>Cuando manejás muchos clientes, la inversión en ads es difícil de controlar con tantos datos dando vueltas por decenas de planillas. En esta guía te mostramos cómo construir alarmas para que tu equipo sea proactivo y tu agencia tenga 25% menos de churn.</p>
     <div class="hero-logos">
       <img src="https://storage.googleapis.com/detrics-static/public/img/meta-ads-logo.png" alt="Meta Ads">
       <img src="https://storage.googleapis.com/detrics-static/public/img/tiktok-logo.png" alt="TikTok Ads">
@@ -177,7 +177,7 @@
 
 <!-- ============ INTRO ============ -->
 <div class="intro fade-up">
-  <p>Al terminar esta guía vas a tener: la data de cada cliente entrando a BigQuery a través de Detrics, una tabla consolidada etiquetada por <strong>cliente</strong>, y un script que cada mañana revisa el gasto de cada cliente — día contra día, month-to-date contra presupuesto, y campaña por campaña — y dispara una alerta por Slack y mail apenas algo se desvía. Sin herramientas nuevas: corre sobre Google Sheets, Apps Script y tu warehouse.</p>
+  <p>Al terminar vas a tener un sistema de alarmas que te ayuda a prevenir desvíos contra tus presupuestos y metas mensuales, antes de que se conviertan en churn. Corre sobre herramientas que ya usás: Google Sheets, Apps Script y tu warehouse.</p>
 </div>
 
 <!-- ============ WHAT YOU GET ============ -->
@@ -188,17 +188,17 @@
 <div class="fade-up">
   <div class="img-ph">
     <span class="ph-icon">&#128266;</span>
-    <strong>Captura — alarma diaria en Slack</strong>
+    <strong>Captura:alarma diaria en Slack</strong>
     <span>Gasto por cliente: ayer + DoD, MTD vs presupuesto, y las campañas outlier (las que se mueren y las que se disparan)</span>
   </div>
   <div class="img-ph">
     <span class="ph-icon">&#128231;</span>
-    <strong>Captura — mail diario</strong>
+    <strong>Captura:mail diario</strong>
     <span>El mismo resumen como tabla HTML, al que maneja las cuentas</span>
   </div>
   <div class="screenshot" onclick="openLightbox(this)">
     <img src="images/alarm-weekly-slack.png" alt="Resumen semanal de gasto en Slack">
-    <div class="screenshot-caption">Resumen semanal del lunes en Slack — últimos 7 días vs 7 días previos por cliente, más las campañas que más se movieron (🟢 sube / 🔴 baja)</div>
+    <div class="screenshot-caption">Resumen semanal del lunes en Slack: últimos 7 días vs 7 días previos por cliente, más las campañas que más se movieron (🟢 sube / 🔴 baja)</div>
   </div>
   <div class="screenshot" onclick="openLightbox(this)">
     <img src="images/alarm-weekly-email.png" alt="Mail del resumen semanal de gasto">
@@ -212,10 +212,10 @@
 <div class="step fade-up">
   <div class="step-header">
     <div class="step-number">1</div>
-    <h2>Meté la data de tus anuncios en BigQuery <small>con Detrics — sin armar ningún pipeline</small></h2>
+    <h2>Meté la data de tus anuncios en BigQuery <small>con Detrics</small></h2>
   </div>
   <div class="step-body">
-    <p>La alarma lee de tu <strong>propio warehouse en BigQuery</strong>. Detrics es lo que lo llena: conectás las cuentas de cada cliente una vez, apuntás Detrics a BigQuery como destino, y la data entra sola todos los días — sin ETL, sin ingeniero.</p>
+    <p>La alarma lee de tu <strong>propio warehouse en BigQuery</strong>. Detrics es lo que lo llena: conectás las cuentas de cada cliente una vez, apuntás Detrics a BigQuery como destino, y la data entra sola todos los días.</p>
 
     <div class="url-box">
       <div class="url-icon"><svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg></div>
@@ -237,13 +237,13 @@
 
     <div class="img-ph">
       <span class="ph-icon">&#128247;</span>
-      <strong>Captura — conectá cuentas y elegí BigQuery como destino</strong>
+      <strong>Captura:conectá cuentas y elegí BigQuery como destino</strong>
       <span>setup de data-sources + destino BigQuery en Detrics</span>
     </div>
 
     <div class="tip green">
       <span class="tip-icon">&#10003;</span>
-      <span>¿Ya sos usuario de Detrics con BigQuery conectado? Tus tablas por plataforma ya están sincronizando — saltá al Paso 2.</span>
+      <span>¿Ya sos usuario de Detrics con BigQuery conectado? Tus tablas por plataforma ya están sincronizando. Saltá al Paso 2.</span>
     </div>
   </div>
 </div>
@@ -252,12 +252,12 @@
 <div class="step fade-up">
   <div class="step-header">
     <div class="step-number">2</div>
-    <h2>Creá el Google Sheet de mapeo <small>tu panel de control: qué cuentas son de qué cliente, y sus presupuestos</small></h2>
+    <h2>Creá el Google Sheet de mapeo <small>mapeá cuentas a clientes, definí presupuestos</small></h2>
   </div>
   <div class="step-body">
-    <p>Las cuentas de anuncios en crudo no saben quién es el "cliente" — un cliente puede tener cinco cuentas en dos canales. Un Google Sheet chico lo resuelve. Creá una planilla nueva con <strong>dos pestañas</strong>. La alarma la lee en vivo, así que editás presupuestos o umbrales cuando quieras y la próxima corrida los toma.</p>
+    <p>Las cuentas de anuncios en crudo no saben quién es el "cliente". Un cliente puede tener cinco cuentas en dos canales. Un Google Sheet chico lo resuelve. Creá una planilla nueva con <strong>dos pestañas</strong>. La alarma la lee en vivo, así que editás presupuestos o umbrales cuando quieras y la próxima corrida los toma.</p>
 
-    <div class="tab-label">Pestaña 1 &mdash; <code>client_map</code></div>
+    <div class="tab-label">Pestaña 1 &middot; <code>client_map</code></div>
     <p style="margin-bottom:8px">Mapeá cada cuenta real al cliente que reportás. Encabezados de columna, exactos:</p>
     <table class="data-table">
       <tr><th>channel</th><th>account_name</th><th>client</th></tr>
@@ -271,7 +271,7 @@
       <button class="copy-btn-light" onclick="copyText('channel\taccount_name\tclient',this)">Copiar</button>
     </div>
 
-    <div class="tab-label">Pestaña 2 &mdash; <code>targets</code></div>
+    <div class="tab-label">Pestaña 2 &middot; <code>targets</code></div>
     <p style="margin-bottom:8px">Una fila por cliente, con el presupuesto y qué tan sensible querés la alarma:</p>
     <table class="data-table">
       <tr><th>client</th><th>daily_budget</th><th>monthly_budget</th><th>swing_threshold_pct</th><th>aov</th></tr>
@@ -284,20 +284,20 @@
     </div>
 
     <ul>
-      <li><strong>swing_threshold_pct</strong> — qué tan grande tiene que ser el movimiento (%) para disparar una alerta. 30 = marcá todo lo que se mueva 30% o más</li>
-      <li><strong>monthly_budget</strong> — maneja el chequeo de "ritmo month-to-date" (vamos por encima o por debajo del presupuesto del mes)</li>
-      <li><strong>aov</strong> — dejala vacía por ahora; es el gancho para prender ROAS más adelante</li>
+      <li><strong>swing_threshold_pct</strong> define qué tan grande tiene que ser el movimiento (%) para disparar una alerta. Ponelo en 30 y se marca todo lo que se mueva 30% o más.</li>
+      <li><strong>monthly_budget</strong> maneja el chequeo de ritmo month-to-date: si vas por encima o por debajo del presupuesto del mes.</li>
+      <li><strong>aov</strong> queda vacía por ahora. Es el gancho para prender ROAS más adelante.</li>
     </ul>
 
     <div class="img-ph">
       <span class="ph-icon">&#128247;</span>
-      <strong>Captura — el Sheet de mapeo de dos pestañas</strong>
+      <strong>Captura:el Sheet de mapeo de dos pestañas</strong>
       <span>pestañas client_map + targets</span>
     </div>
 
     <div class="tip amber">
       <span class="tip-icon">&#9733;</span>
-      <span>Este Sheet es tu panel de control. Cambiá un presupuesto o un umbral cuando cambie el plan — la alarma lo lee en la corrida siguiente, sin tocar código.</span>
+      <span>Este Sheet es tu panel de control. Cambiá un presupuesto o un umbral cuando cambie el plan, y la alarma lo lee en la corrida siguiente, sin tocar código.</span>
     </div>
   </div>
 </div>
@@ -315,7 +315,7 @@
 
     <div class="code-block">
       <div class="code-header">
-        <span>consolidated_ad_performance — scheduled query</span>
+        <span>consolidated_ad_performance &middot; scheduled query</span>
         <button class="copy-btn" onclick="copyText(document.getElementById('sql-src').textContent.trim(),this)">Copiar</button>
       </div>
       <pre class="code-body" id="sql-display"></pre>
@@ -325,18 +325,18 @@
     <ol class="substeps">
       <li>En la consola de BigQuery, pegá la query en una pestaña nueva del editor y correla una vez para crear la tabla.</li>
       <li>Clic en <strong>Programar</strong> &rarr; <strong>Crear nueva consulta programada</strong>, y ponela <strong>diaria</strong> (un par de horas después de que Detrics sincroniza).</li>
-      <li>Dejá los campos de "tabla de destino" <strong>en blanco</strong> — el <code>CREATE OR REPLACE TABLE</code> ya nombra su propio destino.</li>
+      <li>Dejá los campos de "tabla de destino" <strong>en blanco</strong>. El <code>CREATE OR REPLACE TABLE</code> ya nombra su propio destino.</li>
     </ol>
 
     <div class="img-ph">
       <span class="ph-icon">&#128247;</span>
-      <strong>Captura — programá la query (diaria)</strong>
+      <strong>Captura:programá la query (diaria)</strong>
       <span>setup de scheduled query en BigQuery</span>
     </div>
 
     <div class="tip green">
       <span class="tip-icon">&#10003;</span>
-      <span>La columna <code>client</code> ahora vive en tu tabla. Todo lo que la lea — la alarma, o un dashboard de Looker — puede filtrar por cliente al instante.</span>
+      <span>La columna <code>client</code> ahora vive en tu tabla. Todo lo que la lea, sea la alarma o un dashboard de Looker, puede filtrar por cliente al instante.</span>
     </div>
   </div>
 </div>
@@ -345,7 +345,7 @@
 <div class="step fade-up">
   <div class="step-header">
     <div class="step-number">4</div>
-    <h2>Creá el webhook de Slack <small>adónde postea la alarma — 2 minutos</small></h2>
+    <h2>Creá el webhook de Slack <small>adónde postea la alarma</small></h2>
   </div>
   <div class="step-body">
     <p>Un webhook es simplemente una URL a la que le mandás un mensaje y aparece en Slack. Lo creás una vez y lo pegás en el script.</p>
@@ -355,10 +355,10 @@
       <li>Andá a <a href="https://api.slack.com/apps" target="_blank" rel="noopener"><strong>api.slack.com/apps</strong></a> &rarr; <strong>Create New App</strong> &rarr; <em>From scratch</em>, y elegí tu workspace.</li>
       <li>Abrí <strong>Incoming Webhooks</strong> en el menú izquierdo y activalo (<strong>On</strong>).</li>
       <li>Clic en <strong>Add New Webhook to Workspace</strong>, elegí tu canal de alertas y <strong>Allow</strong>.</li>
-      <li>Copiá la URL del webhook — se ve así: <code>https://hooks.slack.com/services/T…/B…/…</code>
+      <li>Copiá la URL del webhook. Se ve así: <code>https://hooks.slack.com/services/T…/B…/…</code>
         <div class="img-ph" style="margin-top:12px">
           <span class="ph-icon">&#128247;</span>
-          <strong>Captura — copiá la URL del webhook</strong>
+          <strong>Captura:copiá la URL del webhook</strong>
           <span>el botón "Copy" al lado de tu webhook nuevo</span>
         </div>
       </li>
@@ -366,7 +366,7 @@
 
     <div class="tip amber">
       <span class="tip-icon">&#9733;</span>
-      <span>Guardá esta URL en privado — cualquiera que la tenga puede postear en tu canal. La vas a pegar en el script en el paso siguiente.</span>
+      <span>Guardá esta URL en privado. Cualquiera que la tenga puede postear en tu canal, así que la vas a pegar en el script en el paso siguiente.</span>
     </div>
   </div>
 </div>
@@ -390,20 +390,20 @@
           <button class="copy-btn-light" onclick="copyText('WEEKLY_EMAIL_TO',this)">Copiar</button>
         </div>
       </li>
-      <li>Corré <code>dryRunDaily</code> una vez — autorizá cuando te lo pida. Solo imprime en el log, no postea nada. Confirmá que ves tus clientes + outliers.</li>
+      <li>Corré <code>dryRunDaily</code> una vez y autorizá cuando te lo pida. Solo imprime en el log, no postea nada. Confirmá que ves tus clientes y outliers.</li>
       <li>Corré <code>runDailySpendAlarm</code> una vez para postear en vivo a Slack, y <code>previewEmails</code> para ver el mail.</li>
       <li>Agregá tres <strong>Triggers</strong> por tiempo (ícono de reloj):
         <ul style="margin-top:8px">
-          <li><code>syncClientMapToBigQuery</code> — diario, antes de la reconstrucción de la tabla</li>
-          <li><code>runDailySpendAlarm</code> — diario, después de la reconstrucción de la tabla</li>
-          <li><code>runWeeklySpendSummary</code> — semanal, lunes a la mañana</li>
+          <li><code>syncClientMapToBigQuery</code>: diario, antes de la reconstrucción de la tabla</li>
+          <li><code>runDailySpendAlarm</code>: diario, después de la reconstrucción de la tabla</li>
+          <li><code>runWeeklySpendSummary</code>: semanal, lunes a la mañana</li>
         </ul>
       </li>
     </ol>
 
     <div class="img-ph">
       <span class="ph-icon">&#128247;</span>
-      <strong>Captura — editor de Apps Script, Servicios, Propiedades y Triggers</strong>
+      <strong>Captura:editor de Apps Script, Servicios, Propiedades y Triggers</strong>
       <span>pegá el código + activá BigQuery + cargá propiedades + agregá triggers</span>
     </div>
 
@@ -420,7 +420,7 @@
 
     <div class="tip green">
       <span class="tip-icon">&#10003;</span>
-      <span>Los presupuestos y la sensibilidad viven en la pestaña <code>targets</code> del Sheet — el script los lee en vivo, así que no volvés a tocar el código una vez que corre.</span>
+      <span>Los presupuestos y la sensibilidad viven en la pestaña <code>targets</code> del Sheet. El script los lee en vivo, así que no volvés a tocar el código una vez que corre.</span>
     </div>
   </div>
 </div>
@@ -429,13 +429,13 @@
 <div class="step fade-up">
   <div class="step-header">
     <div class="opt step-number">6</div>
-    <h2>Visualizá en Looker <small>opcional — un dashboard por cliente sobre la misma tabla</small></h2>
+    <h2>Visualizá en Looker <small>opcional, sobre la misma tabla</small></h2>
   </div>
   <div class="step-body">
     <p>Como la tabla consolidada ya lleva la columna <code>client</code>, un dashboard es un agregado de cinco minutos: conectá Looker Studio a <code>consolidated_ad_performance</code> y poné un <strong>filtro de cliente</strong>. Misma fuente que la alarma, así los números siempre coinciden.</p>
     <div class="img-ph">
       <span class="ph-icon">&#128247;</span>
-      <strong>Captura — dashboard de Looker con filtro de cliente</strong>
+      <strong>Captura:dashboard de Looker con filtro de cliente</strong>
       <span>tendencias de gasto por cliente sobre la tabla consolidada</span>
     </div>
   </div>
@@ -469,7 +469,7 @@
 
 <!-- ============ FOOTER ============ -->
 <div class="footer">
-  <p><a href="https://detrics.io" target="_blank" rel="noopener">detrics.io</a> &mdash; Automatizá tu pipeline de datos de marketing</p>
+  <p><a href="https://detrics.io" target="_blank" rel="noopener">detrics.io</a> &middot; Automatizá tu pipeline de datos de marketing</p>
 </div>
 
 <!-- ===== Raw code sources (not rendered; used for display + copy) ===== -->
