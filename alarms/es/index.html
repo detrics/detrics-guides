@@ -180,7 +180,7 @@
 
 <!-- Sticky book-a-demo bar (slides in after Step 1) -->
 <div class="sticky-cta" id="stickyCta">
-  <span class="sc-brand">Detrics</span>
+  <img src="https://detrics.io/_astro/detrics-logo.C-sT4k0h_ZovnhR.svg" alt="Detrics" style="height:22px; width:auto;">
   <a class="sc-btn" href="https://calendar.app.google/2qQTZiamGmUUALNn6" target="_blank" rel="noopener">Agendá una demo</a>
 </div>
 
@@ -204,6 +204,8 @@
       <img src="https://storage.googleapis.com/detrics-static/public/img/big-query-icon.png" alt="BigQuery">
       <span class="plus">&rarr;</span>
       <img src="https://storage.googleapis.com/detrics-static/public/img/sheets-logo.png" alt="Google Sheets">
+      <img src="../images/apps-script-logo.png" alt="Apps Script">
+      <span class="plus">&rarr;</span>
       <img src="https://storage.googleapis.com/detrics-static/public/img/slack-logo.png" alt="Slack">
     </div>
     <div class="hero-time">Solo 30 minutos de setup</div>
@@ -280,13 +282,57 @@
       <div class="screenshot-caption">Create Destination: conectá tu proyecto de Google Cloud como destino de BigQuery</div>
     </div>
 
-    <h3>Creá las tablas y transfers</h3>
-    <p>Terminá el asistente, y después configurá los <strong>transfers</strong>: qué tablas por plataforma se sincronizan y con qué frecuencia. Detrics crea las tablas en tu dataset y las mantiene actualizadas todos los días.</p>
-    <div class="img-ph">
-      <span class="ph-icon">&#128247;</span>
-      <strong>Captura: creá las tablas y transfers</strong>
-      <span>configuración de transfers en Detrics</span>
+    <h3>Creá un Table Group</h3>
+    <p>Un Table Group define el esquema de tus tablas. Elegí los campos que necesita la tabla consolidada, iguales para Meta y TikTok:</p>
+    <ul>
+      <li><strong>Dimensiones:</strong> date, account name, campaign name</li>
+      <li><strong>Métrica:</strong> spend</li>
+      <li><strong>Agregación temporal:</strong> Daily</li>
+    </ul>
+    <p>Armá uno para Meta y uno para TikTok. En TikTok el campo de fecha es <strong>Stat Time Day</strong> y el de cuenta es <strong>Advertiser Name</strong>. Incluí el account name: es lo que usa el mapeo de clientes para el join.</p>
+    <div class="screenshot" onclick="openLightbox(this)">
+      <img src="../images/detrics-table-group.png" alt="Creando un Table Group en Detrics">
+      <div class="screenshot-caption">Table Group: date + account name + campaign name (dimensiones), spend (métrica), agregación Daily</div>
     </div>
+
+    <h3>Creá un Transfer</h3>
+    <p>Un transfer es cómo la data se sincroniza en BigQuery, y cómo se mantiene actualizada.</p>
+    <div class="url-box">
+      <div class="url-icon"><svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg></div>
+      <a href="https://app.detrics.io/bigquery/transfers/new" target="_blank" rel="noopener">app.detrics.io/bigquery/transfers/new</a>
+    </div>
+    <ol class="substeps">
+      <li>Clic en <strong>+ New Transfer</strong>.
+        <div class="screenshot" onclick="openLightbox(this)" style="margin-top:12px">
+          <img src="../images/detrics-transfers-new.png" alt="Lista de transfers con el botón New Transfer">
+          <div class="screenshot-caption">Transfers &rarr; + New Transfer</div>
+        </div>
+      </li>
+      <li>Elegí el <strong>data source</strong>: la plataforma y la conexión/cuenta a sincronizar.
+        <div class="screenshot" onclick="openLightbox(this)" style="margin-top:12px">
+          <img src="../images/detrics-transfer-source.png" alt="Seleccionar data source">
+          <div class="screenshot-caption">Paso 1 &middot; Source: elegí la plataforma y la cuenta</div>
+        </div>
+      </li>
+      <li>Elegí el <strong>destino</strong> (tu proyecto y dataset de BigQuery).
+        <div class="screenshot" onclick="openLightbox(this)" style="margin-top:12px">
+          <img src="../images/detrics-transfer-destination.png" alt="Seleccionar destino">
+          <div class="screenshot-caption">Paso 2 &middot; Destination</div>
+        </div>
+      </li>
+      <li>Elegí el <strong>Table Group</strong> que acabás de crear.
+        <div class="screenshot" onclick="openLightbox(this)" style="margin-top:12px">
+          <img src="../images/detrics-transfer-tablegroup.png" alt="Seleccionar table group">
+          <div class="screenshot-caption">Paso 3 &middot; Table Group</div>
+        </div>
+      </li>
+      <li>Definí la <strong>sync strategy</strong>: <strong>Replicate Source</strong> (incremental dedup), ventana de <strong>90 días</strong>, <strong>Daily</strong>. Después validá y corré.
+        <div class="screenshot" onclick="openLightbox(this)" style="margin-top:12px">
+          <img src="../images/detrics-transfer-sync.png" alt="Sync strategy">
+          <div class="screenshot-caption">Paso 4 &middot; Sync strategy: Replicate Source, incremental, ventana de 90 días, Daily</div>
+        </div>
+      </li>
+    </ol>
 
     <div class="tip green">
       <span class="tip-icon">&#10003;</span>
@@ -367,12 +413,12 @@
       <h4>Tus datos</h4>
       <p class="cfg-sub">Escribí tus valores. La SQL de abajo y el script del Paso 5 se completan en vivo.</p>
       <div class="cfg-grid">
-        <div class="cfg-field"><label>Project ID de BigQuery</label><input id="in-project" oninput="renderCode()" placeholder="your-project-id"></div>
-        <div class="cfg-field"><label>Dataset</label><input id="in-dataset" oninput="renderCode()" placeholder="your_dataset"></div>
-        <div class="cfg-field"><label>Tabla fuente de Meta</label><input id="in-meta" oninput="renderCode()" placeholder="facebook_ads_your_table"></div>
-        <div class="cfg-field"><label>Tabla fuente de TikTok</label><input id="in-tiktok" oninput="renderCode()" placeholder="tiktok_ads_your_table"></div>
-        <div class="cfg-field"><label>ID del Sheet de mapeo</label><input id="in-sheet" oninput="renderCode()" placeholder="your-google-sheet-id"></div>
-        <div class="cfg-field"><label>URL del webhook de Slack</label><input id="in-webhook" oninput="renderCode()" placeholder="https://hooks.slack.com/services/…"></div>
+        <div class="cfg-field"><label>Project ID de BigQuery</label><input id="in-project" oninput="syncField('project',this.value)" placeholder="your-project-id"></div>
+        <div class="cfg-field"><label>Dataset</label><input id="in-dataset" oninput="syncField('dataset',this.value)" placeholder="your_dataset"></div>
+        <div class="cfg-field"><label>Tabla fuente de Meta</label><input id="in-meta" oninput="syncField('meta',this.value)" placeholder="facebook_ads_your_table"></div>
+        <div class="cfg-field"><label>Tabla fuente de TikTok</label><input id="in-tiktok" oninput="syncField('tiktok',this.value)" placeholder="tiktok_ads_your_table"></div>
+        <div class="cfg-field"><label>ID del Sheet de mapeo</label><input id="in-sheet" oninput="syncField('sheet',this.value)" placeholder="your-google-sheet-id"></div>
+        <div class="cfg-field"><label>URL del webhook de Slack</label><input id="in-webhook" oninput="syncField('webhook',this.value)" placeholder="https://hooks.slack.com/services/…"></div>
       </div>
     </div>
 
@@ -390,12 +436,6 @@
       <li>Clic en <strong>Programar</strong> &rarr; <strong>Crear nueva consulta programada</strong>, y ponela <strong>diaria</strong> (un par de horas después de que Detrics sincroniza).</li>
       <li>Dejá los campos de "tabla de destino" <strong>en blanco</strong>. El <code>CREATE OR REPLACE TABLE</code> ya nombra su propio destino.</li>
     </ol>
-
-    <div class="img-ph">
-      <span class="ph-icon">&#128247;</span>
-      <strong>Captura: programá la query (diaria)</strong>
-      <span>setup de scheduled query en BigQuery</span>
-    </div>
 
     <div class="tip green">
       <span class="tip-icon">&#10003;</span>
@@ -444,7 +484,7 @@
 
     <ol class="substeps">
       <li>Abrí tu Sheet de mapeo &rarr; <strong>Extensiones &rarr; Apps Script</strong>. Borrá el código de ejemplo.</li>
-      <li>Pegá el script completo de abajo, y editá el principio: reemplazá <code>YOUR_PROJECT_ID</code>, <code>YOUR_DATASET</code>, <code>YOUR_SHEET_ID</code> (el id de la URL del Sheet), y cambiá <code>insert.webhook.here</code> por el webhook del Paso 4.</li>
+      <li>Pegá el script completo de abajo. Ya viene con tus datos cargados (usá la caja de abajo si no los cargaste), así que no hay nada que editar a mano.</li>
       <li>En la barra izquierda, clic en <strong>Servicios (＋)</strong> y agregá <strong>BigQuery API</strong>.</li>
       <li>Definí quién recibe el mail: <strong>Configuración del proyecto &rarr; Propiedades de la secuencia de comandos</strong> &rarr; agregá <code>WEEKLY_EMAIL_TO</code> (y <code>ALERT_EMAIL_TO</code> si además querés el diario por mail).
         <div class="copyable-field" style="margin-top:10px">
@@ -464,7 +504,18 @@
     </ol>
 
     <h3>El script completo</h3>
-    <p>Ya viene con tus datos del Paso 3 cargados. Copialo tal cual en el editor de Apps Script.</p>
+    <p>Cargá tus datos acá (se sincronizan con el Paso 3). El script se actualiza en vivo, así que lo pegás tal cual.</p>
+
+    <div class="cfg-panel">
+      <h4>Tus datos</h4>
+      <p class="cfg-sub">Mismos valores que el Paso 3. Editás en cualquiera de los dos y se actualizan los dos.</p>
+      <div class="cfg-grid">
+        <div class="cfg-field"><label>Project ID de BigQuery</label><input id="in-project-b" oninput="syncField('project',this.value)" placeholder="your-project-id"></div>
+        <div class="cfg-field"><label>Dataset</label><input id="in-dataset-b" oninput="syncField('dataset',this.value)" placeholder="your_dataset"></div>
+        <div class="cfg-field"><label>ID del Sheet de mapeo</label><input id="in-sheet-b" oninput="syncField('sheet',this.value)" placeholder="your-google-sheet-id"></div>
+        <div class="cfg-field"><label>URL del webhook de Slack</label><input id="in-webhook-b" oninput="syncField('webhook',this.value)" placeholder="https://hooks.slack.com/services/…"></div>
+      </div>
+    </div>
 
     <div class="code-block">
       <div class="code-header">
@@ -492,7 +543,7 @@
   <span class="flow-arrow">&rarr;</span>
   <div class="flow-node"><div class="flow-icon"><img src="https://storage.googleapis.com/detrics-static/public/img/big-query-icon.png" alt="BigQuery"></div><span class="flow-label">BigQuery</span></div>
   <span class="flow-arrow">&rarr;</span>
-  <div class="flow-node"><div class="flow-icon"><img src="https://storage.googleapis.com/detrics-static/public/img/sheets-logo.png" alt="Sheets + Apps Script"></div><span class="flow-label">Sheets + Apps Script</span></div>
+  <div class="flow-node"><div class="flow-icon" style="width:auto; padding:0 12px; gap:8px;"><img src="https://storage.googleapis.com/detrics-static/public/img/sheets-logo.png" alt="Google Sheets" style="width:24px;height:24px;"><img src="../images/apps-script-logo.png" alt="Apps Script" style="width:24px;height:24px;"></div><span class="flow-label">Sheets + Apps Script</span></div>
   <span class="flow-arrow">&rarr;</span>
   <div class="flow-node"><div class="flow-icon" style="border-color: var(--green); background: var(--green-bg);"><img src="https://storage.googleapis.com/detrics-static/public/img/slack-logo.png" alt="Slack"></div><span class="flow-label">Slack + mail</span></div>
 </div>
@@ -523,7 +574,7 @@
 
 <!-- ============ FOOTER ============ -->
 <div class="footer">
-  <p><a href="https://detrics.io" target="_blank" rel="noopener">detrics.io</a> &middot; Automatizá tu pipeline de datos de marketing</p>
+  <p><a href="https://detrics.io" target="_blank" rel="noopener">detrics.io</a> &middot; Reducimos el churn de más de mil agencias de marketing en LATAM</p>
 </div>
 
 <!-- ===== Raw code sources (not rendered; used for display + copy) ===== -->
@@ -1000,6 +1051,13 @@ function dryRunWeekly() {
     document.getElementById('gs-display').textContent = subst(document.getElementById('gs-src').textContent.trim());
   }
   renderCode();
+
+  // Mantiene sincronizadas las cajas del Paso 3 y el Paso 5, y re-renderiza.
+  function syncField(name, val) {
+    val = (val || '').trim();
+    ['in-' + name, 'in-' + name + '-b'].forEach(function(id) { var el = document.getElementById(id); if (el && el.value !== val) el.value = val; });
+    renderCode();
+  }
 
   // Barra sticky de "agendá una demo": aparece al pasar el Paso 1.
   var stickyTrigger = document.getElementById('stickyTrigger');
