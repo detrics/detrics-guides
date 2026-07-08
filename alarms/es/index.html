@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Detrics: Armá un sistema de alarmas de gasto para reducir el churn</title>
+<title>Detrics: Armá un sistema de alarmas de inversión para reducir el churn</title>
 <link rel="icon" type="image/png" href="/favicon.png">
 <link rel="apple-touch-icon" href="/favicon.png">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -256,19 +256,19 @@
 
 <div class="fade-up">
   <div class="screenshot" onclick="openLightbox(this)">
-    <img src="../images/alarm-daily-slack.png" alt="Alarma diaria de gasto en Slack">
-    <div class="screenshot-caption">Alarma diaria en Slack: gasto por cliente (ayer + DoD), MTD vs presupuesto (pace) y las campañas outlier (💀 frenada, ⚡ pico)</div>
+    <img src="../images/alarm-daily-slack.png" alt="Alarma diaria de inversión en Slack">
+    <div class="screenshot-caption">Alarma diaria en Slack: inversión por cliente (ayer + DoD), MTD vs presupuesto (pace) y las campañas outlier (💀 frenada, ⚡ pico)</div>
   </div>
   <div class="screenshot" onclick="openLightbox(this)">
-    <img src="../images/alarm-daily-email.png" alt="Mail de la alarma diaria de gasto">
+    <img src="../images/alarm-daily-email.png" alt="Mail de la alarma diaria de inversión">
     <div class="screenshot-caption">El mismo resumen diario por mail: tabla por cliente (ayer, DoD, 3d-vs-3d, MTD vs presupuesto) más las campañas outlier</div>
   </div>
   <div class="screenshot" onclick="openLightbox(this)">
-    <img src="../images/alarm-weekly-slack.png" alt="Resumen semanal de gasto en Slack">
+    <img src="../images/alarm-weekly-slack.png" alt="Resumen semanal de inversión en Slack">
     <div class="screenshot-caption">Resumen semanal del lunes en Slack: últimos 7 días vs 7 días previos por cliente, más las campañas que más se movieron (🟢 sube / 🔴 baja)</div>
   </div>
   <div class="screenshot" onclick="openLightbox(this)">
-    <img src="../images/alarm-weekly-email.png" alt="Mail del resumen semanal de gasto">
+    <img src="../images/alarm-weekly-email.png" alt="Mail del resumen semanal de inversión">
     <div class="screenshot-caption">El mismo resumen semanal entregado por mail</div>
   </div>
 </div>
@@ -509,7 +509,7 @@
     <h2>Armá la alarma <small>un Apps Script, tres triggers</small></h2>
   </div>
   <div class="step-body">
-    <p>Este script vive dentro de tu Sheet de mapeo. Consulta BigQuery, compara el gasto contra los presupuestos de tu pestaña <code>targets</code>, y postea a Slack y mail. Pegalo, cargá tus datos y programalo.</p>
+    <p>Este script vive dentro de tu Sheet de mapeo. Consulta BigQuery, compara la inversión contra los presupuestos de tu pestaña <code>targets</code>, y postea a Slack y mail. Pegalo, cargá tus datos y programalo.</p>
 
     <ol class="substeps">
       <li>Abrí tu Sheet de mapeo &rarr; <strong>Extensiones &rarr; Apps Script</strong>. Borrá el código de ejemplo.</li>
@@ -524,7 +524,7 @@
       <li>Corré <code>dryRunDaily</code> para validar el setup: autoriza el acceso, lee tus datos de BigQuery e imprime el resultado en el <strong>Registro de ejecución</strong> (no postea nada). Abrí el log y confirmá que tus clientes están listados. Si aparecen, está bien configurado.
         <div class="screenshot" onclick="openLightbox(this)" style="margin-top:12px">
           <img src="../images/dryrun-log.png" alt="Registro de ejecución de dryRunDaily con los clientes">
-          <div class="screenshot-caption">El Registro de ejecución lista el gasto y outliers por cliente, así sabés que la conexión con BigQuery funciona</div>
+          <div class="screenshot-caption">El Registro de ejecución lista la inversión y outliers por cliente, así sabés que la conexión con BigQuery funciona</div>
         </div>
       </li>
       <li>Corré <code>runDailySpendAlarm</code> para postear en vivo a Slack. Aunque no haya ningún desvío, manda el resumen con un aviso de "sin anomalías", así ves el resultado final. Corré <code>previewEmails</code> para ver el mail.</li>
