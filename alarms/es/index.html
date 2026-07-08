@@ -302,7 +302,7 @@
           <div class="screenshot-caption">Transfers &rarr; + New Transfer</div>
         </div>
       </li>
-      <li>Elegí el <strong>data source</strong>: la plataforma y la conexión/cuenta a sincronizar.
+      <li>Elegí el <strong>data source</strong>: la plataforma y la conexión/cuenta a sincronizar. Empezá con <strong>una sola cuenta</strong> para que la primera sincronización sea rápida; sumá las demás cuando funcione.
         <div class="screenshot" onclick="openLightbox(this)" style="margin-top:12px">
           <img src="../images/detrics-transfer-source.png" alt="Seleccionar data source">
           <div class="screenshot-caption">Paso 1 &middot; Source: elegí la plataforma y la cuenta</div>
@@ -486,7 +486,12 @@
           <button class="copy-btn-light" onclick="copyText('WEEKLY_EMAIL_TO',this)">Copiar</button>
         </div>
       </li>
-      <li>Corré <code>dryRunDaily</code> para validar el setup: autoriza el acceso, chequea que puede leer tus datos de BigQuery e imprime el resultado en el log (no postea nada). Si lista tus clientes, está bien configurado.</li>
+      <li>Corré <code>dryRunDaily</code> para validar el setup: autoriza el acceso, lee tus datos de BigQuery e imprime el resultado en el <strong>Registro de ejecución</strong> (no postea nada). Abrí el log y confirmá que tus clientes están listados. Si aparecen, está bien configurado.
+        <div class="screenshot" onclick="openLightbox(this)" style="margin-top:12px">
+          <img src="../images/dryrun-log.png" alt="Registro de ejecución de dryRunDaily con los clientes">
+          <div class="screenshot-caption">El Registro de ejecución lista el gasto y outliers por cliente, así sabés que la conexión con BigQuery funciona</div>
+        </div>
+      </li>
       <li>Corré <code>runDailySpendAlarm</code> para postear en vivo a Slack. Aunque no haya ningún desvío, manda el resumen con un aviso de "sin anomalías", así ves el resultado final. Corré <code>previewEmails</code> para ver el mail.</li>
       <li>Agregá tres <strong>Triggers</strong> por tiempo (ícono de reloj):
         <ul style="margin-top:8px">

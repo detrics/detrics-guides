@@ -304,7 +304,7 @@
           <div class="screenshot-caption">Transfers &rarr; + New Transfer</div>
         </div>
       </li>
-      <li>Pick the <strong>data source</strong>: the platform and the connection/account to sync.
+      <li>Pick the <strong>data source</strong>: the platform and the connection/account to sync. Start with just <strong>one account</strong> so the first sync is fast; add the rest once it works.
         <div class="screenshot" onclick="openLightbox(this)" style="margin-top:12px">
           <img src="images/detrics-transfer-source.png" alt="Select data source">
           <div class="screenshot-caption">Step 1 &middot; Source: choose the platform and account</div>
@@ -488,7 +488,12 @@
           <button class="copy-btn-light" onclick="copyText('WEEKLY_EMAIL_TO',this)">Copy</button>
         </div>
       </li>
-      <li>Run <code>dryRunDaily</code> to validate the setup: it authorizes access, checks it can read your data from BigQuery, and prints the result to the log (nothing posts). If it lists your clients, you're wired correctly.</li>
+      <li>Run <code>dryRunDaily</code> to validate the setup: it authorizes access, reads your data from BigQuery, and prints the result to the <strong>Execution log</strong> (nothing posts). Open the log and confirm your clients are listed. If they are, it's wired correctly.
+        <div class="screenshot" onclick="openLightbox(this)" style="margin-top:12px">
+          <img src="images/dryrun-log.png" alt="dryRunDaily execution log listing the clients">
+          <div class="screenshot-caption">The Execution log lists each client's spend and outliers, so you know the connection to BigQuery works</div>
+        </div>
+      </li>
       <li>Run <code>runDailySpendAlarm</code> to post live to Slack. Even with no deviations it sends the summary with an "all clear" note, so you see the end result. Run <code>previewEmails</code> to see the email.</li>
       <li>Add three time-based <strong>Triggers</strong> (clock icon):
         <ul style="margin-top:8px">
