@@ -143,11 +143,46 @@
   .flow-node .flow-label { font-size: 12px; color: var(--gray-500); font-weight: 600; }
   .flow-arrow { color: var(--gray-300); font-size: 20px; font-weight: 300; height: 64px; display: flex; align-items: center; padding: 0 12px; }
 
-  @media print { body { background: white; } .hero { padding: 40px 20px 30px; } .hero h1 { font-size: 32px; } .step { break-inside: avoid; } .code-block { break-inside: avoid; } .code-body.tall { max-height: none; } .fade-up { opacity: 1 !important; transform: none !important; } }
+  /* Smaller inline screenshots (click to expand full-size via lightbox) */
+  .screenshot { max-width: 460px; margin-left: auto; margin-right: auto; }
+  .screenshot img { max-height: 320px; object-fit: contain; }
+
+  /* Sticky book-a-demo bar (slides in after Step 1) */
+  .sticky-cta { position: fixed; top: 0; left: 0; right: 0; z-index: 8000; display: flex; align-items: center; justify-content: space-between; padding: 10px 22px; background: rgba(255,255,255,0.92); backdrop-filter: blur(10px); border-bottom: 1px solid var(--gray-200); box-shadow: 0 2px 12px rgba(0,0,0,0.05); transform: translateY(-110%); transition: transform 0.3s ease; }
+  .sticky-cta.visible { transform: translateY(0); }
+  .sticky-cta .sc-brand { font-weight: 800; color: var(--ink); font-size: 15px; letter-spacing: -0.3px; }
+  .sticky-cta .sc-btn { background: linear-gradient(135deg, var(--blue), var(--blue-dark)); color: #fff; text-decoration: none; padding: 9px 20px; border-radius: 10px; font-weight: 600; font-size: 14px; box-shadow: 0 2px 10px var(--blue-glow); transition: transform 0.2s; }
+  .sticky-cta .sc-btn:hover { transform: translateY(-1px); }
+
+  /* Dynamic config panel (inputs fill the SQL + script live) */
+  .cfg-panel { background: linear-gradient(135deg, #EFF6FF, var(--gray-50)); border: 1px solid rgba(37,99,235,0.18); border-radius: 14px; padding: 20px 22px; margin: 20px 0; }
+  .cfg-panel h4 { font-size: 15px; margin-bottom: 4px; color: var(--ink); }
+  .cfg-panel .cfg-sub { font-size: 13px; color: var(--gray-500); margin-bottom: 16px; }
+  .cfg-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .cfg-field { display: flex; flex-direction: column; gap: 4px; }
+  .cfg-field.full { grid-column: 1 / -1; }
+  .cfg-field label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: var(--gray-500); }
+  .cfg-field input { font-family: 'DM Mono', monospace; font-size: 13px; padding: 9px 12px; border: 1px solid var(--gray-300); border-radius: 8px; background: #fff; color: var(--ink); width: 100%; }
+  .cfg-field input:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+
+  /* Congrats closing */
+  .congrats { text-align: center; max-width: 620px; margin: 0 auto 40px; padding: 32px 28px; background: linear-gradient(135deg, #ECFDF5, #F0FDF4); border: 1px solid #A7F3D0; border-radius: 18px; }
+  .congrats .cg-emoji { font-size: 40px; display: block; margin-bottom: 10px; }
+  .congrats h3 { font-size: 22px; color: #065F46; margin-bottom: 8px; letter-spacing: -0.4px; }
+  .congrats p { font-size: 15px; color: #047857; line-height: 1.6; }
+
+  @media (max-width: 640px) { .cfg-grid { grid-template-columns: 1fr; } .sticky-cta { padding: 8px 14px; } .screenshot { max-width: 100%; } }
+  @media print { body { background: white; } .hero { padding: 40px 20px 30px; } .hero h1 { font-size: 32px; } .step { break-inside: avoid; } .code-block { break-inside: avoid; } .code-body.tall { max-height: none; } .sticky-cta { display: none; } .fade-up { opacity: 1 !important; transform: none !important; } }
   @media (max-width: 640px) { .hero { padding: 48px 20px 40px; } .hero h1 { font-size: 28px; letter-spacing: -0.5px; } .step-header { padding: 20px; } .step-body { padding: 20px; } .container { padding: 0 16px; } }
 </style>
 </head>
 <body>
+
+<!-- Sticky book-a-demo bar (slides in after Step 1) -->
+<div class="sticky-cta" id="stickyCta">
+  <span class="sc-brand">Detrics</span>
+  <a class="sc-btn" href="https://calendar.app.google/2qQTZiamGmUUALNn6" target="_blank" rel="noopener">Agendá una demo</a>
+</div>
 
 <!-- Lightbox overlay -->
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">
@@ -162,14 +197,16 @@
     <h1>Detectá una campaña que se muere <span>antes de que el cliente se vaya</span></h1>
     <p>Cuando manejás muchos clientes, la inversión en ads es difícil de controlar con tantos datos dando vueltas por decenas de planillas. En esta guía te mostramos cómo construir alarmas para que tu equipo sea proactivo y tu agencia tenga 25% menos de churn.</p>
     <div class="hero-logos">
-      <img src="https://storage.googleapis.com/detrics-static/public/img/meta-ads-logo.png" alt="Meta Ads">
+      <img src="https://storage.googleapis.com/detrics-static/public/img/google-ads-logo.png" alt="Google Ads">
       <img src="https://storage.googleapis.com/detrics-static/public/img/tiktok-logo.png" alt="TikTok Ads">
+      <img src="https://storage.googleapis.com/detrics-static/public/img/meta-ads-logo.png" alt="Meta Ads">
       <span class="plus">&rarr;</span>
       <img src="https://storage.googleapis.com/detrics-static/public/img/big-query-icon.png" alt="BigQuery">
       <span class="plus">&rarr;</span>
+      <img src="https://storage.googleapis.com/detrics-static/public/img/sheets-logo.png" alt="Google Sheets">
       <img src="https://storage.googleapis.com/detrics-static/public/img/slack-logo.png" alt="Slack">
     </div>
-    <div class="hero-time">~30 min de setup &middot; alarmas diarias y semanales por Slack y mail</div>
+    <div class="hero-time">Solo 30 minutos de setup</div>
   </div>
 </section>
 
@@ -177,7 +214,7 @@
 
 <!-- ============ INTRO ============ -->
 <div class="intro fade-up">
-  <p>Al terminar vas a tener un sistema de alarmas que te ayuda a prevenir desvíos contra tus presupuestos y metas mensuales, antes de que se conviertan en churn. Corre sobre herramientas que ya usás: Google Sheets, Apps Script y tu warehouse.</p>
+  <p>Al terminar vas a tener un sistema de alarmas que te ayuda a prevenir desvíos contra tus presupuestos y metas mensuales, antes de que se conviertan en churn. Corre sobre herramientas que ya usás: Google Sheets, Apps Script y BigQuery.</p>
 </div>
 
 <!-- ============ WHAT YOU GET ============ -->
@@ -214,7 +251,7 @@
     <h2>Meté la data de tus anuncios en BigQuery <small>con Detrics</small></h2>
   </div>
   <div class="step-body">
-    <p>La alarma lee de tu <strong>propio warehouse en BigQuery</strong>. Detrics es lo que lo llena: conectás las cuentas de cada cliente, apuntás Detrics a BigQuery como destino, y la data entra sola todos los días.</p>
+    <p>La alarma lee de tu <strong>propio BigQuery</strong>. Detrics es lo que lo llena: conectás las cuentas de cada cliente, apuntás Detrics a BigQuery como destino, y la data entra sola todos los días.</p>
 
     <h3>Conectá tus cuentas de anuncios</h3>
     <div class="url-box">
@@ -243,13 +280,12 @@
       <div class="screenshot-caption">Create Destination: conectá tu proyecto de Google Cloud como destino de BigQuery</div>
     </div>
 
-    <div class="tip amber">
-      <span class="tip-icon">&#9733;</span>
-      <span>¿Todavía no tenés un proyecto de Google Cloud? Creá uno primero (es gratis) en <a href="https://console.cloud.google.com/" target="_blank" rel="noopener">console.cloud.google.com</a> y volvé.</span>
-    </div>
-    <div class="screenshot" onclick="openLightbox(this)">
-      <img src="../images/gcp-create-project.png" alt="Pasos para crear un proyecto de Google Cloud">
-      <div class="screenshot-caption">Creá un proyecto de Google Cloud: abrí el menú de proyectos, clic en New Project, nombralo y creá</div>
+    <h3>Creá las tablas y transfers</h3>
+    <p>Terminá el asistente, y después configurá los <strong>transfers</strong>: qué tablas por plataforma se sincronizan y con qué frecuencia. Detrics crea las tablas en tu dataset y las mantiene actualizadas todos los días.</p>
+    <div class="img-ph">
+      <span class="ph-icon">&#128247;</span>
+      <strong>Captura: creá las tablas y transfers</strong>
+      <span>configuración de transfers en Detrics</span>
     </div>
 
     <div class="tip green">
@@ -258,6 +294,8 @@
     </div>
   </div>
 </div>
+
+<div id="stickyTrigger"></div>
 
 <!-- ============ STEP 2 ============ -->
 <div class="step fade-up">
@@ -323,12 +361,25 @@
   <div class="step-body">
     <p>Detrics te da una tabla por plataforma. Esta query las apila en una sola tabla <code>consolidated_ad_performance</code> y hace join con <code>client_map</code> para que cada fila lleve su <strong>cliente</strong>. Correla como <strong>scheduled query</strong> en BigQuery para que se reconstruya cada mañana, después de que entra la data.</p>
 
-    <p>Reemplazá los placeholders (<code>YOUR_PROJECT_ID</code>, <code>YOUR_DATASET</code>, y los nombres de las tablas fuente que creó Detrics) y agregá un <code>SELECT</code> por cada plataforma que conectaste:</p>
+    <p>Cargá tus datos una sola vez abajo. La SQL de acá <strong>y</strong> el Apps Script del Paso 5 se actualizan solos, así no editás código a mano. Agregá un <code>SELECT</code> por cada plataforma que conectaste.</p>
+
+    <div class="cfg-panel">
+      <h4>Tus datos</h4>
+      <p class="cfg-sub">Escribí tus valores. La SQL de abajo y el script del Paso 5 se completan en vivo.</p>
+      <div class="cfg-grid">
+        <div class="cfg-field"><label>Project ID de BigQuery</label><input id="in-project" oninput="renderCode()" placeholder="your-project-id"></div>
+        <div class="cfg-field"><label>Dataset</label><input id="in-dataset" oninput="renderCode()" placeholder="your_dataset"></div>
+        <div class="cfg-field"><label>Tabla fuente de Meta</label><input id="in-meta" oninput="renderCode()" placeholder="facebook_ads_your_table"></div>
+        <div class="cfg-field"><label>Tabla fuente de TikTok</label><input id="in-tiktok" oninput="renderCode()" placeholder="tiktok_ads_your_table"></div>
+        <div class="cfg-field"><label>ID del Sheet de mapeo</label><input id="in-sheet" oninput="renderCode()" placeholder="your-google-sheet-id"></div>
+        <div class="cfg-field"><label>URL del webhook de Slack</label><input id="in-webhook" oninput="renderCode()" placeholder="https://hooks.slack.com/services/…"></div>
+      </div>
+    </div>
 
     <div class="code-block">
       <div class="code-header">
         <span>consolidated_ad_performance &middot; scheduled query</span>
-        <button class="copy-btn" onclick="copyText(document.getElementById('sql-src').textContent.trim(),this)">Copiar</button>
+        <button class="copy-btn" onclick="copyText(document.getElementById('sql-display').textContent,this)">Copiar</button>
       </div>
       <pre class="code-body" id="sql-display"></pre>
     </div>
@@ -401,8 +452,8 @@
           <button class="copy-btn-light" onclick="copyText('WEEKLY_EMAIL_TO',this)">Copiar</button>
         </div>
       </li>
-      <li>Corré <code>dryRunDaily</code> una vez y autorizá cuando te lo pida. Solo imprime en el log, no postea nada. Confirmá que ves tus clientes y outliers.</li>
-      <li>Corré <code>runDailySpendAlarm</code> una vez para postear en vivo a Slack, y <code>previewEmails</code> para ver el mail.</li>
+      <li>Corré <code>dryRunDaily</code> para validar el setup: autoriza el acceso, chequea que puede leer tus datos de BigQuery e imprime el resultado en el log (no postea nada). Si lista tus clientes, está bien configurado.</li>
+      <li>Corré <code>runDailySpendAlarm</code> para postear en vivo a Slack. Aunque no haya ningún desvío, manda el resumen con un aviso de "sin anomalías", así ves el resultado final. Corré <code>previewEmails</code> para ver el mail.</li>
       <li>Agregá tres <strong>Triggers</strong> por tiempo (ícono de reloj):
         <ul style="margin-top:8px">
           <li><code>syncClientMapToBigQuery</code>: diario, antes de la reconstrucción de la tabla</li>
@@ -412,19 +463,13 @@
       </li>
     </ol>
 
-    <div class="img-ph">
-      <span class="ph-icon">&#128247;</span>
-      <strong>Captura: editor de Apps Script, Servicios, Propiedades y Triggers</strong>
-      <span>pegá el código + activá BigQuery + cargá propiedades + agregá triggers</span>
-    </div>
-
     <h3>El script completo</h3>
-    <p>Copialo en el editor de Apps Script. Todo se configura desde el principio del archivo o desde las Propiedades.</p>
+    <p>Ya viene con tus datos del Paso 3 cargados. Copialo tal cual en el editor de Apps Script.</p>
 
     <div class="code-block">
       <div class="code-header">
         <span>alarms.gs</span>
-        <button class="copy-btn" onclick="copyText(document.getElementById('gs-src').textContent.trim(),this)">Copiar</button>
+        <button class="copy-btn" onclick="copyText(document.getElementById('gs-display').textContent,this)">Copiar</button>
       </div>
       <pre class="code-body tall" id="gs-display"></pre>
     </div>
@@ -447,22 +492,31 @@
   <span class="flow-arrow">&rarr;</span>
   <div class="flow-node"><div class="flow-icon"><img src="https://storage.googleapis.com/detrics-static/public/img/big-query-icon.png" alt="BigQuery"></div><span class="flow-label">BigQuery</span></div>
   <span class="flow-arrow">&rarr;</span>
+  <div class="flow-node"><div class="flow-icon"><img src="https://storage.googleapis.com/detrics-static/public/img/sheets-logo.png" alt="Sheets + Apps Script"></div><span class="flow-label">Sheets + Apps Script</span></div>
+  <span class="flow-arrow">&rarr;</span>
   <div class="flow-node"><div class="flow-icon" style="border-color: var(--green); background: var(--green-bg);"><img src="https://storage.googleapis.com/detrics-static/public/img/slack-logo.png" alt="Slack"></div><span class="flow-label">Slack + mail</span></div>
 </div>
 
 <!-- ============ CTA ============ -->
 <div class="cta-section fade-up">
   <h2>De reactivo a proactivo</h2>
-  <p>Detrics llena el warehouse. Vos te quedás con el cliente. Empezá gratis.</p>
+  <p>Detrics llena BigQuery. Vos te quedás con el cliente. Empezá gratis.</p>
   <div style="display:flex; gap:14px; justify-content:center; flex-wrap:wrap;">
     <a href="https://app.detrics.io/bigquery/destinations/new" target="_blank" rel="noopener" class="cta-button">
       Creá tu cuenta gratis
       <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
     </a>
-    <a href="https://calendly.com/ignacio-goyanes-detrics/" target="_blank" rel="noopener" class="cta-button" style="background:transparent; color:var(--blue); border:1.5px solid var(--blue); box-shadow:none;">
+    <a href="https://calendar.app.google/2qQTZiamGmUUALNn6" target="_blank" rel="noopener" class="cta-button" style="background:transparent; color:var(--blue); border:1.5px solid var(--blue); box-shadow:none;">
       Agendá una demo
     </a>
   </div>
+</div>
+
+<!-- ============ CONGRATS ============ -->
+<div class="congrats fade-up">
+  <span class="cg-emoji">🎉</span>
+  <h3>¡Felicitaciones, llegaste al final!</h3>
+  <p>Estos 30 minutos te van a ayudar a que tus clientes nunca más se pasen de presupuesto.</p>
 </div>
 
 </div><!-- /container -->
@@ -793,6 +847,7 @@ function buildDailyBlocks(clients, camps, refDate, anyBreach) {
     blocks.push({ type: 'context', elements: [{ type: 'mrkdwn', text: 'No campaign outliers today.' }] });
   }
   if (mention) blocks.push({ type: 'context', elements: [{ type: 'mrkdwn', text: `Deviations detected${mention}` }] });
+  if (!anyBreach) blocks.push({ type: 'context', elements: [{ type: 'mrkdwn', text: '✅ All clear — no anomalies today.' }] });
   return blocks;
 }
 
@@ -926,8 +981,32 @@ function dryRunWeekly() {
 
 <!-- Scripts -->
 <script>
-  document.getElementById('sql-display').textContent = document.getElementById('sql-src').textContent.trim();
-  document.getElementById('gs-display').textContent = document.getElementById('gs-src').textContent.trim();
+  function subst(tpl) {
+    const v = id => (document.getElementById(id) && document.getElementById(id).value.trim()) || '';
+    const map = {
+      'YOUR_PROJECT_ID': v('in-project') || 'YOUR_PROJECT_ID',
+      'YOUR_DATASET': v('in-dataset') || 'YOUR_DATASET',
+      'YOUR_SHEET_ID': v('in-sheet') || 'YOUR_SHEET_ID',
+      'insert.webhook.here': v('in-webhook') || 'insert.webhook.here',
+      'facebook_ads_your_table': v('in-meta') || 'facebook_ads_your_table',
+      'tiktok_ads_your_table': v('in-tiktok') || 'tiktok_ads_your_table',
+    };
+    let out = tpl;
+    Object.keys(map).forEach(k => { out = out.split(k).join(map[k]); });
+    return out;
+  }
+  function renderCode() {
+    document.getElementById('sql-display').textContent = subst(document.getElementById('sql-src').textContent.trim());
+    document.getElementById('gs-display').textContent = subst(document.getElementById('gs-src').textContent.trim());
+  }
+  renderCode();
+
+  // Barra sticky de "agendá una demo": aparece al pasar el Paso 1.
+  var stickyTrigger = document.getElementById('stickyTrigger');
+  var stickyCta = document.getElementById('stickyCta');
+  window.addEventListener('scroll', function() {
+    if (stickyTrigger && stickyCta) stickyCta.classList.toggle('visible', stickyTrigger.getBoundingClientRect().top < 0);
+  });
 
   const observer = new IntersectionObserver((entries) => {
     entries.forEach((entry, i) => {

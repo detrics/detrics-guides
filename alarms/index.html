@@ -145,11 +145,46 @@
   .flow-node .flow-label { font-size: 12px; color: var(--gray-500); font-weight: 600; }
   .flow-arrow { color: var(--gray-300); font-size: 20px; font-weight: 300; height: 64px; display: flex; align-items: center; padding: 0 12px; }
 
-  @media print { body { background: white; } .hero { padding: 40px 20px 30px; } .hero h1 { font-size: 32px; } .step { break-inside: avoid; } .code-block { break-inside: avoid; } .code-body.tall { max-height: none; } .fade-up { opacity: 1 !important; transform: none !important; } }
+  /* Smaller inline screenshots (click to expand full-size via lightbox) */
+  .screenshot { max-width: 460px; margin-left: auto; margin-right: auto; }
+  .screenshot img { max-height: 320px; object-fit: contain; }
+
+  /* Sticky book-a-demo bar (slides in after Step 1) */
+  .sticky-cta { position: fixed; top: 0; left: 0; right: 0; z-index: 8000; display: flex; align-items: center; justify-content: space-between; padding: 10px 22px; background: rgba(255,255,255,0.92); backdrop-filter: blur(10px); border-bottom: 1px solid var(--gray-200); box-shadow: 0 2px 12px rgba(0,0,0,0.05); transform: translateY(-110%); transition: transform 0.3s ease; }
+  .sticky-cta.visible { transform: translateY(0); }
+  .sticky-cta .sc-brand { font-weight: 800; color: var(--ink); font-size: 15px; letter-spacing: -0.3px; }
+  .sticky-cta .sc-btn { background: linear-gradient(135deg, var(--blue), var(--blue-dark)); color: #fff; text-decoration: none; padding: 9px 20px; border-radius: 10px; font-weight: 600; font-size: 14px; box-shadow: 0 2px 10px var(--blue-glow); transition: transform 0.2s; }
+  .sticky-cta .sc-btn:hover { transform: translateY(-1px); }
+
+  /* Dynamic config panel (inputs fill the SQL + script live) */
+  .cfg-panel { background: linear-gradient(135deg, #EFF6FF, var(--gray-50)); border: 1px solid rgba(37,99,235,0.18); border-radius: 14px; padding: 20px 22px; margin: 20px 0; }
+  .cfg-panel h4 { font-size: 15px; margin-bottom: 4px; color: var(--ink); }
+  .cfg-panel .cfg-sub { font-size: 13px; color: var(--gray-500); margin-bottom: 16px; }
+  .cfg-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .cfg-field { display: flex; flex-direction: column; gap: 4px; }
+  .cfg-field.full { grid-column: 1 / -1; }
+  .cfg-field label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: var(--gray-500); }
+  .cfg-field input { font-family: 'DM Mono', monospace; font-size: 13px; padding: 9px 12px; border: 1px solid var(--gray-300); border-radius: 8px; background: #fff; color: var(--ink); width: 100%; }
+  .cfg-field input:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+
+  /* Congrats closing */
+  .congrats { text-align: center; max-width: 620px; margin: 0 auto 40px; padding: 32px 28px; background: linear-gradient(135deg, #ECFDF5, #F0FDF4); border: 1px solid #A7F3D0; border-radius: 18px; }
+  .congrats .cg-emoji { font-size: 40px; display: block; margin-bottom: 10px; }
+  .congrats h3 { font-size: 22px; color: #065F46; margin-bottom: 8px; letter-spacing: -0.4px; }
+  .congrats p { font-size: 15px; color: #047857; line-height: 1.6; }
+
+  @media (max-width: 640px) { .cfg-grid { grid-template-columns: 1fr; } .sticky-cta { padding: 8px 14px; } .screenshot { max-width: 100%; } }
+  @media print { body { background: white; } .hero { padding: 40px 20px 30px; } .hero h1 { font-size: 32px; } .step { break-inside: avoid; } .code-block { break-inside: avoid; } .code-body.tall { max-height: none; } .sticky-cta { display: none; } .fade-up { opacity: 1 !important; transform: none !important; } }
   @media (max-width: 640px) { .hero { padding: 48px 20px 40px; } .hero h1 { font-size: 28px; letter-spacing: -0.5px; } .step-header { padding: 20px; } .step-body { padding: 20px; } .container { padding: 0 16px; } }
 </style>
 </head>
 <body>
+
+<!-- Sticky book-a-demo bar (slides in after Step 1) -->
+<div class="sticky-cta" id="stickyCta">
+  <span class="sc-brand">Detrics</span>
+  <a class="sc-btn" href="https://calendar.app.google/2qQTZiamGmUUALNn6" target="_blank" rel="noopener">Book a demo</a>
+</div>
 
 <!-- Lightbox overlay -->
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">
@@ -164,14 +199,16 @@
     <h1>Catch a dying campaign <span>before the client churns</span></h1>
     <p>When you run many clients, ad spend is hard to control with data scattered across dozens of spreadsheets. This guide shows you how to build alarms so your team stays proactive and your agency churns 25% less.</p>
     <div class="hero-logos">
-      <img src="https://storage.googleapis.com/detrics-static/public/img/meta-ads-logo.png" alt="Meta Ads">
+      <img src="https://storage.googleapis.com/detrics-static/public/img/google-ads-logo.png" alt="Google Ads">
       <img src="https://storage.googleapis.com/detrics-static/public/img/tiktok-logo.png" alt="TikTok Ads">
+      <img src="https://storage.googleapis.com/detrics-static/public/img/meta-ads-logo.png" alt="Meta Ads">
       <span class="plus">&rarr;</span>
       <img src="https://storage.googleapis.com/detrics-static/public/img/big-query-icon.png" alt="BigQuery">
       <span class="plus">&rarr;</span>
+      <img src="https://storage.googleapis.com/detrics-static/public/img/sheets-logo.png" alt="Google Sheets">
       <img src="https://storage.googleapis.com/detrics-static/public/img/slack-logo.png" alt="Slack">
     </div>
-    <div class="hero-time">~30 min setup &middot; daily + weekly alarms on Slack &amp; email</div>
+    <div class="hero-time">Just 30 minutes to set up</div>
   </div>
 </section>
 
@@ -179,7 +216,7 @@
 
 <!-- ============ INTRO ============ -->
 <div class="intro fade-up">
-  <p>By the end you'll have an alarm system that catches spend drift against your monthly budgets and goals, before it turns into churn. It runs on tools you already have: Google Sheets, Apps Script, and your warehouse.</p>
+  <p>By the end you'll have an alarm system that catches spend drift against your monthly budgets and goals, before it turns into churn. It runs on tools you already have: Google Sheets, Apps Script, and BigQuery.</p>
 </div>
 
 <!-- ============ WHAT YOU GET ============ -->
@@ -216,7 +253,7 @@
     <h2>Get your ad data into BigQuery <small>with Detrics</small></h2>
   </div>
   <div class="step-body">
-    <p>The alarm reads from your <strong>own BigQuery warehouse</strong>. Detrics is what fills it: connect each client's ad accounts, point Detrics at BigQuery as the destination, and it syncs the data in every day, automatically.</p>
+    <p>The alarm reads from your <strong>own BigQuery</strong>. Detrics is what fills it: connect each client's ad accounts, point Detrics at BigQuery as the destination, and it syncs the data in every day, automatically.</p>
 
     <h3>Connect your ad accounts</h3>
     <div class="url-box">
@@ -245,13 +282,12 @@
       <div class="screenshot-caption">Create Destination: connect your Google Cloud project as the BigQuery destination</div>
     </div>
 
-    <div class="tip amber">
-      <span class="tip-icon">&#9733;</span>
-      <span>No Google Cloud project yet? Create one first (it's free) at <a href="https://console.cloud.google.com/" target="_blank" rel="noopener">console.cloud.google.com</a>, then come back.</span>
-    </div>
-    <div class="screenshot" onclick="openLightbox(this)">
-      <img src="images/gcp-create-project.png" alt="Steps to create a Google Cloud project">
-      <div class="screenshot-caption">Create a Google Cloud project: open the project dropdown, click New Project, name it, and create it</div>
+    <h3>Create the tables &amp; transfers</h3>
+    <p>Finish the wizard, then set up the <strong>transfers</strong>: which platform tables sync, and how often. Detrics creates the tables in your dataset and keeps them refreshed daily.</p>
+    <div class="img-ph">
+      <span class="ph-icon">&#128247;</span>
+      <strong>Screenshot: create tables &amp; transfers</strong>
+      <span>Detrics transfer configuration</span>
     </div>
 
     <div class="tip green">
@@ -260,6 +296,8 @@
     </div>
   </div>
 </div>
+
+<div id="stickyTrigger"></div>
 
 <!-- ============ STEP 2 ============ -->
 <div class="step fade-up">
@@ -325,12 +363,25 @@
   <div class="step-body">
     <p>Detrics gives you one table per platform. This query stacks them into a single <code>consolidated_ad_performance</code> table and joins <code>client_map</code> so every row carries its <strong>client</strong>. Run it as a <strong>scheduled query</strong> in BigQuery so it rebuilds every morning after the data syncs.</p>
 
-    <p>Replace the placeholders (<code>YOUR_PROJECT_ID</code>, <code>YOUR_DATASET</code>, and the source table names Detrics created) and add one <code>SELECT</code> per platform you connected:</p>
+    <p>Fill in your details once below. The SQL here <strong>and</strong> the Apps Script in Step 5 update automatically, so you never edit code by hand. Add one <code>SELECT</code> per platform you connected.</p>
+
+    <div class="cfg-panel">
+      <h4>Your settings</h4>
+      <p class="cfg-sub">Type your values. The SQL below and the script in Step 5 fill in live.</p>
+      <div class="cfg-grid">
+        <div class="cfg-field"><label>BigQuery project ID</label><input id="in-project" oninput="renderCode()" placeholder="your-project-id"></div>
+        <div class="cfg-field"><label>Dataset</label><input id="in-dataset" oninput="renderCode()" placeholder="your_dataset"></div>
+        <div class="cfg-field"><label>Meta source table</label><input id="in-meta" oninput="renderCode()" placeholder="facebook_ads_your_table"></div>
+        <div class="cfg-field"><label>TikTok source table</label><input id="in-tiktok" oninput="renderCode()" placeholder="tiktok_ads_your_table"></div>
+        <div class="cfg-field"><label>Mapping Sheet ID</label><input id="in-sheet" oninput="renderCode()" placeholder="your-google-sheet-id"></div>
+        <div class="cfg-field"><label>Slack webhook URL</label><input id="in-webhook" oninput="renderCode()" placeholder="https://hooks.slack.com/services/…"></div>
+      </div>
+    </div>
 
     <div class="code-block">
       <div class="code-header">
         <span>consolidated_ad_performance &middot; scheduled query</span>
-        <button class="copy-btn" onclick="copyText(document.getElementById('sql-src').textContent.trim(),this)">Copy</button>
+        <button class="copy-btn" onclick="copyText(document.getElementById('sql-display').textContent,this)">Copy</button>
       </div>
       <pre class="code-body" id="sql-display"></pre>
     </div>
@@ -403,8 +454,8 @@
           <button class="copy-btn-light" onclick="copyText('WEEKLY_EMAIL_TO',this)">Copy</button>
         </div>
       </li>
-      <li>Run <code>dryRunDaily</code> once and authorize when asked. It only prints to the log, nothing posts. Confirm you see your clients and outliers.</li>
-      <li>Run <code>runDailySpendAlarm</code> once to post live to Slack, and <code>previewEmails</code> to see the email.</li>
+      <li>Run <code>dryRunDaily</code> to validate the setup: it authorizes access, checks it can read your data from BigQuery, and prints the result to the log (nothing posts). If it lists your clients, you're wired correctly.</li>
+      <li>Run <code>runDailySpendAlarm</code> to post live to Slack. Even with no deviations it sends the summary with an "all clear" note, so you see the end result. Run <code>previewEmails</code> to see the email.</li>
       <li>Add three time-based <strong>Triggers</strong> (clock icon):
         <ul style="margin-top:8px">
           <li><code>syncClientMapToBigQuery</code>: daily, before the table rebuild</li>
@@ -414,19 +465,13 @@
       </li>
     </ol>
 
-    <div class="img-ph">
-      <span class="ph-icon">&#128247;</span>
-      <strong>Screenshot: Apps Script editor, Services, Script Properties &amp; Triggers</strong>
-      <span>paste code + enable BigQuery + set properties + add triggers</span>
-    </div>
-
     <h3>The full script</h3>
-    <p>Copy this into the Apps Script editor. Everything is configurable from the top of the file or from Script Properties.</p>
+    <p>This already has your settings from Step 3 filled in. Copy it into the Apps Script editor as-is.</p>
 
     <div class="code-block">
       <div class="code-header">
         <span>alarms.gs</span>
-        <button class="copy-btn" onclick="copyText(document.getElementById('gs-src').textContent.trim(),this)">Copy</button>
+        <button class="copy-btn" onclick="copyText(document.getElementById('gs-display').textContent,this)">Copy</button>
       </div>
       <pre class="code-body tall" id="gs-display"></pre>
     </div>
@@ -449,22 +494,31 @@
   <span class="flow-arrow">&rarr;</span>
   <div class="flow-node"><div class="flow-icon"><img src="https://storage.googleapis.com/detrics-static/public/img/big-query-icon.png" alt="BigQuery"></div><span class="flow-label">BigQuery</span></div>
   <span class="flow-arrow">&rarr;</span>
+  <div class="flow-node"><div class="flow-icon"><img src="https://storage.googleapis.com/detrics-static/public/img/sheets-logo.png" alt="Sheets + Apps Script"></div><span class="flow-label">Sheets + Apps Script</span></div>
+  <span class="flow-arrow">&rarr;</span>
   <div class="flow-node"><div class="flow-icon" style="border-color: var(--green); background: var(--green-bg);"><img src="https://storage.googleapis.com/detrics-static/public/img/slack-logo.png" alt="Slack"></div><span class="flow-label">Slack + email</span></div>
 </div>
 
 <!-- ============ CTA ============ -->
 <div class="cta-section fade-up">
   <h2>From reactive to proactive</h2>
-  <p>Detrics fills the warehouse. You keep the client. Start free.</p>
+  <p>Detrics fills BigQuery. You keep the client. Start free.</p>
   <div style="display:flex; gap:14px; justify-content:center; flex-wrap:wrap;">
     <a href="https://app.detrics.io/bigquery/destinations/new" target="_blank" rel="noopener" class="cta-button">
       Create free account
       <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
     </a>
-    <a href="https://calendly.com/ignacio-goyanes-detrics/" target="_blank" rel="noopener" class="cta-button" style="background:transparent; color:var(--blue); border:1.5px solid var(--blue); box-shadow:none;">
+    <a href="https://calendar.app.google/2qQTZiamGmUUALNn6" target="_blank" rel="noopener" class="cta-button" style="background:transparent; color:var(--blue); border:1.5px solid var(--blue); box-shadow:none;">
       Book a demo
     </a>
   </div>
+</div>
+
+<!-- ============ CONGRATS ============ -->
+<div class="congrats fade-up">
+  <span class="cg-emoji">🎉</span>
+  <h3>You made it to the end</h3>
+  <p>These 30 minutes will keep your clients from ever blowing past budget again.</p>
 </div>
 
 </div><!-- /container -->
@@ -795,6 +849,7 @@ function buildDailyBlocks(clients, camps, refDate, anyBreach) {
     blocks.push({ type: 'context', elements: [{ type: 'mrkdwn', text: 'No campaign outliers today.' }] });
   }
   if (mention) blocks.push({ type: 'context', elements: [{ type: 'mrkdwn', text: `Deviations detected${mention}` }] });
+  if (!anyBreach) blocks.push({ type: 'context', elements: [{ type: 'mrkdwn', text: '✅ All clear — no anomalies today.' }] });
   return blocks;
 }
 
@@ -929,8 +984,32 @@ function dryRunWeekly() {
 <!-- Scripts -->
 <script>
   // Populate the code displays from the raw sources (textContent = auto-safe).
-  document.getElementById('sql-display').textContent = document.getElementById('sql-src').textContent.trim();
-  document.getElementById('gs-display').textContent = document.getElementById('gs-src').textContent.trim();
+  function subst(tpl) {
+    const v = id => (document.getElementById(id) && document.getElementById(id).value.trim()) || '';
+    const map = {
+      'YOUR_PROJECT_ID': v('in-project') || 'YOUR_PROJECT_ID',
+      'YOUR_DATASET': v('in-dataset') || 'YOUR_DATASET',
+      'YOUR_SHEET_ID': v('in-sheet') || 'YOUR_SHEET_ID',
+      'insert.webhook.here': v('in-webhook') || 'insert.webhook.here',
+      'facebook_ads_your_table': v('in-meta') || 'facebook_ads_your_table',
+      'tiktok_ads_your_table': v('in-tiktok') || 'tiktok_ads_your_table',
+    };
+    let out = tpl;
+    Object.keys(map).forEach(k => { out = out.split(k).join(map[k]); });
+    return out;
+  }
+  function renderCode() {
+    document.getElementById('sql-display').textContent = subst(document.getElementById('sql-src').textContent.trim());
+    document.getElementById('gs-display').textContent = subst(document.getElementById('gs-src').textContent.trim());
+  }
+  renderCode();
+
+  // Sticky book-a-demo bar: show once the reader scrolls past Step 1.
+  var stickyTrigger = document.getElementById('stickyTrigger');
+  var stickyCta = document.getElementById('stickyCta');
+  window.addEventListener('scroll', function() {
+    if (stickyTrigger && stickyCta) stickyCta.classList.toggle('visible', stickyTrigger.getBoundingClientRect().top < 0);
+  });
 
   const observer = new IntersectionObserver((entries) => {
     entries.forEach((entry, i) => {
