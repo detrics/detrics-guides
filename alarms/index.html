@@ -188,14 +188,13 @@
 <p class="section-subtitle fade-up">Every morning, before you open a single dashboard, the alarm is already in your inbox and your team channel.</p>
 
 <div class="fade-up">
-  <div class="img-ph">
-    <span class="ph-icon">&#128266;</span>
-    <strong>Screenshot:daily Slack alarm</strong>
-    <span>Per-client spend: yesterday + DoD, MTD vs budget pace, and the campaign outliers (dying &amp; runaway)</span>
+  <div class="screenshot" onclick="openLightbox(this)">
+    <img src="images/alarm-daily-slack.png" alt="Daily spend alarm posted to Slack">
+    <div class="screenshot-caption">Daily alarm in Slack: per-client spend (yesterday + DoD), MTD vs budget pace, and the campaign outliers (💀 stopped, ⚡ spike)</div>
   </div>
   <div class="img-ph">
     <span class="ph-icon">&#128231;</span>
-    <strong>Screenshot:daily email</strong>
+    <strong>Screenshot: daily email</strong>
     <span>The same digest as a clean HTML table, delivered to whoever owns the accounts</span>
   </div>
   <div class="screenshot" onclick="openLightbox(this)">
@@ -217,30 +216,42 @@
     <h2>Get your ad data into BigQuery <small>with Detrics</small></h2>
   </div>
   <div class="step-body">
-    <p>The alarm reads from your <strong>own BigQuery warehouse</strong>. Detrics is what fills it: connect each client's ad accounts once, point Detrics at BigQuery as the destination, and it syncs the data in every day, automatically.</p>
+    <p>The alarm reads from your <strong>own BigQuery warehouse</strong>. Detrics is what fills it: connect each client's ad accounts, point Detrics at BigQuery as the destination, and it syncs the data in every day, automatically.</p>
 
+    <h3>Connect your ad accounts</h3>
     <div class="url-box">
       <div class="url-icon"><svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg></div>
-      <a href="https://app.detrics.io" target="_blank" rel="noopener">app.detrics.io</a>
+      <a href="https://app.detrics.io/datasources" target="_blank" rel="noopener">app.detrics.io/datasources</a>
     </div>
-
     <div class="platform-chips">
       <div class="chip"><img src="https://storage.googleapis.com/detrics-static/public/img/meta-ads-logo.png" alt="Meta Ads"> Meta Ads</div>
       <div class="chip"><img src="https://storage.googleapis.com/detrics-static/public/img/tiktok-logo.png" alt="TikTok Ads"> TikTok Ads</div>
       <div class="chip"><img src="https://storage.googleapis.com/detrics-static/public/img/google-ads-logo.png" alt="Google Ads"> Google Ads</div>
       <div class="chip">&hellip; and every other client account</div>
     </div>
+    <div class="screenshot" onclick="openLightbox(this)">
+      <img src="images/detrics-datasources.png" alt="Detrics Data Sources page with connected ad accounts">
+      <div class="screenshot-caption">Detrics Data Sources: your connected client accounts</div>
+    </div>
 
-    <ul>
-      <li>Connect each client's ad accounts (Meta, TikTok, Google Ads, &hellip;)</li>
-      <li>Choose <strong>BigQuery</strong> as the destination and authorize your Google Cloud project</li>
-      <li>Detrics creates one table per platform in your dataset and keeps them synced daily</li>
-    </ul>
+    <h3>Create a BigQuery destination</h3>
+    <div class="url-box">
+      <div class="url-icon"><svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg></div>
+      <a href="https://app.detrics.io/bigquery/destinations/new" target="_blank" rel="noopener">app.detrics.io/bigquery/destinations/new</a>
+    </div>
+    <p>Point Detrics at your Google Cloud project. It writes one table per platform into your dataset and keeps them synced daily.</p>
+    <div class="screenshot" onclick="openLightbox(this)">
+      <img src="images/detrics-create-destination.png" alt="Detrics Create Destination wizard">
+      <div class="screenshot-caption">Create Destination: connect your Google Cloud project as the BigQuery destination</div>
+    </div>
 
-    <div class="img-ph">
-      <span class="ph-icon">&#128247;</span>
-      <strong>Screenshot:connect accounts &amp; pick BigQuery as destination</strong>
-      <span>Detrics data-sources + BigQuery destination setup</span>
+    <div class="tip amber">
+      <span class="tip-icon">&#9733;</span>
+      <span>No Google Cloud project yet? Create one first (it's free) at <a href="https://console.cloud.google.com/" target="_blank" rel="noopener">console.cloud.google.com</a>, then come back.</span>
+    </div>
+    <div class="screenshot" onclick="openLightbox(this)">
+      <img src="images/gcp-create-project.png" alt="Steps to create a Google Cloud project">
+      <div class="screenshot-caption">Create a Google Cloud project: open the project dropdown, click New Project, name it, and create it</div>
     </div>
 
     <div class="tip green">
@@ -272,30 +283,31 @@
       <span class="cf-text">channel	account_name	client</span>
       <button class="copy-btn-light" onclick="copyText('channel\taccount_name\tclient',this)">Copy</button>
     </div>
+    <div class="screenshot" onclick="openLightbox(this)">
+      <img src="images/client-map-sheet.png" alt="client_map tab example">
+      <div class="screenshot-caption">client_map tab: each ad account mapped to a client (one client can span many accounts and channels)</div>
+    </div>
 
     <div class="tab-label">Tab 2 &middot; <code>targets</code></div>
     <p style="margin-bottom:8px">One row per client, with the budget and how sensitive the alarm should be:</p>
     <table class="data-table">
-      <tr><th>client</th><th>daily_budget</th><th>monthly_budget</th><th>swing_threshold_pct</th><th>aov</th></tr>
-      <tr><td>Acme</td><td>5000</td><td>150000</td><td>30</td><td></td></tr>
-      <tr><td>Globex</td><td>3000</td><td>90000</td><td>25</td><td></td></tr>
+      <tr><th>client</th><th>daily_budget</th><th>monthly_budget</th><th>swing_threshold_pct</th></tr>
+      <tr><td>Acme</td><td>5000</td><td>150000</td><td>30</td></tr>
+      <tr><td>Globex</td><td>3000</td><td>90000</td><td>25</td></tr>
     </table>
     <div class="copyable-field">
-      <span class="cf-text">client	daily_budget	monthly_budget	swing_threshold_pct	aov</span>
-      <button class="copy-btn-light" onclick="copyText('client\tdaily_budget\tmonthly_budget\tswing_threshold_pct\taov',this)">Copy</button>
+      <span class="cf-text">client	daily_budget	monthly_budget	swing_threshold_pct</span>
+      <button class="copy-btn-light" onclick="copyText('client\tdaily_budget\tmonthly_budget\tswing_threshold_pct',this)">Copy</button>
+    </div>
+    <div class="screenshot" onclick="openLightbox(this)">
+      <img src="images/targets-sheet.png" alt="targets tab example">
+      <div class="screenshot-caption">targets tab: budget and sensitivity per client</div>
     </div>
 
     <ul>
       <li><strong>swing_threshold_pct</strong> sets how big a move (%) triggers an alert. Set it to 30 and anything that moves 30% or more gets flagged.</li>
       <li><strong>monthly_budget</strong> drives the month-to-date pace check: whether you're over or under budget for the month so far.</li>
-      <li><strong>aov</strong> stays blank for now. It's the hook to switch on ROAS later.</li>
     </ul>
-
-    <div class="img-ph">
-      <span class="ph-icon">&#128247;</span>
-      <strong>Screenshot:the two-tab mapping Sheet</strong>
-      <span>client_map + targets tabs</span>
-    </div>
 
     <div class="tip amber">
       <span class="tip-icon">&#9733;</span>
@@ -332,7 +344,7 @@
 
     <div class="img-ph">
       <span class="ph-icon">&#128247;</span>
-      <strong>Screenshot:schedule the query (daily)</strong>
+      <strong>Screenshot: schedule the query (daily)</strong>
       <span>BigQuery scheduled-query setup</span>
     </div>
 
@@ -358,10 +370,9 @@
       <li>Open <strong>Incoming Webhooks</strong> in the left menu and toggle it <strong>On</strong>.</li>
       <li>Click <strong>Add New Webhook to Workspace</strong>, choose your alerts channel, and <strong>Allow</strong>.</li>
       <li>Copy the webhook URL. It looks like <code>https://hooks.slack.com/services/T…/B…/…</code>
-        <div class="img-ph" style="margin-top:12px">
-          <span class="ph-icon">&#128247;</span>
-          <strong>Screenshot:copy the webhook URL</strong>
-          <span>the "Copy" button next to your new webhook</span>
+        <div class="screenshot" onclick="openLightbox(this)" style="margin-top:12px">
+          <img src="images/slack-webhook-copy.png" alt="Copy the Slack incoming webhook URL">
+          <div class="screenshot-caption">Copy the webhook URL from the incoming-webhooks page</div>
         </div>
       </li>
     </ol>
@@ -405,7 +416,7 @@
 
     <div class="img-ph">
       <span class="ph-icon">&#128247;</span>
-      <strong>Screenshot:Apps Script editor, Services, Script Properties &amp; Triggers</strong>
+      <strong>Screenshot: Apps Script editor, Services, Script Properties &amp; Triggers</strong>
       <span>paste code + enable BigQuery + set properties + add triggers</span>
     </div>
 
@@ -427,28 +438,12 @@
   </div>
 </div>
 
-<!-- ============ STEP 6 (OPTIONAL) ============ -->
-<div class="step fade-up">
-  <div class="step-header">
-    <div class="opt step-number">6</div>
-    <h2>Visualize in Looker <small>optional, on the same table</small></h2>
-  </div>
-  <div class="step-body">
-    <p>Because the consolidated table already carries the <code>client</code> column, a dashboard is a five-minute add: connect Looker Studio to <code>consolidated_ad_performance</code> and drop a <strong>client filter</strong>. Same source as the alarm, so the numbers always agree.</p>
-    <div class="img-ph">
-      <span class="ph-icon">&#128247;</span>
-      <strong>Screenshot:Looker dashboard with a client filter</strong>
-      <span>spend trends per client on the consolidated table</span>
-    </div>
-  </div>
-</div>
-
 <!-- ============ FLOW ============ -->
 <div class="divider"></div>
 <h2 class="section-title fade-up">The complete flow</h2>
 <br>
 <div class="flow fade-up">
-  <div class="flow-node"><div class="flow-icon"><img src="https://storage.googleapis.com/detrics-static/public/img/meta-ads-logo.png" alt="Ad platforms"></div><span class="flow-label">Ad accounts</span></div>
+  <div class="flow-node"><div class="flow-icon" style="width:auto; padding:0 12px; gap:8px;"><img src="https://storage.googleapis.com/detrics-static/public/img/google-ads-logo.png" alt="Google Ads" style="width:24px;height:24px;"><img src="https://storage.googleapis.com/detrics-static/public/img/tiktok-logo.png" alt="TikTok Ads" style="width:24px;height:24px;"><img src="https://storage.googleapis.com/detrics-static/public/img/meta-ads-logo.png" alt="Meta Ads" style="width:24px;height:24px;"></div><span class="flow-label">Ad accounts</span></div>
   <span class="flow-arrow">&rarr;</span>
   <div class="flow-node"><div class="flow-icon" style="border-color: var(--blue); background: #EFF6FF;"><img src="https://detrics.io/_astro/detrics-logo.C-sT4k0h_ZovnhR.svg" alt="Detrics" style="width: 40px; height: 32px;"></div><span class="flow-label">Detrics</span></div>
   <span class="flow-arrow">&rarr;</span>
@@ -461,10 +456,15 @@
 <div class="cta-section fade-up">
   <h2>From reactive to proactive</h2>
   <p>Detrics fills the warehouse. You keep the client. Start free.</p>
-  <a href="https://detrics.io/get-started" target="_blank" rel="noopener" class="cta-button">
-    Create free account
-    <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-  </a>
+  <div style="display:flex; gap:14px; justify-content:center; flex-wrap:wrap;">
+    <a href="https://app.detrics.io/bigquery/destinations/new" target="_blank" rel="noopener" class="cta-button">
+      Create free account
+      <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </a>
+    <a href="https://calendly.com/ignacio-goyanes-detrics/" target="_blank" rel="noopener" class="cta-button" style="background:transparent; color:var(--blue); border:1.5px solid var(--blue); box-shadow:none;">
+      Book a demo
+    </a>
+  </div>
 </div>
 
 </div><!-- /container -->
