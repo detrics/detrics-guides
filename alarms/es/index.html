@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Detrics — Armá un sistema de alarmas de gasto para reducir el churn</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="apple-touch-icon" href="/favicon.png">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue: #2563EB; --blue-dark: #1D4ED8; --blue-light: #3B82F6; --blue-glow: rgba(37, 99, 235, 0.25);
+    --ink: #0F172A; --surface: #FFFFFF;
+    --gray-50: #F8FAFC; --gray-100: #F1F5F9; --gray-200: #E2E8F0; --gray-300: #CBD5E1;
+    --gray-400: #94A3B8; --gray-500: #64748B; --gray-600: #475569; --gray-700: #334155;
+    --green: #10B981; --green-bg: #ECFDF5; --amber: #F59E0B; --amber-bg: #FFFBEB;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', -apple-system, sans-serif; color: var(--ink); background: var(--gray-50); line-height: 1.6; -webkit-font-smoothing: antialiased; }
+  .fade-up { opacity: 0; transform: translateY(24px); transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1), transform 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
+  .fade-up.visible { opacity: 1; transform: translateY(0); }
+
+  .hero { background: linear-gradient(160deg, #0B1120 0%, #0F172A 40%, #131C2E 100%); color: white; padding: 80px 40px 60px; text-align: center; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; top: -40%; left: -20%; width: 140%; height: 180%; background: radial-gradient(ellipse 600px 400px at 25% 30%, rgba(37, 99, 235, 0.18) 0%, transparent 70%), radial-gradient(ellipse 500px 500px at 75% 70%, rgba(59, 130, 246, 0.1) 0%, transparent 60%), radial-gradient(ellipse 300px 300px at 50% 50%, rgba(16, 185, 129, 0.06) 0%, transparent 50%); animation: heroPulse 10s ease-in-out infinite alternate; }
+  @keyframes heroPulse { 0% { opacity: 0.5; transform: scale(1); } 100% { opacity: 1; transform: scale(1.05); } }
+  .hero::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(37, 99, 235, 0.3), transparent); }
+  .hero-content { position: relative; z-index: 1; max-width: 720px; margin: 0 auto; }
+  .hero-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(37, 99, 235, 0.12); border: 1px solid rgba(37, 99, 235, 0.25); border-radius: 100px; padding: 6px 16px; font-size: 12px; font-weight: 600; color: #93C5FD; margin-bottom: 28px; letter-spacing: 1px; text-transform: uppercase; backdrop-filter: blur(8px); animation: badgeFade 1s ease-out; }
+  @keyframes badgeFade { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+  .hero h1 { font-size: 44px; font-weight: 800; line-height: 1.12; margin-bottom: 18px; letter-spacing: -1px; animation: heroTitle 0.8s ease-out 0.1s both; }
+  @keyframes heroTitle { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  .hero h1 span { background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 50%, #2563EB 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .hero p { font-size: 17px; color: #94A3B8; max-width: 560px; margin: 0 auto 36px; line-height: 1.75; animation: heroTitle 0.8s ease-out 0.25s both; }
+  .hero-logos { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 32px; flex-wrap: wrap; animation: heroTitle 0.8s ease-out 0.4s both; }
+  .hero-logos img { width: 40px; height: 40px; border-radius: 10px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); padding: 6px; object-fit: contain; transition: transform 0.3s, box-shadow 0.3s; }
+  .hero-logos img:hover { transform: scale(1.1); box-shadow: 0 0 20px var(--blue-glow); }
+  .hero-logos .plus { color: var(--gray-500); font-size: 18px; font-weight: 300; }
+  .hero-time { display: inline-flex; align-items: center; gap: 8px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 100px; padding: 8px 20px; font-size: 13px; color: #6EE7B7; font-weight: 500; backdrop-filter: blur(8px); animation: heroTitle 0.8s ease-out 0.55s both; margin-top: 28px; }
+
+  .container { max-width: 760px; margin: 0 auto; padding: 0 24px; }
+  .intro { padding: 56px 0 20px; text-align: center; }
+  .intro p { font-size: 17px; color: var(--gray-600); max-width: 620px; margin: 0 auto; line-height: 1.8; }
+
+  .step { background: var(--surface); border: 1px solid var(--gray-200); border-radius: 16px; margin-bottom: 32px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.02); transition: box-shadow 0.3s, border-color 0.3s; }
+  .step:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.06), 0 12px 32px rgba(0,0,0,0.04); border-color: var(--gray-300); }
+  .step-header { display: flex; align-items: center; gap: 16px; padding: 28px 32px; border-bottom: 1px solid var(--gray-100); background: linear-gradient(180deg, var(--gray-50) 0%, var(--surface) 100%); }
+  .step-number { width: 42px; height: 42px; border-radius: 12px; background: linear-gradient(135deg, var(--blue) 0%, var(--blue-dark) 100%); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 18px; flex-shrink: 0; box-shadow: 0 2px 8px var(--blue-glow); }
+  .step-header .opt { width: 42px; height: 42px; border-radius: 12px; background: linear-gradient(135deg, var(--gray-400), var(--gray-500)); }
+  .step-header h2 { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
+  .step-header h2 small { display: block; font-size: 13px; font-weight: 400; color: var(--gray-400); margin-top: 3px; }
+  .step-body { padding: 28px 32px; }
+  .step-body p { font-size: 15px; color: var(--gray-600); margin-bottom: 16px; line-height: 1.7; }
+  .step-body ul { list-style: none; margin-bottom: 20px; }
+  .step-body ul li { position: relative; padding-left: 28px; margin-bottom: 10px; font-size: 15px; color: var(--gray-600); line-height: 1.6; }
+  .step-body ul li::before { content: '\2192'; position: absolute; left: 0; color: var(--blue); font-weight: 600; }
+  .step-body h3 { font-size: 16px; margin: 24px 0 12px; color: var(--ink); }
+
+  .url-box { display: flex; align-items: center; gap: 12px; background: linear-gradient(135deg, #EFF6FF 0%, var(--gray-50) 100%); border: 1px solid rgba(37, 99, 235, 0.15); border-radius: 10px; padding: 12px 16px; margin: 16px 0; transition: border-color 0.2s, box-shadow 0.2s; }
+  .url-box:hover { border-color: rgba(37, 99, 235, 0.35); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.06); }
+  .url-box .url-icon { width: 28px; height: 28px; background: var(--blue); border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .url-box .url-icon svg { width: 14px; height: 14px; fill: white; }
+  .url-box a { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--blue); text-decoration: none; word-break: break-all; font-weight: 500; }
+  .url-box a:hover { text-decoration: underline; }
+
+  .screenshot { border: 1px solid var(--gray-200); border-radius: 12px; overflow: hidden; margin: 20px 0; background: var(--gray-50); cursor: pointer; transition: box-shadow 0.3s; position: relative; }
+  .screenshot:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+  .screenshot::after { content: 'Clic para ampliar'; position: absolute; bottom: 0; left: 0; right: 0; padding: 6px; background: linear-gradient(transparent, rgba(0,0,0,0.5)); color: white; font-size: 11px; text-align: center; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+  .screenshot:hover::after { opacity: 1; }
+  .screenshot img { width: 100%; display: block; object-fit: contain; }
+  .screenshot-caption { padding: 10px 16px; font-size: 12px; color: var(--gray-400); text-align: center; border-top: 1px solid var(--gray-100); font-style: italic; background: var(--surface); }
+
+  .img-ph { border: 2px dashed var(--gray-300); border-radius: 12px; padding: 30px 20px; margin: 20px 0; text-align: center; background: repeating-linear-gradient(45deg, var(--gray-50), var(--gray-50) 12px, #F3F6FA 12px, #F3F6FA 24px); color: var(--gray-500); }
+  .img-ph .ph-icon { font-size: 26px; display: block; margin-bottom: 6px; opacity: 0.6; }
+  .img-ph strong { display: block; color: var(--gray-600); font-size: 14px; margin-bottom: 2px; }
+  .img-ph span { font-size: 12.5px; color: var(--gray-400); }
+
+  .lightbox { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 9999; cursor: zoom-out; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s; }
+  .lightbox.active { opacity: 1; visibility: visible; }
+  .lightbox img { max-width: 92%; max-height: 90vh; border-radius: 12px; box-shadow: 0 8px 40px rgba(0,0,0,0.4); transform: scale(0.95); transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1); }
+  .lightbox.active img { transform: scale(1); }
+  .lightbox-close { position: absolute; top: 24px; right: 28px; color: white; font-size: 32px; font-weight: 300; cursor: pointer; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(255,255,255,0.1); transition: background 0.2s; }
+  .lightbox-close:hover { background: rgba(255,255,255,0.2); }
+
+  .platform-chips { display: flex; gap: 10px; flex-wrap: wrap; margin: 16px 0; }
+  .chip { display: inline-flex; align-items: center; gap: 8px; background: var(--surface); border: 1px solid var(--gray-200); border-radius: 10px; padding: 10px 16px; font-size: 14px; font-weight: 500; color: var(--gray-700); transition: border-color 0.2s, box-shadow 0.2s; }
+  .chip:hover { border-color: var(--blue-light); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.06); }
+  .chip img { width: 22px; height: 22px; border-radius: 4px; object-fit: contain; }
+
+  .code-block { background: #0B1120; border-radius: 14px; overflow: hidden; margin: 20px 0; border: 1px solid rgba(255,255,255,0.06); box-shadow: 0 4px 24px rgba(0,0,0,0.15); }
+  .code-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; background: rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .code-header span { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--gray-500); }
+  .copy-btn { font-size: 11px; color: var(--gray-400); background: rgba(255,255,255,0.06); padding: 4px 12px; border-radius: 6px; cursor: pointer; border: 1px solid rgba(255,255,255,0.08); font-family: 'DM Mono', monospace; transition: all 0.2s; white-space: nowrap; }
+  .copy-btn:hover { background: rgba(37, 99, 235, 0.2); border-color: rgba(37, 99, 235, 0.3); color: #93C5FD; }
+  .copy-btn-light { font-size: 11px; color: var(--gray-400); background: var(--gray-100); padding: 3px 10px; border-radius: 6px; cursor: pointer; border: 1px solid var(--gray-200); font-family: 'DM Mono', monospace; transition: all 0.2s; white-space: nowrap; flex-shrink: 0; }
+  .copy-btn-light:hover { background: #DBEAFE; border-color: var(--blue-light); color: var(--blue); }
+  .code-body { padding: 24px; font-family: 'DM Mono', monospace; font-size: 12.5px; line-height: 1.7; color: #CBD5E1; white-space: pre; overflow-x: auto; margin: 0; }
+  .code-body.tall { max-height: 460px; overflow-y: auto; }
+
+  .tip { display: flex; gap: 12px; padding: 16px 20px; border-radius: 12px; margin: 20px 0; font-size: 14px; line-height: 1.6; transition: transform 0.2s; }
+  .tip:hover { transform: translateY(-1px); }
+  .tip.green { background: linear-gradient(135deg, #ECFDF5, #F0FDF4); border: 1px solid #A7F3D0; color: #065F46; }
+  .tip.amber { background: linear-gradient(135deg, #FFFBEB, #FEF9C3); border: 1px solid #FDE68A; color: #92400E; }
+  .tip-icon { font-size: 18px; flex-shrink: 0; line-height: 1.4; }
+
+  .substeps { counter-reset: substep; list-style: none; margin: 20px 0; padding: 0; }
+  .substeps li { counter-increment: substep; position: relative; padding-left: 48px; margin-bottom: 24px; font-size: 15px; color: var(--gray-600); line-height: 1.6; }
+  .substeps li::before { content: counter(substep); position: absolute; left: 0; top: 0; width: 30px; height: 30px; border-radius: 10px; background: linear-gradient(135deg, var(--gray-100), var(--gray-50)); border: 1px solid var(--gray-200); color: var(--ink); font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center; text-align: center; line-height: 30px; }
+  .substeps li strong { color: var(--ink); }
+
+  code { font-family: 'DM Mono', monospace; font-size: 13px; background: linear-gradient(135deg, #EFF6FF, var(--gray-100)); border: 1px solid rgba(37, 99, 235, 0.12); border-radius: 6px; padding: 2px 8px; color: var(--blue-dark); }
+
+  .copyable-field { display: flex; align-items: center; gap: 10px; background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: 10px; padding: 12px 16px; margin: 8px 0 16px; transition: border-color 0.2s; }
+  .copyable-field:hover { border-color: var(--blue-light); }
+  .copyable-field .cf-text { flex: 1; font-size: 14px; color: var(--ink); font-weight: 500; line-height: 1.5; font-family: 'DM Mono', monospace; word-break: break-all; }
+
+  .data-table { width: 100%; border-collapse: collapse; margin: 8px 0 16px; font-size: 13px; border: 1px solid var(--gray-200); border-radius: 10px; overflow: hidden; }
+  .data-table th { background: var(--ink); color: #fff; text-align: left; padding: 9px 12px; font-weight: 600; font-family: 'DM Mono', monospace; font-size: 12px; }
+  .data-table td { padding: 8px 12px; border-top: 1px solid var(--gray-100); color: var(--gray-600); font-family: 'DM Mono', monospace; font-size: 12px; }
+  .data-table tr:nth-child(even) td { background: var(--gray-50); }
+  .tab-label { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--blue); margin: 20px 0 4px; }
+  .tab-label::before { content: ''; width: 8px; height: 8px; border-radius: 2px; background: var(--blue); }
+
+  .divider { height: 1px; background: linear-gradient(90deg, transparent, var(--gray-300), transparent); margin: 56px 0; }
+  .section-title { font-size: 26px; font-weight: 800; text-align: center; margin-bottom: 8px; letter-spacing: -0.5px; }
+  .section-subtitle { text-align: center; color: var(--gray-500); font-size: 15px; margin-bottom: 32px; max-width: 560px; margin-left: auto; margin-right: auto; }
+
+  .cta-section { text-align: center; padding: 60px 0 80px; }
+  .cta-section h2 { font-size: 30px; font-weight: 800; margin-bottom: 12px; letter-spacing: -0.5px; }
+  .cta-section p { font-size: 16px; color: var(--gray-500); margin-bottom: 28px; }
+  .cta-button { display: inline-flex; align-items: center; gap: 10px; background: linear-gradient(135deg, var(--blue) 0%, var(--blue-dark) 100%); color: white; text-decoration: none; padding: 16px 36px; border-radius: 12px; font-weight: 600; font-size: 16px; transition: all 0.3s; box-shadow: 0 4px 16px var(--blue-glow); }
+  .cta-button:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(37, 99, 235, 0.35); }
+  .cta-button svg { width: 18px; height: 18px; fill: white; }
+
+  .footer { text-align: center; padding: 40px 0; border-top: 1px solid var(--gray-200); font-size: 13px; color: var(--gray-400); }
+  .footer a { color: var(--blue); text-decoration: none; }
+
+  .flow { display: flex; align-items: flex-start; justify-content: center; gap: 0; margin: 28px 0; flex-wrap: wrap; }
+  .flow-node { display: flex; flex-direction: column; align-items: center; gap: 10px; transition: transform 0.3s; }
+  .flow-node:hover { transform: translateY(-4px); }
+  .flow-node .flow-icon { width: 64px; height: 64px; border-radius: 16px; background: var(--surface); border: 1px solid var(--gray-200); display: flex; align-items: center; justify-content: center; transition: box-shadow 0.3s, border-color 0.3s; }
+  .flow-node:hover .flow-icon { box-shadow: 0 4px 16px rgba(0,0,0,0.08); border-color: var(--gray-300); }
+  .flow-node .flow-icon img { width: 32px; height: 32px; border-radius: 6px; object-fit: contain; }
+  .flow-node .flow-label { font-size: 12px; color: var(--gray-500); font-weight: 600; }
+  .flow-arrow { color: var(--gray-300); font-size: 20px; font-weight: 300; height: 64px; display: flex; align-items: center; padding: 0 12px; }
+
+  @media print { body { background: white; } .hero { padding: 40px 20px 30px; } .hero h1 { font-size: 32px; } .step { break-inside: avoid; } .code-block { break-inside: avoid; } .code-body.tall { max-height: none; } .fade-up { opacity: 1 !important; transform: none !important; } }
+  @media (max-width: 640px) { .hero { padding: 48px 20px 40px; } .hero h1 { font-size: 28px; letter-spacing: -0.5px; } .step-header { padding: 20px; } .step-body { padding: 20px; } .container { padding: 0 16px; } }
+</style>
+</head>
+<body>
+
+<!-- Lightbox overlay -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <div class="lightbox-close">&times;</div>
+  <img id="lightbox-img" src="" alt="">
+</div>
+
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-badge">Guía paso a paso</div>
+    <h1>Detectá una campaña que se muere <span>antes de que el cliente se vaya</span></h1>
+    <p>Cuando manejás muchos clientes, el gasto se desvía en silencio — una campaña se muere, un presupuesto se dispara — y te enterás cuando el cliente ya tiene un pie afuera. Esta guía arma un sistema de alarmas de gasto sobre tu propio warehouse en BigQuery que te avisa por Slack y mail apenas un cliente o una campaña se mueve.</p>
+    <div class="hero-logos">
+      <img src="https://storage.googleapis.com/detrics-static/public/img/meta-ads-logo.png" alt="Meta Ads">
+      <img src="https://storage.googleapis.com/detrics-static/public/img/tiktok-logo.png" alt="TikTok Ads">
+      <span class="plus">&rarr;</span>
+      <img src="https://storage.googleapis.com/detrics-static/public/img/big-query-icon.png" alt="BigQuery">
+      <span class="plus">&rarr;</span>
+      <img src="https://storage.googleapis.com/detrics-static/public/img/slack-logo.png" alt="Slack">
+    </div>
+    <div class="hero-time">~30 min de setup &middot; alarmas diarias y semanales por Slack y mail</div>
+  </div>
+</section>
+
+<div class="container">
+
+<!-- ============ INTRO ============ -->
+<div class="intro fade-up">
+  <p>Al terminar esta guía vas a tener: la data de cada cliente entrando a BigQuery a través de Detrics, una tabla consolidada etiquetada por <strong>cliente</strong>, y un script que cada mañana revisa el gasto de cada cliente — día contra día, month-to-date contra presupuesto, y campaña por campaña — y dispara una alerta por Slack y mail apenas algo se desvía. Sin herramientas nuevas: corre sobre Google Sheets, Apps Script y tu warehouse.</p>
+</div>
+
+<!-- ============ WHAT YOU GET ============ -->
+<div class="divider"></div>
+<h2 class="section-title fade-up">Qué obtenés</h2>
+<p class="section-subtitle fade-up">Cada mañana, antes de abrir un solo dashboard, la alarma ya está en tu bandeja de entrada y en el canal de tu equipo.</p>
+
+<div class="fade-up">
+  <div class="img-ph">
+    <span class="ph-icon">&#128266;</span>
+    <strong>Captura — alarma diaria en Slack</strong>
+    <span>Gasto por cliente: ayer + DoD, MTD vs presupuesto, y las campañas outlier (las que se mueren y las que se disparan)</span>
+  </div>
+  <div class="img-ph">
+    <span class="ph-icon">&#128231;</span>
+    <strong>Captura — mail diario</strong>
+    <span>El mismo resumen como tabla HTML, al que maneja las cuentas</span>
+  </div>
+  <div class="screenshot" onclick="openLightbox(this)">
+    <img src="images/alarm-weekly-slack.png" alt="Resumen semanal de gasto en Slack">
+    <div class="screenshot-caption">Resumen semanal del lunes en Slack — últimos 7 días vs 7 días previos por cliente, más las campañas que más se movieron (🟢 sube / 🔴 baja)</div>
+  </div>
+  <div class="screenshot" onclick="openLightbox(this)">
+    <img src="images/alarm-weekly-email.png" alt="Mail del resumen semanal de gasto">
+    <div class="screenshot-caption">El mismo resumen semanal entregado por mail</div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ============ STEP 1 ============ -->
+<div class="step fade-up">
+  <div class="step-header">
+    <div class="step-number">1</div>
+    <h2>Meté la data de tus anuncios en BigQuery <small>con Detrics — sin armar ningún pipeline</small></h2>
+  </div>
+  <div class="step-body">
+    <p>La alarma lee de tu <strong>propio warehouse en BigQuery</strong>. Detrics es lo que lo llena: conectás las cuentas de cada cliente una vez, apuntás Detrics a BigQuery como destino, y la data entra sola todos los días — sin ETL, sin ingeniero.</p>
+
+    <div class="url-box">
+      <div class="url-icon"><svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg></div>
+      <a href="https://app.detrics.io" target="_blank" rel="noopener">app.detrics.io</a>
+    </div>
+
+    <div class="platform-chips">
+      <div class="chip"><img src="https://storage.googleapis.com/detrics-static/public/img/meta-ads-logo.png" alt="Meta Ads"> Meta Ads</div>
+      <div class="chip"><img src="https://storage.googleapis.com/detrics-static/public/img/tiktok-logo.png" alt="TikTok Ads"> TikTok Ads</div>
+      <div class="chip"><img src="https://storage.googleapis.com/detrics-static/public/img/google-ads-logo.png" alt="Google Ads"> Google Ads</div>
+      <div class="chip">&hellip; y cada cuenta de cada cliente</div>
+    </div>
+
+    <ul>
+      <li>Conectá las cuentas de anuncios de cada cliente (Meta, TikTok, Google Ads, &hellip;)</li>
+      <li>Elegí <strong>BigQuery</strong> como destino y autorizá tu proyecto de Google Cloud</li>
+      <li>Detrics crea una tabla por plataforma en tu dataset y las mantiene sincronizadas todos los días</li>
+    </ul>
+
+    <div class="img-ph">
+      <span class="ph-icon">&#128247;</span>
+      <strong>Captura — conectá cuentas y elegí BigQuery como destino</strong>
+      <span>setup de data-sources + destino BigQuery en Detrics</span>
+    </div>
+
+    <div class="tip green">
+      <span class="tip-icon">&#10003;</span>
+      <span>¿Ya sos usuario de Detrics con BigQuery conectado? Tus tablas por plataforma ya están sincronizando — saltá al Paso 2.</span>
+    </div>
+  </div>
+</div>
+
+<!-- ============ STEP 2 ============ -->
+<div class="step fade-up">
+  <div class="step-header">
+    <div class="step-number">2</div>
+    <h2>Creá el Google Sheet de mapeo <small>tu panel de control: qué cuentas son de qué cliente, y sus presupuestos</small></h2>
+  </div>
+  <div class="step-body">
+    <p>Las cuentas de anuncios en crudo no saben quién es el "cliente" — un cliente puede tener cinco cuentas en dos canales. Un Google Sheet chico lo resuelve. Creá una planilla nueva con <strong>dos pestañas</strong>. La alarma la lee en vivo, así que editás presupuestos o umbrales cuando quieras y la próxima corrida los toma.</p>
+
+    <div class="tab-label">Pestaña 1 &mdash; <code>client_map</code></div>
+    <p style="margin-bottom:8px">Mapeá cada cuenta real al cliente que reportás. Encabezados de columna, exactos:</p>
+    <table class="data-table">
+      <tr><th>channel</th><th>account_name</th><th>client</th></tr>
+      <tr><td>Meta Ads</td><td>ACME_US</td><td>Acme</td></tr>
+      <tr><td>Meta Ads</td><td>ACME_MX</td><td>Acme</td></tr>
+      <tr><td>TikTok Ads</td><td>Acme Global</td><td>Acme</td></tr>
+      <tr><td>Meta Ads</td><td>Globex-Main</td><td>Globex</td></tr>
+    </table>
+    <div class="copyable-field">
+      <span class="cf-text">channel	account_name	client</span>
+      <button class="copy-btn-light" onclick="copyText('channel\taccount_name\tclient',this)">Copiar</button>
+    </div>
+
+    <div class="tab-label">Pestaña 2 &mdash; <code>targets</code></div>
+    <p style="margin-bottom:8px">Una fila por cliente, con el presupuesto y qué tan sensible querés la alarma:</p>
+    <table class="data-table">
+      <tr><th>client</th><th>daily_budget</th><th>monthly_budget</th><th>swing_threshold_pct</th><th>aov</th></tr>
+      <tr><td>Acme</td><td>5000</td><td>150000</td><td>30</td><td></td></tr>
+      <tr><td>Globex</td><td>3000</td><td>90000</td><td>25</td><td></td></tr>
+    </table>
+    <div class="copyable-field">
+      <span class="cf-text">client	daily_budget	monthly_budget	swing_threshold_pct	aov</span>
+      <button class="copy-btn-light" onclick="copyText('client\tdaily_budget\tmonthly_budget\tswing_threshold_pct\taov',this)">Copiar</button>
+    </div>
+
+    <ul>
+      <li><strong>swing_threshold_pct</strong> — qué tan grande tiene que ser el movimiento (%) para disparar una alerta. 30 = marcá todo lo que se mueva 30% o más</li>
+      <li><strong>monthly_budget</strong> — maneja el chequeo de "ritmo month-to-date" (vamos por encima o por debajo del presupuesto del mes)</li>
+      <li><strong>aov</strong> — dejala vacía por ahora; es el gancho para prender ROAS más adelante</li>
+    </ul>
+
+    <div class="img-ph">
+      <span class="ph-icon">&#128247;</span>
+      <strong>Captura — el Sheet de mapeo de dos pestañas</strong>
+      <span>pestañas client_map + targets</span>
+    </div>
+
+    <div class="tip amber">
+      <span class="tip-icon">&#9733;</span>
+      <span>Este Sheet es tu panel de control. Cambiá un presupuesto o un umbral cuando cambie el plan — la alarma lo lee en la corrida siguiente, sin tocar código.</span>
+    </div>
+  </div>
+</div>
+
+<!-- ============ STEP 3 ============ -->
+<div class="step fade-up">
+  <div class="step-header">
+    <div class="step-number">3</div>
+    <h2>Consolidá en una sola tabla <small>uní todas las plataformas + agregá la columna de cliente</small></h2>
+  </div>
+  <div class="step-body">
+    <p>Detrics te da una tabla por plataforma. Esta query las apila en una sola tabla <code>consolidated_ad_performance</code> y hace join con <code>client_map</code> para que cada fila lleve su <strong>cliente</strong>. Correla como <strong>scheduled query</strong> en BigQuery para que se reconstruya cada mañana, después de que entra la data.</p>
+
+    <p>Reemplazá los placeholders (<code>YOUR_PROJECT_ID</code>, <code>YOUR_DATASET</code>, y los nombres de las tablas fuente que creó Detrics) y agregá un <code>SELECT</code> por cada plataforma que conectaste:</p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span>consolidated_ad_performance — scheduled query</span>
+        <button class="copy-btn" onclick="copyText(document.getElementById('sql-src').textContent.trim(),this)">Copiar</button>
+      </div>
+      <pre class="code-body" id="sql-display"></pre>
+    </div>
+
+    <h3>Programala para que corra todos los días</h3>
+    <ol class="substeps">
+      <li>En la consola de BigQuery, pegá la query en una pestaña nueva del editor y correla una vez para crear la tabla.</li>
+      <li>Clic en <strong>Programar</strong> &rarr; <strong>Crear nueva consulta programada</strong>, y ponela <strong>diaria</strong> (un par de horas después de que Detrics sincroniza).</li>
+      <li>Dejá los campos de "tabla de destino" <strong>en blanco</strong> — el <code>CREATE OR REPLACE TABLE</code> ya nombra su propio destino.</li>
+    </ol>
+
+    <div class="img-ph">
+      <span class="ph-icon">&#128247;</span>
+      <strong>Captura — programá la query (diaria)</strong>
+      <span>setup de scheduled query en BigQuery</span>
+    </div>
+
+    <div class="tip green">
+      <span class="tip-icon">&#10003;</span>
+      <span>La columna <code>client</code> ahora vive en tu tabla. Todo lo que la lea — la alarma, o un dashboard de Looker — puede filtrar por cliente al instante.</span>
+    </div>
+  </div>
+</div>
+
+<!-- ============ STEP 4 ============ -->
+<div class="step fade-up">
+  <div class="step-header">
+    <div class="step-number">4</div>
+    <h2>Creá el webhook de Slack <small>adónde postea la alarma — 2 minutos</small></h2>
+  </div>
+  <div class="step-body">
+    <p>Un webhook es simplemente una URL a la que le mandás un mensaje y aparece en Slack. Lo creás una vez y lo pegás en el script.</p>
+
+    <ol class="substeps">
+      <li>En Slack, creá el canal para tus alertas (ej. <code>#spend-alarms</code>).</li>
+      <li>Andá a <a href="https://api.slack.com/apps" target="_blank" rel="noopener"><strong>api.slack.com/apps</strong></a> &rarr; <strong>Create New App</strong> &rarr; <em>From scratch</em>, y elegí tu workspace.</li>
+      <li>Abrí <strong>Incoming Webhooks</strong> en el menú izquierdo y activalo (<strong>On</strong>).</li>
+      <li>Clic en <strong>Add New Webhook to Workspace</strong>, elegí tu canal de alertas y <strong>Allow</strong>.</li>
+      <li>Copiá la URL del webhook — se ve así: <code>https://hooks.slack.com/services/T…/B…/…</code>
+        <div class="img-ph" style="margin-top:12px">
+          <span class="ph-icon">&#128247;</span>
+          <strong>Captura — copiá la URL del webhook</strong>
+          <span>el botón "Copy" al lado de tu webhook nuevo</span>
+        </div>
+      </li>
+    </ol>
+
+    <div class="tip amber">
+      <span class="tip-icon">&#9733;</span>
+      <span>Guardá esta URL en privado — cualquiera que la tenga puede postear en tu canal. La vas a pegar en el script en el paso siguiente.</span>
+    </div>
+  </div>
+</div>
+
+<!-- ============ STEP 5 ============ -->
+<div class="step fade-up">
+  <div class="step-header">
+    <div class="step-number">5</div>
+    <h2>Armá la alarma <small>un Apps Script, tres triggers</small></h2>
+  </div>
+  <div class="step-body">
+    <p>Este script vive dentro de tu Sheet de mapeo. Consulta BigQuery, compara el gasto contra los presupuestos de tu pestaña <code>targets</code>, y postea a Slack y mail. Pegalo, cargá tus datos y programalo.</p>
+
+    <ol class="substeps">
+      <li>Abrí tu Sheet de mapeo &rarr; <strong>Extensiones &rarr; Apps Script</strong>. Borrá el código de ejemplo.</li>
+      <li>Pegá el script completo de abajo, y editá el principio: reemplazá <code>YOUR_PROJECT_ID</code>, <code>YOUR_DATASET</code>, <code>YOUR_SHEET_ID</code> (el id de la URL del Sheet), y cambiá <code>insert.webhook.here</code> por el webhook del Paso 4.</li>
+      <li>En la barra izquierda, clic en <strong>Servicios (＋)</strong> y agregá <strong>BigQuery API</strong>.</li>
+      <li>Definí quién recibe el mail: <strong>Configuración del proyecto &rarr; Propiedades de la secuencia de comandos</strong> &rarr; agregá <code>WEEKLY_EMAIL_TO</code> (y <code>ALERT_EMAIL_TO</code> si además querés el diario por mail).
+        <div class="copyable-field" style="margin-top:10px">
+          <span class="cf-text">WEEKLY_EMAIL_TO</span>
+          <button class="copy-btn-light" onclick="copyText('WEEKLY_EMAIL_TO',this)">Copiar</button>
+        </div>
+      </li>
+      <li>Corré <code>dryRunDaily</code> una vez — autorizá cuando te lo pida. Solo imprime en el log, no postea nada. Confirmá que ves tus clientes + outliers.</li>
+      <li>Corré <code>runDailySpendAlarm</code> una vez para postear en vivo a Slack, y <code>previewEmails</code> para ver el mail.</li>
+      <li>Agregá tres <strong>Triggers</strong> por tiempo (ícono de reloj):
+        <ul style="margin-top:8px">
+          <li><code>syncClientMapToBigQuery</code> — diario, antes de la reconstrucción de la tabla</li>
+          <li><code>runDailySpendAlarm</code> — diario, después de la reconstrucción de la tabla</li>
+          <li><code>runWeeklySpendSummary</code> — semanal, lunes a la mañana</li>
+        </ul>
+      </li>
+    </ol>
+
+    <div class="img-ph">
+      <span class="ph-icon">&#128247;</span>
+      <strong>Captura — editor de Apps Script, Servicios, Propiedades y Triggers</strong>
+      <span>pegá el código + activá BigQuery + cargá propiedades + agregá triggers</span>
+    </div>
+
+    <h3>El script completo</h3>
+    <p>Copialo en el editor de Apps Script. Todo se configura desde el principio del archivo o desde las Propiedades.</p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span>alarms.gs</span>
+        <button class="copy-btn" onclick="copyText(document.getElementById('gs-src').textContent.trim(),this)">Copiar</button>
+      </div>
+      <pre class="code-body tall" id="gs-display"></pre>
+    </div>
+
+    <div class="tip green">
+      <span class="tip-icon">&#10003;</span>
+      <span>Los presupuestos y la sensibilidad viven en la pestaña <code>targets</code> del Sheet — el script los lee en vivo, así que no volvés a tocar el código una vez que corre.</span>
+    </div>
+  </div>
+</div>
+
+<!-- ============ STEP 6 (OPTIONAL) ============ -->
+<div class="step fade-up">
+  <div class="step-header">
+    <div class="opt step-number">6</div>
+    <h2>Visualizá en Looker <small>opcional — un dashboard por cliente sobre la misma tabla</small></h2>
+  </div>
+  <div class="step-body">
+    <p>Como la tabla consolidada ya lleva la columna <code>client</code>, un dashboard es un agregado de cinco minutos: conectá Looker Studio a <code>consolidated_ad_performance</code> y poné un <strong>filtro de cliente</strong>. Misma fuente que la alarma, así los números siempre coinciden.</p>
+    <div class="img-ph">
+      <span class="ph-icon">&#128247;</span>
+      <strong>Captura — dashboard de Looker con filtro de cliente</strong>
+      <span>tendencias de gasto por cliente sobre la tabla consolidada</span>
+    </div>
+  </div>
+</div>
+
+<!-- ============ FLOW ============ -->
+<div class="divider"></div>
+<h2 class="section-title fade-up">El flujo completo</h2>
+<br>
+<div class="flow fade-up">
+  <div class="flow-node"><div class="flow-icon"><img src="https://storage.googleapis.com/detrics-static/public/img/meta-ads-logo.png" alt="Plataformas de anuncios"></div><span class="flow-label">Cuentas de anuncios</span></div>
+  <span class="flow-arrow">&rarr;</span>
+  <div class="flow-node"><div class="flow-icon" style="border-color: var(--blue); background: #EFF6FF;"><img src="https://detrics.io/_astro/detrics-logo.C-sT4k0h_ZovnhR.svg" alt="Detrics" style="width: 40px; height: 32px;"></div><span class="flow-label">Detrics</span></div>
+  <span class="flow-arrow">&rarr;</span>
+  <div class="flow-node"><div class="flow-icon"><img src="https://storage.googleapis.com/detrics-static/public/img/big-query-icon.png" alt="BigQuery"></div><span class="flow-label">BigQuery</span></div>
+  <span class="flow-arrow">&rarr;</span>
+  <div class="flow-node"><div class="flow-icon" style="border-color: var(--green); background: var(--green-bg);"><img src="https://storage.googleapis.com/detrics-static/public/img/slack-logo.png" alt="Slack"></div><span class="flow-label">Slack + mail</span></div>
+</div>
+
+<!-- ============ CTA ============ -->
+<div class="cta-section fade-up">
+  <h2>De reactivo a proactivo</h2>
+  <p>Detrics llena el warehouse. Vos te quedás con el cliente. Empezá gratis.</p>
+  <a href="https://detrics.io/get-started" target="_blank" rel="noopener" class="cta-button">
+    Creá tu cuenta gratis
+    <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+  </a>
+</div>
+
+</div><!-- /container -->
+
+<!-- ============ FOOTER ============ -->
+<div class="footer">
+  <p><a href="https://detrics.io" target="_blank" rel="noopener">detrics.io</a> &mdash; Automatizá tu pipeline de datos de marketing</p>
+</div>
+
+<!-- ===== Raw code sources (not rendered; used for display + copy) ===== -->
+<script type="text/plain" id="sql-src">CREATE OR REPLACE TABLE `YOUR_PROJECT_ID.YOUR_DATASET.consolidated_ad_performance` AS
+WITH unioned AS (
+  -- One SELECT per platform Detrics created. Alias every column to the SAME
+  -- names so the tables stack cleanly. Add more metrics if you want them later.
+  SELECT
+    'Meta Ads'      AS channel,
+    date,
+    account_name,
+    campaign_name,
+    spend
+  FROM `YOUR_PROJECT_ID.YOUR_DATASET.facebook_ads_your_table`
+  UNION ALL
+  SELECT
+    'TikTok Ads'    AS channel,
+    stat_time_day   AS date,
+    advertiser_name AS account_name,
+    campaign_name,
+    spend
+  FROM `YOUR_PROJECT_ID.YOUR_DATASET.tiktok_ads_your_table`
+)
+-- Add the client label from the mapping Sheet's client_map table.
+SELECT m.client, u.*
+FROM unioned u
+LEFT JOIN `YOUR_PROJECT_ID.YOUR_DATASET.client_map` m
+  ON u.account_name = m.account_name AND u.channel = m.channel;</script>
+
+<script type="text/plain" id="gs-src">/**
+ * Multi-Client Spend Alarms — Google Apps Script
+ * ==============================================
+ * Reads your consolidated multi-client ad-performance table in BigQuery,
+ * detects SPEND deviations (day-over-day, 3d-vs-3d, month-to-date vs budget,
+ * and per-campaign outliers = dying / runaway campaigns), and posts a digest
+ * to Slack + email. Daily + weekly.
+ *
+ * SETUP: replace YOUR_PROJECT_ID / YOUR_DATASET / YOUR_SHEET_ID below (or set
+ * them as Script Properties), paste your Slack webhook, enable the BigQuery
+ * advanced service, and set budgets + thresholds in the Sheet's `targets` tab.
+ */
+
+const PROPS = PropertiesService.getScriptProperties();
+function cfg(key, dflt) { return PROPS.getProperty(key) || dflt; }
+
+const BQ_PROJECT_ID   = cfg('BQ_PROJECT_ID', 'YOUR_PROJECT_ID');
+const BQ_DATASET      = cfg('BQ_DATASET', 'YOUR_DATASET');
+const BQ_TABLE        = cfg('BQ_TABLE', `${BQ_PROJECT_ID}.${BQ_DATASET}.consolidated_ad_performance`);
+const CONFIG_SHEET_ID = cfg('CONFIG_SHEET_ID', 'YOUR_SHEET_ID');
+const CAMPAIGN_FLOOR  = Number(cfg('CAMPAIGN_SPEND_FLOOR', '500'));   // ignore tiny campaigns (noise)
+const ANONYMIZE       = cfg('ANONYMIZE_CAMPAIGNS', 'false') === 'true'; // keep false to see real campaign names
+const ALERT_EMAIL_TO  = cfg('ALERT_EMAIL_TO', '');                    // DAILY alarm email; comma-separated; '' = skip
+const WEEKLY_EMAIL_TO = cfg('WEEKLY_EMAIL_TO', ALERT_EMAIL_TO);       // MONDAY summary email; defaults to ALERT_EMAIL_TO
+const MENTION_SLACK_ID= cfg('MENTION_SLACK_ID', '');                  // e.g. U0XXXXXXX -> @mentions on breach
+const CURRENCY        = cfg('CURRENCY_SYMBOL', '$');                  // prefix on money values in Slack + email
+
+// Your Slack incoming webhook (see the "Create the Slack webhook" step).
+// Paste it here, or set SLACK_WEBHOOK_URL in Script Properties.
+const SLACK_WEBHOOK_FALLBACK = 'insert.webhook.here';
+function slackWebhook() { return cfg('SLACK_WEBHOOK_URL', SLACK_WEBHOOK_FALLBACK); }
+
+// =============================================================================
+// MAIN 1 — DAILY spend alarm. Schedule with a daily time trigger (after the
+// table rebuild — e.g. mid-morning).
+// =============================================================================
+function runDailySpendAlarm() {
+  const { clients, camps, refDate, anyBreach } = computeDaily();
+  if (!clients.length) { console.log('No client rows — nothing to post.'); return; }
+
+  postToSlack(buildDailyBlocks(clients, camps, refDate, anyBreach), `Spend alarm — ${refDate}`);
+  if (ALERT_EMAIL_TO) sendEmail(ALERT_EMAIL_TO, `Spend alarm — ${refDate}${anyBreach ? ' 🚨' : ''}`,
+                                buildDailyEmail(clients, camps, refDate));
+  logRun('daily', refDate, anyBreach, clients.length, camps.length);
+  console.log(`Daily alarm posted. refDate=${refDate} breach=${anyBreach} campaigns=${camps.length}`);
+}
+
+// Shared: pull + annotate client rows with breaches (each client's own swing
+// threshold), and filter campaign outliers to that threshold. Used by the daily
+// alarm, the email preview, and the dry run.
+function computeDaily() {
+  const targets = getTargets();
+  const clients = pullClientDaily();
+  clients.forEach((c) => {
+    const t = targets[c.client] || {};
+    const thr = t.threshold != null ? t.threshold : 30;
+    c.monthly_budget = t.monthly_budget != null ? t.monthly_budget : null;
+    // MTD pace: spend-so-far vs the budget we SHOULD have spent by this day of month
+    // (monthly_budget prorated by days elapsed). Robust to a single partial day.
+    c.expected_mtd = (c.monthly_budget != null && c.days_in_month)
+      ? c.monthly_budget * c.days_elapsed / c.days_in_month : null;
+    c.pace_pct = c.expected_mtd ? pct(c.spend_mtd - c.expected_mtd, c.expected_mtd) : null;
+    c.breaches = [];
+    if (Math.abs(c.dod_pct) >= thr) c.breaches.push(`DoD ${signed(c.dod_pct)}`);
+    if (Math.abs(c.l3_vs_p3_pct) >= thr) c.breaches.push(`3d-vs-3d ${signed(c.l3_vs_p3_pct)}`);
+    if (c.pace_pct != null && Math.abs(c.pace_pct) >= thr) c.breaches.push(`MTD pace ${signed(c.pace_pct)}`);
+  });
+  const camps = pullCampaignOutliers().filter((c) => {
+    const thr = (targets[c.client] && targets[c.client].threshold != null) ? targets[c.client].threshold : 30;
+    return Math.abs(c.pct) >= thr;
+  });
+  const anyBreach = clients.some((c) => c.breaches.length) || camps.length > 0;
+  return { clients, camps, refDate: clients.length ? clients[0].ref_date : null, anyBreach };
+}
+
+// =============================================================================
+// MAIN 2 — WEEKLY summary. Schedule with a Monday time trigger.
+// last 7 days vs prior 7 days, per client, + the week's biggest campaign movers.
+// =============================================================================
+function runWeeklySpendSummary() {
+  const clients = pullClientWeekly();
+  const movers = pullCampaignWeeklyMovers();
+  if (!clients.length) { console.log('No client rows for weekly.'); return; }
+  const refDate = clients[0].ref_date;
+  postToSlack(buildWeeklyBlocks(clients, movers, refDate), `Weekly spend summary — week ending ${refDate}`);
+  if (WEEKLY_EMAIL_TO) sendEmail(WEEKLY_EMAIL_TO, `Weekly spend summary — week ending ${refDate}`,
+                                 buildWeeklyEmail(clients, movers, refDate));
+  logRun('weekly', refDate, false, clients.length, movers.length);
+  console.log(`Weekly summary posted. refDate=${refDate}`);
+}
+
+// =============================================================================
+// MAIN 3 — sync the Sheet's client_map tab -> BigQuery client_map table so
+// edits to the mapping flow into the daily rebuild. Schedule BEFORE the table
+// rebuild. Safe to run anytime.
+// =============================================================================
+function syncClientMapToBigQuery() {
+  const rows = readTab('client_map');            // [{channel, account_name, client}]
+  if (!rows.length) { console.log('client_map empty — skipping sync.'); return; }
+  const values = rows.map((r) =>
+    `SELECT ${sqlStr(r.channel)} AS channel, ${sqlStr(r.account_name)} AS account_name, ${sqlStr(r.client)} AS client`
+  ).join('\nUNION ALL ');
+  const sql = `CREATE OR REPLACE TABLE \`${BQ_PROJECT_ID}.${BQ_DATASET}.client_map\` AS\n${values}`;
+  bqRun(sql);
+  console.log(`Synced ${rows.length} client_map rows to BigQuery.`);
+}
+
+// =============================================================================
+// BigQuery — SELECT queries (return parsed rows) + DDL runner
+// =============================================================================
+function pullClientDaily() {
+  // 40-day window covers the DoD/3d windows AND full month-to-date.
+  const sql = `
+    WITH ref AS (SELECT MAX(date) AS d FROM \`${BQ_TABLE}\`),
+    daily AS (
+      SELECT client, date, SUM(spend) AS spend
+      FROM \`${BQ_TABLE}\`
+      WHERE client IS NOT NULL AND date >= DATE_SUB((SELECT d FROM ref), INTERVAL 40 DAY)
+      GROUP BY client, date
+    )
+    SELECT
+      client,
+      CAST((SELECT d FROM ref) AS STRING) AS ref_date,
+      SUM(IF(date=(SELECT d FROM ref), spend, 0)) AS spend_latest,
+      SUM(IF(date=DATE_SUB((SELECT d FROM ref),INTERVAL 1 DAY), spend, 0)) AS spend_prev,
+      SUM(IF(date BETWEEN DATE_SUB((SELECT d FROM ref),INTERVAL 2 DAY) AND (SELECT d FROM ref), spend, 0)) AS spend_l3,
+      SUM(IF(date BETWEEN DATE_SUB((SELECT d FROM ref),INTERVAL 5 DAY) AND DATE_SUB((SELECT d FROM ref),INTERVAL 3 DAY), spend, 0)) AS spend_p3,
+      SUM(IF(date >= DATE_TRUNC((SELECT d FROM ref), MONTH), spend, 0)) AS spend_mtd,
+      EXTRACT(DAY FROM (SELECT d FROM ref)) AS days_elapsed,
+      EXTRACT(DAY FROM LAST_DAY((SELECT d FROM ref))) AS days_in_month
+    FROM daily GROUP BY client ORDER BY client`;
+  return bqQuery(sql).map((c) => {
+    const o = {
+      client: c[0], ref_date: c[1],
+      spend_latest: num(c[2]), spend_prev: num(c[3]),
+      spend_l3: num(c[4]), spend_p3: num(c[5]),
+      spend_mtd: num(c[6]), days_elapsed: num(c[7]), days_in_month: num(c[8]),
+    };
+    o.dod_pct = pct(o.spend_latest - o.spend_prev, o.spend_prev);
+    o.l3_vs_p3_pct = pct(o.spend_l3 - o.spend_p3, o.spend_p3);
+    return o;
+  });
+}
+
+function pullCampaignOutliers() {
+  const sql = `
+    WITH ref AS (SELECT MAX(date) AS d FROM \`${BQ_TABLE}\`),
+    camp AS (
+      SELECT client, channel, campaign_name,
+        SUM(IF(date BETWEEN DATE_SUB((SELECT d FROM ref),INTERVAL 2 DAY) AND (SELECT d FROM ref), spend,0)) AS l3,
+        SUM(IF(date BETWEEN DATE_SUB((SELECT d FROM ref),INTERVAL 5 DAY) AND DATE_SUB((SELECT d FROM ref),INTERVAL 3 DAY), spend,0)) AS p3
+      FROM \`${BQ_TABLE}\`
+      WHERE client IS NOT NULL AND date >= DATE_SUB((SELECT d FROM ref), INTERVAL 5 DAY)
+      GROUP BY client, channel, campaign_name
+    )
+    SELECT client, channel, campaign_name, l3, p3
+    FROM camp
+    WHERE (p3 >= ${CAMPAIGN_FLOOR} OR l3 >= ${CAMPAIGN_FLOOR})
+    ORDER BY client, SAFE_DIVIDE(l3-p3,p3)`;
+  return bqQuery(sql).map((c) => {
+    const l3 = num(c[3]), p3 = num(c[4]);
+    return { client: c[0], channel: c[1], campaign_name: c[2], l3, p3,
+             pct: p3 > 0 ? pct(l3 - p3, p3) : (l3 > 0 ? 100 : 0) };
+  });
+}
+
+function pullClientWeekly() {
+  const sql = `
+    WITH ref AS (SELECT MAX(date) AS d FROM \`${BQ_TABLE}\`)
+    SELECT client, CAST((SELECT d FROM ref) AS STRING) AS ref_date,
+      SUM(IF(date BETWEEN DATE_SUB((SELECT d FROM ref),INTERVAL 6 DAY) AND (SELECT d FROM ref), spend,0)) AS last7,
+      SUM(IF(date BETWEEN DATE_SUB((SELECT d FROM ref),INTERVAL 13 DAY) AND DATE_SUB((SELECT d FROM ref),INTERVAL 7 DAY), spend,0)) AS prev7
+    FROM \`${BQ_TABLE}\`
+    WHERE client IS NOT NULL AND date >= DATE_SUB((SELECT d FROM ref), INTERVAL 13 DAY)
+    GROUP BY client ORDER BY client`;
+  return bqQuery(sql).map((c) => {
+    const last7 = num(c[2]), prev7 = num(c[3]);
+    return { client: c[0], ref_date: c[1], last7, prev7, wow_pct: pct(last7 - prev7, prev7) };
+  });
+}
+
+function pullCampaignWeeklyMovers() {
+  const sql = `
+    WITH ref AS (SELECT MAX(date) AS d FROM \`${BQ_TABLE}\`),
+    camp AS (
+      SELECT client, channel, campaign_name,
+        SUM(IF(date BETWEEN DATE_SUB((SELECT d FROM ref),INTERVAL 6 DAY) AND (SELECT d FROM ref), spend,0)) AS last7,
+        SUM(IF(date BETWEEN DATE_SUB((SELECT d FROM ref),INTERVAL 13 DAY) AND DATE_SUB((SELECT d FROM ref),INTERVAL 7 DAY), spend,0)) AS prev7
+      FROM \`${BQ_TABLE}\`
+      WHERE client IS NOT NULL AND date >= DATE_SUB((SELECT d FROM ref), INTERVAL 13 DAY)
+      GROUP BY client, channel, campaign_name
+    )
+    SELECT client, channel, campaign_name, last7, prev7
+    FROM camp WHERE (prev7 >= ${CAMPAIGN_FLOOR} OR last7 >= ${CAMPAIGN_FLOOR})
+    ORDER BY ABS(SAFE_DIVIDE(last7-prev7,prev7)) DESC LIMIT 8`;
+  return bqQuery(sql).map((c) => {
+    const last7 = num(c[3]), prev7 = num(c[4]);
+    return { client: c[0], channel: c[1], campaign_name: c[2], last7, prev7,
+             pct: prev7 > 0 ? pct(last7 - prev7, prev7) : (last7 > 0 ? 100 : 0) };
+  });
+}
+
+// Low-level: run a SELECT, return array of r.f value arrays.
+function bqQuery(sql) {
+  let job = BigQuery.Jobs.query({ query: sql, useLegacySql: false }, BQ_PROJECT_ID);
+  while (!job.jobComplete) {
+    Utilities.sleep(500);
+    job = BigQuery.Jobs.getQueryResults(BQ_PROJECT_ID, job.jobReference.jobId);
+  }
+  return (job.rows || []).map((r) => r.f.map((x) => x.v));
+}
+
+// Low-level: run a DDL/DML statement (no rows expected).
+function bqRun(sql) {
+  let job = BigQuery.Jobs.query({ query: sql, useLegacySql: false }, BQ_PROJECT_ID);
+  while (!job.jobComplete) {
+    Utilities.sleep(500);
+    job = BigQuery.Jobs.getQueryResults(BQ_PROJECT_ID, job.jobReference.jobId);
+  }
+}
+
+// =============================================================================
+// Config Sheet I/O
+// =============================================================================
+function readTab(name) {
+  const ss = SpreadsheetApp.openById(CONFIG_SHEET_ID);
+  const sh = ss.getSheetByName(name);
+  if (!sh) throw new Error(`Config sheet tab "${name}" not found`);
+  const data = sh.getDataRange().getValues();
+  if (data.length < 2) return [];
+  const head = data[0].map((h) => String(h).trim());
+  return data.slice(1).filter((row) => row.some((v) => v !== '' && v != null)).map((row) => {
+    const o = {}; head.forEach((h, i) => { o[h] = row[i]; }); return o;
+  });
+}
+
+function getTargets() {
+  const out = {};
+  readTab('targets').forEach((r) => {
+    out[String(r.client).trim()] = {
+      daily_budget: r.daily_budget === '' || r.daily_budget == null ? null : Number(r.daily_budget),
+      monthly_budget: r.monthly_budget === '' ? null : Number(r.monthly_budget),
+      threshold: r.swing_threshold_pct === '' || r.swing_threshold_pct == null ? 30 : Number(r.swing_threshold_pct),
+      aov: r.aov === '' || r.aov == null ? null : Number(r.aov),
+    };
+  });
+  return out;
+}
+
+// Append one row to the `log` tab (audit trail; created on first run).
+function logRun(kind, refDate, breach, nClients, nCamps) {
+  const ss = SpreadsheetApp.openById(CONFIG_SHEET_ID);
+  let sh = ss.getSheetByName('log');
+  if (!sh) {
+    sh = ss.insertSheet('log');
+    sh.getRange(1, 1, 1, 6).setValues([['run_at', 'kind', 'ref_date', 'breach', 'clients', 'campaigns_flagged']])
+      .setFontWeight('bold');
+    sh.setFrozenRows(1);
+  }
+  sh.appendRow([new Date(), kind, refDate, breach ? 'yes' : 'no', nClients, nCamps]);
+}
+
+// =============================================================================
+// Presentation — Slack Block Kit
+// =============================================================================
+function buildDailyBlocks(clients, camps, refDate, anyBreach) {
+  const mention = (anyBreach && MENTION_SLACK_ID) ? ` <@${MENTION_SLACK_ID}>` : '';
+  const blocks = [
+    { type: 'header', text: { type: 'plain_text', text: `${anyBreach ? '🚨' : '📊'} Spend alarm — ${refDate}`, emoji: true } },
+  ];
+  clients.forEach((c) => {
+    const flag = c.breaches.length ? `  🚨 ${c.breaches.join(' · ')}` : '';
+    const mtd = c.expected_mtd != null
+      ? `MTD ${fmt(c.spend_mtd)} / ${fmt(c.monthly_budget)} budget · pace ${signed(c.pace_pct)} ${arrow(c.pace_pct)}`
+      : `MTD ${fmt(c.spend_mtd)}`;
+    blocks.push({ type: 'section', text: { type: 'mrkdwn',
+      text: `*${c.client}* — yesterday ${fmt(c.spend_latest)}  ·  DoD ${signed(c.dod_pct)} ${arrow(c.dod_pct)}  ·  3d-vs-3d ${signed(c.l3_vs_p3_pct)} ${arrow(c.l3_vs_p3_pct)}\n`
+          + `${mtd}${flag}` } });
+  });
+  if (camps.length) {
+    blocks.push({ type: 'divider' });
+    blocks.push({ type: 'section', text: { type: 'mrkdwn', text: `*Campaign outliers* (3d vs prior 3d):` } });
+    camps.slice(0, 12).forEach((c) => {
+      const dead = c.l3 === 0 ? '  💀 stopped' : (c.pct >= 100 ? '  ⚡ spike' : '');
+      blocks.push({ type: 'section', text: { type: 'mrkdwn',
+        text: `${arrow(c.pct)} *${c.client}* · ${c.channel} · ${maskCampaign(c.campaign_name)}\n`
+            + `${fmt(c.p3)} → ${fmt(c.l3)}  (${signed(c.pct)})${dead}` } });
+    });
+    if (camps.length > 12) blocks.push({ type: 'context',
+      elements: [{ type: 'mrkdwn', text: `…and ${camps.length - 12} more` }] });
+  } else {
+    blocks.push({ type: 'context', elements: [{ type: 'mrkdwn', text: 'No campaign outliers today.' }] });
+  }
+  if (mention) blocks.push({ type: 'context', elements: [{ type: 'mrkdwn', text: `Deviations detected${mention}` }] });
+  return blocks;
+}
+
+function buildWeeklyBlocks(clients, movers, refDate) {
+  const blocks = [
+    { type: 'header', text: { type: 'plain_text', text: `🗓️ Weekly spend — week ending ${refDate}`, emoji: true } },
+  ];
+  clients.forEach((c) => {
+    blocks.push({ type: 'section', text: { type: 'mrkdwn',
+      text: `*${c.client}* — last 7d ${fmt(c.last7)}  ·  prior 7d ${fmt(c.prev7)}  ·  WoW ${signed(c.wow_pct)} ${arrow(c.wow_pct)}` } });
+  });
+  if (movers.length) {
+    blocks.push({ type: 'divider' });
+    blocks.push({ type: 'section', text: { type: 'mrkdwn', text: `*Biggest campaign movers (WoW):*` } });
+    movers.forEach((c) => {
+      blocks.push({ type: 'section', text: { type: 'mrkdwn',
+        text: `${arrow(c.pct)} *${c.client}* · ${c.channel} · ${maskCampaign(c.campaign_name)} — ${fmt(c.prev7)} → ${fmt(c.last7)} (${signed(c.pct)})` } });
+    });
+  }
+  return blocks;
+}
+
+function postToSlack(blocks, fallbackText) {
+  const res = UrlFetchApp.fetch(slackWebhook(), {
+    method: 'post', contentType: 'application/json',
+    payload: JSON.stringify({ blocks, text: fallbackText }), muteHttpExceptions: true,
+  });
+  if (res.getResponseCode() !== 200) throw new Error(`Slack post failed (${res.getResponseCode()}): ${res.getContentText()}`);
+}
+
+// =============================================================================
+// Presentation — Email (HTML)
+// =============================================================================
+function buildDailyEmail(clients, camps, refDate) {
+  let h = `<h2>Spend alarm — ${refDate}</h2>`;
+  h += `<table cellpadding="6" style="border-collapse:collapse;font-family:Arial,sans-serif;font-size:13px">
+        <tr style="background:#0F172A;color:#fff"><th align="left">Client</th><th align="right">Yesterday</th>
+        <th align="right">DoD</th><th align="right">3d-vs-3d</th><th align="right">MTD</th>
+        <th align="right">Monthly budget</th><th align="right">Pace</th><th align="left">Flags</th></tr>`;
+  clients.forEach((c) => {
+    h += `<tr style="border-bottom:1px solid #e5e7eb"><td>${c.client}</td>
+          <td align="right">${fmt(c.spend_latest)}</td>
+          <td align="right">${signed(c.dod_pct)}</td>
+          <td align="right">${signed(c.l3_vs_p3_pct)}</td>
+          <td align="right">${fmt(c.spend_mtd)}</td>
+          <td align="right">${c.monthly_budget != null ? fmt(c.monthly_budget) : '—'}</td>
+          <td align="right">${c.pace_pct != null ? signed(c.pace_pct) : '—'}</td>
+          <td style="color:#b91c1c">${c.breaches.join(' · ')}</td></tr>`;
+  });
+  h += `</table>`;
+  if (camps.length) {
+    h += `<h3>Campaign outliers (3d vs prior 3d)</h3><ul style="font-family:Arial,sans-serif;font-size:13px">`;
+    camps.slice(0, 20).forEach((c) => {
+      h += `<li><b>${c.client}</b> · ${c.channel} · ${maskCampaign(c.campaign_name)} — ${fmt(c.p3)} → ${fmt(c.l3)} (<b>${signed(c.pct)}</b>)${c.l3 === 0 ? ' 💀' : ''}</li>`;
+    });
+    h += `</ul>`;
+  }
+  return h;
+}
+
+function buildWeeklyEmail(clients, movers, refDate) {
+  let h = `<h2>Weekly spend summary — week ending ${refDate}</h2>`;
+  h += `<table cellpadding="6" style="border-collapse:collapse;font-family:Arial,sans-serif;font-size:13px">
+        <tr style="background:#0F172A;color:#fff"><th align="left">Client</th><th align="right">Last 7d</th>
+        <th align="right">Prior 7d</th><th align="right">WoW</th></tr>`;
+  clients.forEach((c) => {
+    h += `<tr style="border-bottom:1px solid #e5e7eb"><td>${c.client}</td><td align="right">${fmt(c.last7)}</td>
+          <td align="right">${fmt(c.prev7)}</td><td align="right">${signed(c.wow_pct)}</td></tr>`;
+  });
+  h += `</table>`;
+  if (movers.length) {
+    h += `<h3>Biggest campaign movers (WoW)</h3><ul style="font-family:Arial,sans-serif;font-size:13px">`;
+    movers.forEach((c) => { h += `<li><b>${c.client}</b> · ${c.channel} · ${maskCampaign(c.campaign_name)} — ${fmt(c.prev7)} → ${fmt(c.last7)} (<b>${signed(c.pct)}</b>)</li>`; });
+    h += `</ul>`;
+  }
+  return h;
+}
+
+function sendEmail(to, subject, htmlBody) {
+  MailApp.sendEmail({ to, subject: `[Alarms] ${subject}`, htmlBody });
+}
+
+// =============================================================================
+// Helpers
+// =============================================================================
+function num(v) { return v == null ? 0 : Number(v); }
+function pct(numer, denom) { return denom ? Math.round((numer / denom) * 1000) / 10 : 0; }
+function signed(p) { return (p > 0 ? '+' : '') + (p == null ? '—' : p.toFixed(1) + '%'); }
+// Green = up, red = down, white = flat. (Direction by colour; the signed % shows magnitude.)
+function arrow(p) { return p > 0 ? '🟢' : p < 0 ? '🔴' : '⚪'; }
+function fmt(n) { return CURRENCY + Number(Math.round(n)).toLocaleString('en-US'); }
+function sqlStr(s) { return `'${String(s == null ? '' : s).replace(/'/g, "\\'")}'`; }
+
+// Optional: mask campaign names to stable pseudonyms (leave ANONYMIZE=false to
+// see real names — a real agency wants the real name).
+function maskCampaign(name) {
+  if (!ANONYMIZE) return name;
+  const bytes = Utilities.computeDigest(Utilities.DigestAlgorithm.MD5, String(name));
+  const hex = bytes.slice(0, 2).map((b) => ('0' + (b & 0xff).toString(16)).slice(-2)).join('');
+  return `Campaign ${hex}`;
+}
+
+// =============================================================================
+// Dry-run helpers (run from the editor; log only, no Slack/email/writes)
+// =============================================================================
+function dryRunDaily() {
+  const { clients, camps } = computeDaily();
+  clients.forEach((c) => console.log(`${c.client}: spend ${fmt(c.spend_latest)}  DoD ${signed(c.dod_pct)}  3dv3d ${signed(c.l3_vs_p3_pct)}`));
+  console.log(`--- ${camps.length} campaign outliers ---`);
+  camps.slice(0, 15).forEach((c) => console.log(`  ${c.client} ${c.channel} ${maskCampaign(c.campaign_name)}  ${fmt(c.p3)}→${fmt(c.l3)} ${signed(c.pct)}`));
+}
+
+// Email-only preview (NO Slack post): sends the daily + weekly email to
+// WEEKLY_EMAIL_TO so you can eyeball the output. Run from the editor.
+function previewEmails() {
+  const to = WEEKLY_EMAIL_TO || ALERT_EMAIL_TO;
+  if (!to) { console.log('Set WEEKLY_EMAIL_TO (or ALERT_EMAIL_TO) first.'); return; }
+  const { clients, camps, refDate } = computeDaily();
+  if (clients.length) sendEmail(to, `PREVIEW · Daily spend alarm — ${refDate}`, buildDailyEmail(clients, camps, refDate));
+  const wc = pullClientWeekly();
+  const movers = pullCampaignWeeklyMovers();
+  if (wc.length) sendEmail(to, `PREVIEW · Weekly spend summary — week ending ${wc[0].ref_date}`, buildWeeklyEmail(wc, movers, wc[0].ref_date));
+  console.log(`Sent preview email(s) to ${to}`);
+}
+
+function dryRunWeekly() {
+  pullClientWeekly().forEach((c) => console.log(`${c.client}: last7 ${fmt(c.last7)} prev7 ${fmt(c.prev7)} WoW ${signed(c.wow_pct)}`));
+  console.log('--- movers ---');
+  pullCampaignWeeklyMovers().forEach((c) => console.log(`  ${c.client} ${maskCampaign(c.campaign_name)} ${signed(c.pct)}`));
+}</script>
+
+<!-- Scripts -->
+<script>
+  document.getElementById('sql-display').textContent = document.getElementById('sql-src').textContent.trim();
+  document.getElementById('gs-display').textContent = document.getElementById('gs-src').textContent.trim();
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 80);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+  function openLightbox(el) {
+    const img = el.querySelector('img');
+    if (!img) return;
+    const lb = document.getElementById('lightbox');
+    document.getElementById('lightbox-img').src = img.src;
+    lb.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('active');
+    document.body.style.overflow = '';
+  }
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLightbox(); });
+
+  function copyText(text, btn) {
+    navigator.clipboard.writeText(text).then(() => {
+      const orig = btn.textContent;
+      btn.textContent = '¡Copiado!';
+      btn.style.color = '#10B981';
+      setTimeout(() => { btn.textContent = orig; btn.style.color = ''; }, 2000);
+    });
+  }
+</script>
+
+</body>
+</html>
