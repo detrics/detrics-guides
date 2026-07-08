@@ -143,6 +143,15 @@
   .flow-node .flow-label { font-size: 12px; color: var(--gray-500); font-weight: 600; }
   .flow-arrow { color: var(--gray-300); font-size: 20px; font-weight: 300; height: 64px; display: flex; align-items: center; padding: 0 12px; }
 
+  /* Social proof logo strip */
+  .trust { text-align: center; padding: 10px 0; }
+  .trust h3 { font-size: 18px; font-weight: 700; color: var(--gray-600); margin-bottom: 22px; letter-spacing: -0.3px; }
+  .trust h3 b { color: var(--blue); }
+  .trust-logos { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 26px 34px; max-width: 720px; margin: 0 auto; }
+  .trust-logos img { height: 26px; width: auto; max-width: 120px; object-fit: contain; filter: grayscale(1); opacity: 0.6; transition: filter 0.2s, opacity 0.2s; }
+  .trust-logos img:hover { filter: grayscale(0); opacity: 1; }
+  @media (max-width: 640px) { .trust-logos { gap: 18px 22px; } .trust-logos img { height: 20px; } }
+
   /* Smaller inline screenshots (click to expand full-size via lightbox) */
   .screenshot { max-width: 460px; margin-left: auto; margin-right: auto; }
   .screenshot img { max-height: 320px; object-fit: contain; }
@@ -181,7 +190,7 @@
 <!-- Sticky book-a-demo bar (slides in after Step 1) -->
 <div class="sticky-cta" id="stickyCta">
   <img src="https://detrics.io/_astro/detrics-logo.C-sT4k0h_ZovnhR.svg" alt="Detrics" style="height:22px; width:auto;">
-  <a class="sc-btn" href="https://calendar.app.google/2qQTZiamGmUUALNn6" target="_blank" rel="noopener">Agendá una demo</a>
+  <a class="sc-btn" href="https://detrics.io/demo/book/" target="_blank" rel="noopener">Agendá una demo</a>
 </div>
 
 <!-- Lightbox overlay -->
@@ -239,6 +248,31 @@
 </div>
 
 <div class="divider"></div>
+
+<!-- ============ TRUST ============ -->
+<div class="trust fade-up">
+  <h3><b>+1.000 agencias</b> ya confían en Detrics</h3>
+  <div class="trust-logos">
+    <img src="../images/brands/abn.svg" alt="ABN">
+    <img src="../images/brands/ad_astra.svg" alt="Ad Astra">
+    <img src="../images/brands/belo.svg" alt="Belo">
+    <img src="../images/brands/blend.svg" alt="Blend">
+    <img src="../images/brands/calm.svg" alt="Calm">
+    <img src="../images/brands/despegar.svg" alt="Despegar">
+    <img src="../images/brands/elevva.svg" alt="Elevva">
+    <img src="../images/brands/estropical.svg" alt="Estropical">
+    <img src="../images/brands/fanatiz.svg" alt="Fanatiz">
+    <img src="../images/brands/frubis.svg" alt="Frubis">
+    <img src="../images/brands/fz_sports.svg" alt="FZ Sports">
+    <img src="../images/brands/genex_mkt.svg" alt="Genex">
+    <img src="../images/brands/hyppo.svg" alt="Hyppo">
+    <img src="../images/brands/johnfoos.svg" alt="John Foos">
+    <img src="../images/brands/marketify.svg" alt="Marketify">
+    <img src="../images/brands/snippet.svg" alt="Snippet">
+    <img src="../images/brands/turismo_city.svg" alt="Turismo City">
+    <img src="../images/brands/uke.svg" alt="Uke">
+  </div>
+</div>
 
 <!-- ============ STEP 1 ============ -->
 <div class="step fade-up">
@@ -556,7 +590,7 @@
       Creá tu cuenta gratis
       <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
     </a>
-    <a href="https://calendar.app.google/2qQTZiamGmUUALNn6" target="_blank" rel="noopener" class="cta-button" style="background:transparent; color:var(--blue); border:1.5px solid var(--blue); box-shadow:none;">
+    <a href="https://detrics.io/demo/book/" target="_blank" rel="noopener" class="cta-button" style="background:transparent; color:var(--blue); border:1.5px solid var(--blue); box-shadow:none;">
       Agendá una demo
     </a>
   </div>
