@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Detrics: Build a consolidated marketing table in BigQuery</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="apple-touch-icon" href="/favicon.png">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue: #2563EB; --blue-dark: #1D4ED8; --blue-light: #3B82F6; --blue-glow: rgba(37, 99, 235, 0.25);
+    --ink: #0F172A; --surface: #FFFFFF;
+    --gray-50: #F8FAFC; --gray-100: #F1F5F9; --gray-200: #E2E8F0; --gray-300: #CBD5E1;
+    --gray-400: #94A3B8; --gray-500: #64748B; --gray-600: #475569; --gray-700: #334155;
+    --green: #10B981; --green-bg: #ECFDF5; --amber: #F59E0B; --amber-bg: #FFFBEB;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', -apple-system, sans-serif; color: var(--ink); background: var(--gray-50); line-height: 1.6; -webkit-font-smoothing: antialiased; }
+  .fade-up { opacity: 0; transform: translateY(24px); transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1), transform 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
+  .fade-up.visible { opacity: 1; transform: translateY(0); }
+
+  .hero { background: linear-gradient(160deg, #0B1120 0%, #0F172A 40%, #131C2E 100%); color: white; padding: 80px 40px 60px; text-align: center; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; top: -40%; left: -20%; width: 140%; height: 180%; background: radial-gradient(ellipse 600px 400px at 25% 30%, rgba(37, 99, 235, 0.18) 0%, transparent 70%), radial-gradient(ellipse 500px 500px at 75% 70%, rgba(59, 130, 246, 0.1) 0%, transparent 60%), radial-gradient(ellipse 300px 300px at 50% 50%, rgba(16, 185, 129, 0.06) 0%, transparent 50%); animation: heroPulse 10s ease-in-out infinite alternate; }
+  @keyframes heroPulse { 0% { opacity: 0.5; transform: scale(1); } 100% { opacity: 1; transform: scale(1.05); } }
+  .hero::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(37, 99, 235, 0.3), transparent); }
+  .hero-content { position: relative; z-index: 1; max-width: 720px; margin: 0 auto; }
+  .hero-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(37, 99, 235, 0.12); border: 1px solid rgba(37, 99, 235, 0.25); border-radius: 100px; padding: 6px 16px; font-size: 12px; font-weight: 600; color: #93C5FD; margin-bottom: 28px; letter-spacing: 1px; text-transform: uppercase; backdrop-filter: blur(8px); animation: badgeFade 1s ease-out; }
+  @keyframes badgeFade { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+  .hero h1 { font-size: 44px; font-weight: 800; line-height: 1.12; margin-bottom: 18px; letter-spacing: -1px; animation: heroTitle 0.8s ease-out 0.1s both; }
+  @keyframes heroTitle { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  .hero h1 span { background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 50%, #2563EB 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .hero p { font-size: 17px; color: #94A3B8; max-width: 560px; margin: 0 auto 36px; line-height: 1.75; animation: heroTitle 0.8s ease-out 0.25s both; }
+  .hero-logos { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 32px; flex-wrap: wrap; animation: heroTitle 0.8s ease-out 0.4s both; }
+  .hero-logos img { width: 40px; height: 40px; border-radius: 10px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); padding: 6px; object-fit: contain; transition: transform 0.3s, box-shadow 0.3s; }
+  .hero-logos img:hover { transform: scale(1.1); box-shadow: 0 0 20px var(--blue-glow); }
+  .hero-logos .plus { color: var(--gray-500); font-size: 18px; font-weight: 300; }
+  .hero-time { display: inline-flex; align-items: center; gap: 8px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 100px; padding: 8px 20px; font-size: 13px; color: #6EE7B7; font-weight: 500; backdrop-filter: blur(8px); animation: heroTitle 0.8s ease-out 0.55s both; margin-top: 28px; }
+
+  .container { max-width: 760px; margin: 0 auto; padding: 0 24px; }
+  .intro { padding: 56px 0 20px; text-align: center; }
+  .intro p { font-size: 17px; color: var(--gray-600); max-width: 620px; margin: 0 auto; line-height: 1.8; }
+
+  .step { background: var(--surface); border: 1px solid var(--gray-200); border-radius: 16px; margin-bottom: 32px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.02); transition: box-shadow 0.3s, border-color 0.3s; }
+  .step:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.06), 0 12px 32px rgba(0,0,0,0.04); border-color: var(--gray-300); }
+  .step-header { display: flex; align-items: center; gap: 16px; padding: 28px 32px; border-bottom: 1px solid var(--gray-100); background: linear-gradient(180deg, var(--gray-50) 0%, var(--surface) 100%); }
+  .step-number { width: 42px; height: 42px; border-radius: 12px; background: linear-gradient(135deg, var(--blue) 0%, var(--blue-dark) 100%); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 18px; flex-shrink: 0; box-shadow: 0 2px 8px var(--blue-glow); }
+  .step-header .opt { width: 42px; height: 42px; border-radius: 12px; background: linear-gradient(135deg, var(--gray-400), var(--gray-500)); }
+  .step-header h2 { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
+  .step-header h2 small { display: block; font-size: 13px; font-weight: 400; color: var(--gray-400); margin-top: 3px; }
+  .step-body { padding: 28px 32px; }
+  .step-body p { font-size: 15px; color: var(--gray-600); margin-bottom: 16px; line-height: 1.7; }
+  .step-body ul { list-style: none; margin-bottom: 20px; }
+  .step-body ul li { position: relative; padding-left: 28px; margin-bottom: 10px; font-size: 15px; color: var(--gray-600); line-height: 1.6; }
+  .step-body ul li::before { content: '\2192'; position: absolute; left: 0; color: var(--blue); font-weight: 600; }
+  .step-body h3 { font-size: 16px; margin: 24px 0 12px; color: var(--ink); }
+
+  .url-box { display: flex; align-items: center; gap: 12px; background: linear-gradient(135deg, #EFF6FF 0%, var(--gray-50) 100%); border: 1px solid rgba(37, 99, 235, 0.15); border-radius: 10px; padding: 12px 16px; margin: 16px 0; transition: border-color 0.2s, box-shadow 0.2s; }
+  .url-box:hover { border-color: rgba(37, 99, 235, 0.35); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.06); }
+  .url-box .url-icon { width: 28px; height: 28px; background: var(--blue); border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .url-box .url-icon svg { width: 14px; height: 14px; fill: white; }
+  .url-box a { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--blue); text-decoration: none; word-break: break-all; font-weight: 500; }
+  .url-box a:hover { text-decoration: underline; }
+
+  .screenshot { border: 1px solid var(--gray-200); border-radius: 12px; overflow: hidden; margin: 20px 0; background: var(--gray-50); cursor: pointer; transition: box-shadow 0.3s; position: relative; }
+  .screenshot:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+  .screenshot::after { content: 'Click to enlarge'; position: absolute; bottom: 0; left: 0; right: 0; padding: 6px; background: linear-gradient(transparent, rgba(0,0,0,0.5)); color: white; font-size: 11px; text-align: center; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+  .screenshot:hover::after { opacity: 1; }
+  .screenshot img { width: 100%; display: block; object-fit: contain; }
+  .screenshot-caption { padding: 10px 16px; font-size: 12px; color: var(--gray-400); text-align: center; border-top: 1px solid var(--gray-100); font-style: italic; background: var(--surface); }
+
+  /* Image placeholder, replace with a .screenshot block when the screenshot is ready */
+  .img-ph { border: 2px dashed var(--gray-300); border-radius: 12px; padding: 30px 20px; margin: 20px 0; text-align: center; background: repeating-linear-gradient(45deg, var(--gray-50), var(--gray-50) 12px, #F3F6FA 12px, #F3F6FA 24px); color: var(--gray-500); }
+  .img-ph .ph-icon { font-size: 26px; display: block; margin-bottom: 6px; opacity: 0.6; }
+  .img-ph strong { display: block; color: var(--gray-600); font-size: 14px; margin-bottom: 2px; }
+  .img-ph span { font-size: 12.5px; color: var(--gray-400); }
+
+  .lightbox { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 9999; cursor: zoom-out; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s; }
+  .lightbox.active { opacity: 1; visibility: visible; }
+  .lightbox img { max-width: 92%; max-height: 90vh; border-radius: 12px; box-shadow: 0 8px 40px rgba(0,0,0,0.4); transform: scale(0.95); transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1); }
+  .lightbox.active img { transform: scale(1); }
+  .lightbox-close { position: absolute; top: 24px; right: 28px; color: white; font-size: 32px; font-weight: 300; cursor: pointer; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(255,255,255,0.1); transition: background 0.2s; }
+  .lightbox-close:hover { background: rgba(255,255,255,0.2); }
+
+  .platform-chips { display: flex; gap: 10px; flex-wrap: wrap; margin: 16px 0; }
+  .chip { display: inline-flex; align-items: center; gap: 8px; background: var(--surface); border: 1px solid var(--gray-200); border-radius: 10px; padding: 10px 16px; font-size: 14px; font-weight: 500; color: var(--gray-700); transition: border-color 0.2s, box-shadow 0.2s; }
+  .chip:hover { border-color: var(--blue-light); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.06); }
+  .chip img { width: 22px; height: 22px; border-radius: 4px; object-fit: contain; }
+
+  .code-block { background: #0B1120; border-radius: 14px; overflow: hidden; margin: 20px 0; border: 1px solid rgba(255,255,255,0.06); box-shadow: 0 4px 24px rgba(0,0,0,0.15); }
+  .code-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; background: rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .code-header span { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--gray-500); }
+  .copy-btn { font-size: 11px; color: var(--gray-400); background: rgba(255,255,255,0.06); padding: 4px 12px; border-radius: 6px; cursor: pointer; border: 1px solid rgba(255,255,255,0.08); font-family: 'DM Mono', monospace; transition: all 0.2s; white-space: nowrap; }
+  .copy-btn:hover { background: rgba(37, 99, 235, 0.2); border-color: rgba(37, 99, 235, 0.3); color: #93C5FD; }
+  .copy-btn-light { font-size: 11px; color: var(--gray-400); background: var(--gray-100); padding: 3px 10px; border-radius: 6px; cursor: pointer; border: 1px solid var(--gray-200); font-family: 'DM Mono', monospace; transition: all 0.2s; white-space: nowrap; flex-shrink: 0; }
+  .copy-btn-light:hover { background: #DBEAFE; border-color: var(--blue-light); color: var(--blue); }
+  .code-body { padding: 24px; font-family: 'DM Mono', monospace; font-size: 12.5px; line-height: 1.7; color: #CBD5E1; white-space: pre; overflow-x: auto; margin: 0; }
+  .code-body.tall { max-height: 460px; overflow-y: auto; }
+
+  .tip { display: flex; gap: 12px; padding: 16px 20px; border-radius: 12px; margin: 20px 0; font-size: 14px; line-height: 1.6; transition: transform 0.2s; }
+  .tip:hover { transform: translateY(-1px); }
+  .tip.green { background: linear-gradient(135deg, #ECFDF5, #F0FDF4); border: 1px solid #A7F3D0; color: #065F46; }
+  .tip.amber { background: linear-gradient(135deg, #FFFBEB, #FEF9C3); border: 1px solid #FDE68A; color: #92400E; }
+  .tip-icon { font-size: 18px; flex-shrink: 0; line-height: 1.4; }
+
+  .substeps { counter-reset: substep; list-style: none; margin: 20px 0; padding: 0; }
+  .substeps li { counter-increment: substep; position: relative; padding-left: 48px; margin-bottom: 24px; font-size: 15px; color: var(--gray-600); line-height: 1.6; }
+  .substeps li::before { content: counter(substep); position: absolute; left: 0; top: 0; width: 30px; height: 30px; border-radius: 10px; background: linear-gradient(135deg, var(--gray-100), var(--gray-50)); border: 1px solid var(--gray-200); color: var(--ink); font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center; text-align: center; line-height: 30px; }
+  .substeps li strong { color: var(--ink); }
+
+  code { font-family: 'DM Mono', monospace; font-size: 13px; background: linear-gradient(135deg, #EFF6FF, var(--gray-100)); border: 1px solid rgba(37, 99, 235, 0.12); border-radius: 6px; padding: 2px 8px; color: var(--blue-dark); }
+
+  .copyable-field { display: flex; align-items: center; gap: 10px; background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: 10px; padding: 12px 16px; margin: 8px 0 16px; transition: border-color 0.2s; }
+  .copyable-field:hover { border-color: var(--blue-light); }
+  .copyable-field .cf-text { flex: 1; font-size: 14px; color: var(--ink); font-weight: 500; line-height: 1.5; font-family: 'DM Mono', monospace; word-break: break-all; }
+
+  /* Data table (Sheet tabs) */
+  .data-table { width: 100%; border-collapse: collapse; margin: 8px 0 16px; font-size: 13px; border: 1px solid var(--gray-200); border-radius: 10px; overflow: hidden; }
+  .data-table th { background: var(--ink); color: #fff; text-align: left; padding: 9px 12px; font-weight: 600; font-family: 'DM Mono', monospace; font-size: 12px; }
+  .data-table td { padding: 8px 12px; border-top: 1px solid var(--gray-100); color: var(--gray-600); font-family: 'DM Mono', monospace; font-size: 12px; }
+  .data-table tr:nth-child(even) td { background: var(--gray-50); }
+  .tab-label { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--blue); margin: 20px 0 4px; }
+  .tab-label::before { content: ''; width: 8px; height: 8px; border-radius: 2px; background: var(--blue); }
+
+  .divider { height: 1px; background: linear-gradient(90deg, transparent, var(--gray-300), transparent); margin: 56px 0; }
+  .section-title { font-size: 26px; font-weight: 800; text-align: center; margin-bottom: 8px; letter-spacing: -0.5px; }
+  .section-subtitle { text-align: center; color: var(--gray-500); font-size: 15px; margin-bottom: 32px; max-width: 560px; margin-left: auto; margin-right: auto; }
+
+  .cta-section { text-align: center; padding: 60px 0 80px; }
+  .cta-section h2 { font-size: 30px; font-weight: 800; margin-bottom: 12px; letter-spacing: -0.5px; }
+  .cta-section p { font-size: 16px; color: var(--gray-500); margin-bottom: 28px; }
+  .cta-button { display: inline-flex; align-items: center; gap: 10px; background: linear-gradient(135deg, var(--blue) 0%, var(--blue-dark) 100%); color: white; text-decoration: none; padding: 16px 36px; border-radius: 12px; font-weight: 600; font-size: 16px; transition: all 0.3s; box-shadow: 0 4px 16px var(--blue-glow); }
+  .cta-button:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(37, 99, 235, 0.35); }
+  .cta-button svg { width: 18px; height: 18px; fill: white; }
+
+  .footer { text-align: center; padding: 40px 0; border-top: 1px solid var(--gray-200); font-size: 13px; color: var(--gray-400); }
+  .footer a { color: var(--blue); text-decoration: none; }
+
+  .flow { display: flex; align-items: flex-start; justify-content: center; gap: 0; margin: 28px 0; flex-wrap: wrap; }
+  .flow-node { display: flex; flex-direction: column; align-items: center; gap: 10px; transition: transform 0.3s; }
+  .flow-node:hover { transform: translateY(-4px); }
+  .flow-node .flow-icon { width: 64px; height: 64px; border-radius: 16px; background: var(--surface); border: 1px solid var(--gray-200); display: flex; align-items: center; justify-content: center; transition: box-shadow 0.3s, border-color 0.3s; }
+  .flow-node:hover .flow-icon { box-shadow: 0 4px 16px rgba(0,0,0,0.08); border-color: var(--gray-300); }
+  .flow-node .flow-icon img { width: 32px; height: 32px; border-radius: 6px; object-fit: contain; }
+  .flow-node .flow-label { font-size: 12px; color: var(--gray-500); font-weight: 600; }
+  .flow-arrow { color: var(--gray-300); font-size: 20px; font-weight: 300; height: 64px; display: flex; align-items: center; padding: 0 12px; }
+
+  /* Social proof logo strip */
+  .trust { text-align: center; padding: 52px 0 24px; }
+  .trust h3 { font-size: 26px; font-weight: 800; color: var(--gray-600); margin-bottom: 32px; letter-spacing: -0.5px; }
+  .trust h3 b { color: var(--blue); }
+  .trust-logos { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 26px 34px; max-width: 720px; margin: 0 auto; }
+  .trust-logos img { height: 26px; width: auto; max-width: 120px; object-fit: contain; filter: grayscale(1); opacity: 0.6; transition: filter 0.2s, opacity 0.2s; }
+  .trust-logos img:hover { filter: grayscale(0); opacity: 1; }
+  @media (max-width: 640px) { .trust-logos { gap: 18px 22px; } .trust-logos img { height: 20px; } }
+
+  /* Smaller inline screenshots (click to expand full-size via lightbox) */
+  .screenshot { max-width: 460px; margin-left: auto; margin-right: auto; }
+  .screenshot img { max-height: 320px; object-fit: contain; }
+
+  /* Sticky book-a-demo bar (slides in after Step 1) */
+  .sticky-cta { position: fixed; top: 0; left: 0; right: 0; z-index: 8000; display: flex; align-items: center; justify-content: space-between; padding: 10px 22px; background: rgba(255,255,255,0.92); backdrop-filter: blur(10px); border-bottom: 1px solid var(--gray-200); box-shadow: 0 2px 12px rgba(0,0,0,0.05); transform: translateY(-110%); transition: transform 0.3s ease; }
+  .sticky-cta.visible { transform: translateY(0); }
+  .sticky-cta .sc-brand { font-weight: 800; color: var(--ink); font-size: 15px; letter-spacing: -0.3px; }
+  .sticky-cta .sc-btn { background: linear-gradient(135deg, var(--blue), var(--blue-dark)); color: #fff; text-decoration: none; padding: 9px 20px; border-radius: 10px; font-weight: 600; font-size: 14px; box-shadow: 0 2px 10px var(--blue-glow); transition: transform 0.2s; }
+  .sticky-cta .sc-btn:hover { transform: translateY(-1px); }
+
+  /* Dynamic config panel (inputs fill the SQL + script live) */
+  .cfg-panel { background: linear-gradient(135deg, #EFF6FF, var(--gray-50)); border: 1px solid rgba(37,99,235,0.18); border-radius: 14px; padding: 20px 22px; margin: 20px 0; }
+  .cfg-panel h4 { font-size: 15px; margin-bottom: 4px; color: var(--ink); }
+  .cfg-panel .cfg-sub { font-size: 13px; color: var(--gray-500); margin-bottom: 16px; }
+  .cfg-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .cfg-field { display: flex; flex-direction: column; gap: 4px; }
+  .cfg-field.full { grid-column: 1 / -1; }
+  .cfg-field label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: var(--gray-500); }
+  .cfg-field input { font-family: 'DM Mono', monospace; font-size: 13px; padding: 9px 12px; border: 1px solid var(--gray-300); border-radius: 8px; background: #fff; color: var(--ink); width: 100%; }
+  .cfg-field input:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+
+  /* Congrats closing */
+  .congrats { text-align: center; max-width: 620px; margin: 0 auto 40px; padding: 32px 28px; background: linear-gradient(135deg, #ECFDF5, #F0FDF4); border: 1px solid #A7F3D0; border-radius: 18px; }
+  .congrats .cg-emoji { font-size: 40px; display: block; margin-bottom: 10px; }
+  .congrats h3 { font-size: 22px; color: #065F46; margin-bottom: 8px; letter-spacing: -0.4px; }
+  .congrats p { font-size: 15px; color: #047857; line-height: 1.6; }
+
+  @media (max-width: 640px) { .cfg-grid { grid-template-columns: 1fr; } .sticky-cta { padding: 8px 14px; } .screenshot { max-width: 100%; } }
+  @media print { body { background: white; } .hero { padding: 40px 20px 30px; } .hero h1 { font-size: 32px; } .step { break-inside: avoid; } .code-block { break-inside: avoid; } .code-body.tall { max-height: none; } .sticky-cta { display: none; } .fade-up { opacity: 1 !important; transform: none !important; } }
+  @media (max-width: 640px) { .hero { padding: 48px 20px 40px; } .hero h1 { font-size: 28px; letter-spacing: -0.5px; } .step-header { padding: 20px; } .step-body { padding: 20px; } .container { padding: 0 16px; } }
+</style>
+</head>
+<body>
+
+<!-- Sticky book-a-demo bar (slides in after Step 1) -->
+<div class="sticky-cta" id="stickyCta">
+  <img src="https://detrics.io/_astro/detrics-logo.C-sT4k0h_ZovnhR.svg" alt="Detrics" style="height:22px; width:auto;">
+  <a class="sc-btn" href="https://detrics.io/demo/book/" target="_blank" rel="noopener">Book a demo</a>
+</div>
+
+<!-- Lightbox overlay -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <div class="lightbox-close">&times;</div>
+  <img id="lightbox-img" src="" alt="">
+</div>
+
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-badge">Step-by-step guide</div>
+    <h1>Every client's ad data <span>in one BigQuery table</span></h1>
+    <p>Your ad data is scattered across Meta, TikTok, and dozens of accounts. This guide shows you how to stack it into a single table where every row already knows which <strong>client</strong> and which <strong>creative</strong> it belongs to, ready for any dashboard.</p>
+    <div class="hero-logos">
+      <img src="https://storage.googleapis.com/detrics-static/public/img/google-ads-logo.png" alt="Google Ads">
+      <img src="https://storage.googleapis.com/detrics-static/public/img/tiktok-logo.png" alt="TikTok Ads">
+      <img src="https://storage.googleapis.com/detrics-static/public/img/meta-ads-logo.png" alt="Meta Ads">
+      <span class="plus">&rarr;</span>
+      <img src="https://storage.googleapis.com/detrics-static/public/img/big-query-icon.png" alt="BigQuery">
+      <span class="plus">&rarr;</span>
+      <img src="https://storage.googleapis.com/detrics-static/public/img/looker-logo.png" alt="Looker Studio">
+    </div>
+    <div class="hero-time">Just <strong>30 minutes</strong> to set up</div>
+  </div>
+</section>
+
+<div class="container">
+
+<!-- ============ TRUST ============ -->
+<div class="trust fade-up">
+  <h3><b>1,000+ agencies</b> already trust Detrics</h3>
+  <div class="trust-logos">
+    <img src="images/brands/abn.svg" alt="ABN">
+    <img src="images/brands/ad_astra.svg" alt="Ad Astra">
+    <img src="images/brands/belo.svg" alt="Belo">
+    <img src="images/brands/blend.svg" alt="Blend">
+    <img src="images/brands/calm.svg" alt="Calm">
+    <img src="images/brands/despegar.svg" alt="Despegar">
+    <img src="images/brands/elevva.svg" alt="Elevva">
+    <img src="images/brands/estropical.svg" alt="Estropical">
+    <img src="images/brands/fanatiz.svg" alt="Fanatiz">
+    <img src="images/brands/frubis.svg" alt="Frubis">
+    <img src="images/brands/fz_sports.svg" alt="FZ Sports">
+    <img src="images/brands/genex_mkt.svg" alt="Genex">
+    <img src="images/brands/hyppo.svg" alt="Hyppo">
+    <img src="images/brands/johnfoos.svg" alt="John Foos">
+    <img src="images/brands/marketify.svg" alt="Marketify">
+    <img src="images/brands/snippet.svg" alt="Snippet">
+    <img src="images/brands/turismo_city.svg" alt="Turismo City">
+    <img src="images/brands/uke.svg" alt="Uke">
+  </div>
+</div>
+
+<!-- ============ WHAT YOU GET ============ -->
+<div class="divider"></div>
+<h2 class="section-title fade-up">What you get</h2>
+<p class="section-subtitle fade-up">One BigQuery table that unions every platform and every account, with a <code>client</code> label on every row, plus a creative-level report you can point any stakeholder at.</p>
+
+<div class="fade-up">
+  <div class="img-ph">
+    <span class="ph-icon">🖼️</span>
+    <strong>Screenshot pending</strong>
+    <span>The consolidated table in BigQuery: Meta + TikTok stacked into one, with <code>client</code>, <code>channel</code>, campaign, ad, spend, and the creative image URL on every row</span>
+  </div>
+  <div class="img-ph">
+    <span class="ph-icon">🖼️</span>
+    <strong>Screenshot pending</strong>
+    <span>A creative-level report in Looker Studio: the actual ad thumbnail next to its spend, filtered by client</span>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ============ STEP 1 ============ -->
+<div class="step fade-up">
+  <div class="step-header">
+    <div class="step-number">1</div>
+    <h2>Get your ad data into BigQuery <small>with Detrics</small></h2>
+  </div>
+  <div class="step-body">
+    <p>The consolidated table is built on your <strong>own BigQuery</strong>. Detrics is what fills it: connect each client's ad accounts, point Detrics at BigQuery as the destination, and it syncs one table per platform in every day, automatically.</p>
+
+    <h3>Connect your ad accounts</h3>
+    <div class="url-box">
+      <div class="url-icon"><svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg></div>
+      <a href="https://app.detrics.io/datasources" target="_blank" rel="noopener">app.detrics.io/datasources</a>
+    </div>
+    <div class="platform-chips">
+      <div class="chip"><img src="https://storage.googleapis.com/detrics-static/public/img/meta-ads-logo.png" alt="Meta Ads"> Meta Ads</div>
+      <div class="chip"><img src="https://storage.googleapis.com/detrics-static/public/img/tiktok-logo.png" alt="TikTok Ads"> TikTok Ads</div>
+      <div class="chip"><img src="https://storage.googleapis.com/detrics-static/public/img/google-ads-logo.png" alt="Google Ads"> Google Ads</div>
+      <div class="chip">&hellip; and every other client account</div>
+    </div>
+    <div class="screenshot" onclick="openLightbox(this)">
+      <img src="images/detrics-datasources.png" alt="Detrics Data Sources page with connected ad accounts">
+      <div class="screenshot-caption">Detrics Data Sources: your connected client accounts</div>
+    </div>
+
+    <h3>Create a BigQuery destination</h3>
+    <div class="url-box">
+      <div class="url-icon"><svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg></div>
+      <a href="https://app.detrics.io/bigquery/destinations/new" target="_blank" rel="noopener">app.detrics.io/bigquery/destinations/new</a>
+    </div>
+    <p>Point Detrics at your Google Cloud project. It writes one table per platform into your dataset and keeps them synced daily.</p>
+    <div class="screenshot" onclick="openLightbox(this)">
+      <img src="images/detrics-create-destination.png" alt="Detrics Create Destination wizard">
+      <div class="screenshot-caption">Create Destination: connect your Google Cloud project as the BigQuery destination</div>
+    </div>
+
+    <h3>Create a Table Group</h3>
+    <p>A Table Group defines the schema of your tables. Pick <strong>the full set of fields below</strong>, so your Detrics tables carry the campaign detail, the metrics, and the creative image every row needs. Build one Table Group for Meta and one for TikTok. The fields are named differently on each platform, so here's exactly what to tick:</p>
+
+    <div class="tab-label">Meta Ads</div>
+    <ul>
+      <li><strong>Dimensions:</strong> Date, Account Name, Campaign Name, Ad Set Name, Ad Name, Ad ID, <strong>Ad Image URL</strong>, Ad Video URL</li>
+      <li><strong>Metrics:</strong> Amount Spent, Impressions, Inline Link Clicks</li>
+    </ul>
+
+    <div class="tab-label">TikTok Ads</div>
+    <ul>
+      <li><strong>Dimensions:</strong> Stat Time Day, Advertiser Name, Campaign Name, Adgroup Name, Ad Name, Ad Id, <strong>Creative Thumbnail Url</strong>, Ad Playable Url, Creative Preview Url</li>
+      <li><strong>Metrics:</strong> Spend, Impressions, Clicks, Conversion, Likes, Engagements</li>
+    </ul>
+
+    <p><strong>Time aggregation:</strong> Daily, on both. Keep the account field (<strong>Account Name</strong> on Meta, <strong>Advertiser Name</strong> on TikTok): the client mapping joins on it. The creative fields are named differently but describe the same thing, so when you consolidate you line them up into one column: Meta's <em>Ad Image URL</em> and TikTok's <em>Creative Thumbnail Url</em> both become <code>creative_image_url</code>.</p>
+    <div class="screenshot" onclick="openLightbox(this)">
+      <img src="images/detrics-table-group.png" alt="Creating a Table Group in Detrics">
+      <div class="screenshot-caption">Table Group: the dimensions + metrics above, Daily aggregation</div>
+    </div>
+
+    <h3>Create a Transfer</h3>
+    <p>A transfer is how the data syncs into BigQuery, and how it stays updated.</p>
+    <div class="url-box">
+      <div class="url-icon"><svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg></div>
+      <a href="https://app.detrics.io/bigquery/transfers/new" target="_blank" rel="noopener">app.detrics.io/bigquery/transfers/new</a>
+    </div>
+    <ol class="substeps">
+      <li>Click <strong>+ New Transfer</strong>.
+        <div class="screenshot" onclick="openLightbox(this)" style="margin-top:12px">
+          <img src="images/detrics-transfers-new.png" alt="Transfers list with New Transfer button">
+          <div class="screenshot-caption">Transfers &rarr; + New Transfer</div>
+        </div>
+      </li>
+      <li>Pick the <strong>data source</strong>: the platform and the connection/account to sync. Start with just <strong>one account</strong> so the first sync is fast; add the rest once it works.
+        <div class="screenshot" onclick="openLightbox(this)" style="margin-top:12px">
+          <img src="images/detrics-transfer-source.png" alt="Select data source">
+          <div class="screenshot-caption">Step 1 &middot; Source: choose the platform and account</div>
+        </div>
+      </li>
+      <li>Pick the <strong>destination</strong> (your BigQuery project and dataset).
+        <div class="screenshot" onclick="openLightbox(this)" style="margin-top:12px">
+          <img src="images/detrics-transfer-destination.png" alt="Select destination">
+          <div class="screenshot-caption">Step 2 &middot; Destination</div>
+        </div>
+      </li>
+      <li>Pick the <strong>Table Group</strong> you just created.
+        <div class="screenshot" onclick="openLightbox(this)" style="margin-top:12px">
+          <img src="images/detrics-transfer-tablegroup.png" alt="Select table group">
+          <div class="screenshot-caption">Step 3 &middot; Table Group</div>
+        </div>
+      </li>
+      <li>Set the <strong>sync strategy</strong>: <strong>Replicate Source</strong> (incremental dedup), a <strong>90-day</strong> window, <strong>Daily</strong>. Then validate and run.
+        <div class="screenshot" onclick="openLightbox(this)" style="margin-top:12px">
+          <img src="images/detrics-transfer-sync.png" alt="Sync strategy">
+          <div class="screenshot-caption">Step 4 &middot; Sync strategy: Replicate Source, incremental, 90-day window, Daily</div>
+        </div>
+      </li>
+    </ol>
+
+    <div class="tip green">
+      <span class="tip-icon">&#10003;</span>
+      <span>Already a Detrics user with BigQuery connected? Your platform tables are already syncing. Skip to Step 2.</span>
+    </div>
+  </div>
+</div>
+
+<div id="stickyTrigger"></div>
+
+<!-- ============ STEP 2 ============ -->
+<div class="step fade-up">
+  <div class="step-header">
+    <div class="step-number">2</div>
+    <h2>Map each account to a client <small>a tiny Google Sheet, read live by BigQuery</small></h2>
+  </div>
+  <div class="step-body">
+    <p>Raw ad accounts don't know who the "client" is. One client can run five accounts across three platforms. A tiny Google Sheet fixes that: you list each account and the client it belongs to, and BigQuery reads it live. Add an account or rename a client and you edit the Sheet, nothing else.</p>
+
+    <div class="tab-label"><code>client_map</code></div>
+    <p style="margin-bottom:8px">One row per real ad account, mapped to the client you report on. Column headers, exactly:</p>
+    <table class="data-table">
+      <tr><th>channel</th><th>account_name</th><th>client</th></tr>
+      <tr><td>Meta Ads</td><td>ACME_US</td><td>Acme</td></tr>
+      <tr><td>Meta Ads</td><td>ACME_MX</td><td>Acme</td></tr>
+      <tr><td>TikTok Ads</td><td>Acme Global</td><td>Acme</td></tr>
+      <tr><td>Meta Ads</td><td>Globex-Main</td><td>Globex</td></tr>
+    </table>
+    <div class="copyable-field">
+      <span class="cf-text">channel	account_name	client</span>
+      <button class="copy-btn-light" onclick="copyText('channel\taccount_name\tclient',this)">Copy</button>
+    </div>
+    <div class="screenshot" onclick="openLightbox(this)">
+      <img src="images/client-map-sheet.png" alt="client_map tab example">
+      <div class="screenshot-caption">client_map: each ad account mapped to a client (one client can span many accounts and channels)</div>
+    </div>
+    <div class="tip amber">
+      <span class="tip-icon">&#9733;</span>
+      <span>The <code>account_name</code> has to match exactly what the platform reports (Account Name on Meta, Advertiser Name on TikTok). That's the key the join uses. Anything you leave unmapped still lands in the table, just with a blank client.</span>
+    </div>
+
+    <h3>Let BigQuery read the Sheet</h3>
+    <p>So the consolidation query can join this mapping, expose the Sheet to BigQuery as an <strong>external table</strong>. It reads the live Sheet, so every edit shows up on the next run with no export step.</p>
+    <ol class="substeps">
+      <li>In the BigQuery Console, open your dataset &rarr; <strong>Create table</strong>.</li>
+      <li>Source: <strong>Drive</strong>. Paste the Sheet's URL, format <strong>Google Sheets</strong>, and set the sheet range to the tab (e.g. <code>client_map!A:C</code>).</li>
+      <li>Table name: <code>client_map</code>. Turn on <strong>Auto-detect</strong> schema, set <strong>Header rows to skip = 1</strong>, and Create.</li>
+    </ol>
+    <div class="tip green">
+      <span class="tip-icon">&#10003;</span>
+      <span>This <code>client_map</code> is your control panel. Add a client or an account in the Sheet and the next rebuild picks it up, no code to touch.</span>
+    </div>
+  </div>
+</div>
+
+<!-- ============ STEP 3 ============ -->
+<div class="step fade-up">
+  <div class="step-header">
+    <div class="step-number">3</div>
+    <h2>Consolidate into one table <small>union every platform + add the client column</small></h2>
+  </div>
+  <div class="step-body">
+    <p>Detrics gives you one table per platform. This query stacks them into a single <code>consolidated_ad_performance</code> table and joins <code>client_map</code> so every row carries its <strong>client</strong>. The creative fields line up here too: Meta's image URL and TikTok's thumbnail become one <code>creative_image_url</code>. Run it as a <strong>scheduled query</strong> in BigQuery so it rebuilds every morning after the data syncs.</p>
+
+    <p>Fill in your four values once below and the SQL fills in live, so you never edit it by hand. Add one <code>SELECT</code> per platform you connected.</p>
+
+    <div class="cfg-panel">
+      <h4>Your settings</h4>
+      <p class="cfg-sub">Type your values. The SQL below fills in live.</p>
+      <div class="cfg-grid">
+        <div class="cfg-field"><label>BigQuery project ID</label><input id="in-project" oninput="syncField('project',this.value)" placeholder="your-project-id"></div>
+        <div class="cfg-field"><label>Dataset</label><input id="in-dataset" oninput="syncField('dataset',this.value)" placeholder="your_dataset"></div>
+        <div class="cfg-field"><label>Meta source table</label><input id="in-meta" oninput="syncField('meta',this.value)" placeholder="facebook_ads_your_table"></div>
+        <div class="cfg-field"><label>TikTok source table</label><input id="in-tiktok" oninput="syncField('tiktok',this.value)" placeholder="tiktok_ads_your_table"></div>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span>consolidated_ad_performance &middot; scheduled query</span>
+        <button class="copy-btn" onclick="copyText(document.getElementById('sql-display').textContent,this)">Copy</button>
+      </div>
+      <pre class="code-body" id="sql-display"></pre>
+    </div>
+
+    <h3>Set it to run daily</h3>
+    <ol class="substeps">
+      <li>In the BigQuery Console, paste the query into a new editor tab and run it once to create the table.</li>
+      <li>Click <strong>Schedule</strong> &rarr; <strong>Create new scheduled query</strong>, set it to run <strong>daily</strong> (a couple of hours after Detrics syncs).</li>
+      <li>Leave the "destination table" fields <strong>blank</strong>. The <code>CREATE OR REPLACE TABLE</code> already names its own destination.</li>
+    </ol>
+
+    <div class="tip green">
+      <span class="tip-icon">&#10003;</span>
+      <span>The <code>client</code> column now lives in your table. Anything that reads it, a Looker report, a Sheet, a notebook, can slice by client instantly.</span>
+    </div>
+  </div>
+</div>
+
+<!-- ============ STEP 4 ============ -->
+<div class="step fade-up">
+  <div class="step-header">
+    <div class="step-number">4</div>
+    <h2>Build a creative-level report <small>spend next to the actual ad, in Looker Studio</small></h2>
+  </div>
+  <div class="step-body">
+    <p>The consolidated table already carries the creative image URL for every ad. Point Looker Studio at it and you get a report where each row shows the <strong>real ad thumbnail</strong> next to its spend, filterable by client, so anyone can see which creative is eating the budget.</p>
+
+    <ol class="substeps">
+      <li>Open <a href="https://lookerstudio.google.com" target="_blank" rel="noopener"><strong>lookerstudio.google.com</strong></a> &rarr; <strong>Create &rarr; Report</strong>, add a <strong>BigQuery</strong> data source, and pick your <code>consolidated_ad_performance</code> table.</li>
+      <li>Set <code>creative_image_url</code>'s type to <strong>Image</strong> (in the data panel, click the field's type and choose URL &rarr; Image). That's what renders the thumbnail instead of raw text.</li>
+      <li>Drop a <strong>Table</strong> chart on the page. Dimensions: <code>creative_image_url</code>, <code>client</code>, <code>channel</code>, <code>campaign_name</code>, <code>ad_name</code>. Metrics: <code>spend</code>, <code>impressions</code>, <code>clicks</code>.</li>
+      <li>Add a <strong>filter control</strong> on <code>client</code> and sort the table by <code>spend</code> descending.</li>
+    </ol>
+
+    <div class="img-ph">
+      <span class="ph-icon">🖼️</span>
+      <strong>Screenshot pending</strong>
+      <span>Each ad's thumbnail next to its spend, impressions, and clicks, filtered to one client</span>
+    </div>
+
+    <div class="tip amber">
+      <span class="tip-icon">&#9733;</span>
+      <span>Use <code>creative_image_url</code> for the thumbnail, not the video or preview URL. It's populated for both Meta and TikTok and the links are permanent; the TikTok preview link expires.</span>
+    </div>
+  </div>
+</div>
+
+<!-- ============ FLOW ============ -->
+<div class="divider"></div>
+<h2 class="section-title fade-up">The complete flow</h2>
+<br>
+<div class="flow fade-up">
+  <div class="flow-node"><div class="flow-icon" style="width:auto; padding:0 12px; gap:8px;"><img src="https://storage.googleapis.com/detrics-static/public/img/google-ads-logo.png" alt="Google Ads" style="width:24px;height:24px;"><img src="https://storage.googleapis.com/detrics-static/public/img/tiktok-logo.png" alt="TikTok Ads" style="width:24px;height:24px;"><img src="https://storage.googleapis.com/detrics-static/public/img/meta-ads-logo.png" alt="Meta Ads" style="width:24px;height:24px;"></div><span class="flow-label">Ad accounts</span></div>
+  <span class="flow-arrow">&rarr;</span>
+  <div class="flow-node"><div class="flow-icon" style="border-color: var(--blue); background: #EFF6FF;"><img src="https://detrics.io/_astro/detrics-logo.C-sT4k0h_ZovnhR.svg" alt="Detrics" style="width: 40px; height: 32px;"></div><span class="flow-label">Detrics</span></div>
+  <span class="flow-arrow">&rarr;</span>
+  <div class="flow-node"><div class="flow-icon"><img src="https://storage.googleapis.com/detrics-static/public/img/big-query-icon.png" alt="BigQuery"></div><span class="flow-label">One BigQuery table</span></div>
+  <span class="flow-arrow">&rarr;</span>
+  <div class="flow-node"><div class="flow-icon" style="border-color: var(--green); background: var(--green-bg);"><img src="https://storage.googleapis.com/detrics-static/public/img/looker-logo.png" alt="Looker Studio"></div><span class="flow-label">Any dashboard</span></div>
+</div>
+
+<!-- ============ CTA ============ -->
+<div class="cta-section fade-up">
+  <h2>One table. Every client. Any dashboard.</h2>
+  <p>Detrics fills BigQuery. You build once, report forever. Start free.</p>
+  <div style="display:flex; gap:14px; justify-content:center; flex-wrap:wrap;">
+    <a href="https://app.detrics.io/bigquery/destinations/new" target="_blank" rel="noopener" class="cta-button">
+      Create free account
+      <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </a>
+    <a href="https://detrics.io/demo/book/" target="_blank" rel="noopener" class="cta-button" style="background:transparent; color:var(--blue); border:1.5px solid var(--blue); box-shadow:none;">
+      Book a demo
+    </a>
+  </div>
+</div>
+
+<!-- ============ CONGRATS + NEXT ============ -->
+<div class="congrats fade-up">
+  <span class="cg-emoji">🎉</span>
+  <h3>You made it to the end</h3>
+  <p>You now have one table with every client, every creative, and every dollar of spend. Next: turn it into automatic spend alarms so a dying campaign pings your team before the client notices. <a href="https://guides.detrics.io/alarms/" target="_blank" rel="noopener" style="color:#047857; font-weight:600; text-decoration:underline;">Build the spend-alarm system &rarr;</a></p>
+</div>
+
+</div><!-- /container -->
+
+<!-- ============ FOOTER ============ -->
+<div class="footer">
+  <p><a href="https://detrics.io" target="_blank" rel="noopener">detrics.io</a> &middot; The marketing data warehouse for 1,000+ agencies across LATAM</p>
+</div>
+
+<!-- ===== Raw code sources (not rendered; used for display + copy) ===== -->
+<script type="text/plain" id="sql-src">CREATE OR REPLACE TABLE `YOUR_PROJECT_ID.YOUR_DATASET.consolidated_ad_performance` AS
+WITH unioned AS (
+  -- One SELECT per platform Detrics created. Alias every column to the SAME
+  -- names so the tables stack cleanly. The creative fields are named
+  -- differently per platform but map to one column each.
+  SELECT
+    'Meta Ads'              AS channel,
+    date,
+    FORMAT_DATE('%Y-%m', date) AS month_year,
+    account_name,
+    campaign_name,
+    adset_name,
+    ad_id,
+    ad_name,
+    impressions,
+    spend,
+    inline_link_clicks      AS clicks,
+    CAST(NULL AS INT64)     AS conversions,
+    CAST(NULL AS INT64)     AS likes,
+    CAST(NULL AS INT64)     AS engagements,
+    ad_image_url            AS creative_image_url,
+    ad_video_url            AS creative_video_url,
+    CAST(NULL AS STRING)    AS creative_preview_url
+  FROM `YOUR_PROJECT_ID.YOUR_DATASET.facebook_ads_your_table`
+  UNION ALL
+  SELECT
+    'TikTok Ads'            AS channel,
+    stat_time_day           AS date,
+    FORMAT_DATE('%Y-%m', stat_time_day) AS month_year,
+    advertiser_name         AS account_name,
+    campaign_name,
+    adgroup_name            AS adset_name,
+    ad_id,
+    ad_name,
+    impressions,
+    spend,
+    clicks,
+    conversion              AS conversions,
+    likes,
+    engagements,
+    creative_thumbnail_url  AS creative_image_url,
+    ad_playable_url         AS creative_video_url,
+    creative_preview_url
+  FROM `YOUR_PROJECT_ID.YOUR_DATASET.tiktok_ads_your_table`
+)
+-- Add the client label from your client_map external table (the Google Sheet).
+SELECT m.client, u.*
+FROM unioned u
+LEFT JOIN `YOUR_PROJECT_ID.YOUR_DATASET.client_map` m
+  ON u.account_name = m.account_name AND u.channel = m.channel;</script>
+
+
+<!-- Scripts -->
+<script>
+  // Populate the code displays from the raw sources (textContent = auto-safe).
+  function subst(tpl) {
+    const v = id => (document.getElementById(id) && document.getElementById(id).value.trim()) || '';
+    const map = {
+      'YOUR_PROJECT_ID': v('in-project') || 'YOUR_PROJECT_ID',
+      'YOUR_DATASET': v('in-dataset') || 'YOUR_DATASET',
+      'facebook_ads_your_table': v('in-meta') || 'facebook_ads_your_table',
+      'tiktok_ads_your_table': v('in-tiktok') || 'tiktok_ads_your_table',
+    };
+    let out = tpl;
+    Object.keys(map).forEach(k => { out = out.split(k).join(map[k]); });
+    return out;
+  }
+  function renderCode() {
+    document.getElementById('sql-display').textContent = subst(document.getElementById('sql-src').textContent.trim());
+  }
+  renderCode();
+
+  // Keep the Step-3 setting box in sync, then re-render.
+  function syncField(name, val) {
+    val = (val || '').trim();
+    ['in-' + name, 'in-' + name + '-b'].forEach(function(id) { var el = document.getElementById(id); if (el && el.value !== val) el.value = val; });
+    renderCode();
+  }
+
+  // Sticky book-a-demo bar: show once the reader scrolls past Step 1.
+  var stickyTrigger = document.getElementById('stickyTrigger');
+  var stickyCta = document.getElementById('stickyCta');
+  window.addEventListener('scroll', function() {
+    if (stickyTrigger && stickyCta) stickyCta.classList.toggle('visible', stickyTrigger.getBoundingClientRect().top < 0);
+  });
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 80);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+  function openLightbox(el) {
+    const img = el.querySelector('img');
+    if (!img) return;
+    const lb = document.getElementById('lightbox');
+    document.getElementById('lightbox-img').src = img.src;
+    lb.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('active');
+    document.body.style.overflow = '';
+  }
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLightbox(); });
+
+  function copyText(text, btn) {
+    navigator.clipboard.writeText(text).then(() => {
+      const orig = btn.textContent;
+      btn.textContent = 'Copied!';
+      btn.style.color = '#10B981';
+      setTimeout(() => { btn.textContent = orig; btn.style.color = ''; }, 2000);
+    });
+  }
+</script>
+
+</body>
+</html>
