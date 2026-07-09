@@ -312,16 +312,24 @@
     </div>
 
     <h3>Creá un Table Group</h3>
-    <p>Un Table Group define el esquema de tus tablas. Elegí los campos que necesita la tabla consolidada, iguales para Meta y TikTok:</p>
+    <p>Un Table Group define el esquema de tus tablas. Elegí <strong>todos los campos de abajo</strong>, así tus tablas de Detrics llevan todo lo que la alarma necesita ahora y lo que un reporte a nivel creativo puede usar después. Armá un Table Group para Meta y uno para TikTok. Los campos se llaman distinto en cada plataforma, así que esto es exactamente lo que tenés que tildar:</p>
+
+    <div class="tab-label">Meta Ads</div>
     <ul>
-      <li><strong>Dimensiones:</strong> date, account name, campaign name</li>
-      <li><strong>Métrica:</strong> spend</li>
-      <li><strong>Agregación temporal:</strong> Daily</li>
+      <li><strong>Dimensiones:</strong> Date, Account Name, Campaign Name, Ad Set Name, Ad Name, Ad ID, <strong>Ad Image URL</strong>, Ad Video URL</li>
+      <li><strong>Métricas:</strong> Amount Spent, Impressions, Inline Link Clicks</li>
     </ul>
-    <p>Armá uno para Meta y uno para TikTok. En TikTok el campo de fecha es <strong>Stat Time Day</strong> y el de cuenta es <strong>Advertiser Name</strong>. Incluí el account name: es lo que usa el mapeo de clientes para el join.</p>
+
+    <div class="tab-label">TikTok Ads</div>
+    <ul>
+      <li><strong>Dimensiones:</strong> Stat Time Day, Advertiser Name, Campaign Name, Adgroup Name, Ad Name, Ad Id, <strong>Creative Thumbnail Url</strong>, Ad Playable Url, Creative Preview Url</li>
+      <li><strong>Métricas:</strong> Spend, Impressions, Clicks, Conversion, Likes, Engagements</li>
+    </ul>
+
+    <p><strong>Agregación temporal:</strong> Daily en las dos. Dejá el campo de cuenta (<strong>Account Name</strong> en Meta, <strong>Advertiser Name</strong> en TikTok): es lo que usa el mapeo de clientes para el join. Los campos de creativo se llaman distinto pero describen lo mismo, así que al consolidar los unís en una sola columna: el <em>Ad Image URL</em> de Meta y el <em>Creative Thumbnail Url</em> de TikTok pasan a ser <code>creative_image_url</code>.</p>
     <div class="screenshot" onclick="openLightbox(this)">
       <img src="../images/detrics-table-group.png" alt="Creando un Table Group en Detrics">
-      <div class="screenshot-caption">Table Group: date + account name + campaign name (dimensiones), spend (métrica), agregación Daily</div>
+      <div class="screenshot-caption">Table Group: las dimensiones + métricas de arriba, agregación Daily</div>
     </div>
 
     <h3>Creá un Transfer</h3>

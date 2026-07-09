@@ -314,16 +314,24 @@
     </div>
 
     <h3>Create a Table Group</h3>
-    <p>A Table Group defines the schema of your tables. Pick the fields the consolidated table needs, the same for Meta and TikTok:</p>
+    <p>A Table Group defines the schema of your tables. Pick <strong>the full set of fields below</strong>, so your Detrics tables carry everything the alarm needs now and a creative-level report can use later. Build one Table Group for Meta and one for TikTok. The fields are named differently on each platform, so here's exactly what to tick:</p>
+
+    <div class="tab-label">Meta Ads</div>
     <ul>
-      <li><strong>Dimensions:</strong> date, account name, campaign name</li>
-      <li><strong>Metric:</strong> spend</li>
-      <li><strong>Time aggregation:</strong> Daily</li>
+      <li><strong>Dimensions:</strong> Date, Account Name, Campaign Name, Ad Set Name, Ad Name, Ad ID, <strong>Ad Image URL</strong>, Ad Video URL</li>
+      <li><strong>Metrics:</strong> Amount Spent, Impressions, Inline Link Clicks</li>
     </ul>
-    <p>Build one for Meta and one for TikTok. On TikTok the date field is <strong>Stat Time Day</strong> and the account field is <strong>Advertiser Name</strong>. Include the account name: it's what the client mapping joins on later.</p>
+
+    <div class="tab-label">TikTok Ads</div>
+    <ul>
+      <li><strong>Dimensions:</strong> Stat Time Day, Advertiser Name, Campaign Name, Adgroup Name, Ad Name, Ad Id, <strong>Creative Thumbnail Url</strong>, Ad Playable Url, Creative Preview Url</li>
+      <li><strong>Metrics:</strong> Spend, Impressions, Clicks, Conversion, Likes, Engagements</li>
+    </ul>
+
+    <p><strong>Time aggregation:</strong> Daily, on both. Keep the account field (<strong>Account Name</strong> on Meta, <strong>Advertiser Name</strong> on TikTok): the client mapping joins on it. The creative fields are named differently but describe the same thing, so when you consolidate you line them up into one column: Meta's <em>Ad Image URL</em> and TikTok's <em>Creative Thumbnail Url</em> both become <code>creative_image_url</code>.</p>
     <div class="screenshot" onclick="openLightbox(this)">
       <img src="images/detrics-table-group.png" alt="Creating a Table Group in Detrics">
-      <div class="screenshot-caption">Table Group: date + account name + campaign name (dimensions), spend (metric), Daily aggregation</div>
+      <div class="screenshot-caption">Table Group: the dimensions + metrics above, Daily aggregation</div>
     </div>
 
     <h3>Create a Transfer</h3>
