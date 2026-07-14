@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Success case: How Loymark cut churn 25% with BigQuery + Detrics</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="apple-touch-icon" href="/favicon.png">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue: #2563EB; --blue-dark: #1D4ED8; --blue-light: #3B82F6; --blue-glow: rgba(37, 99, 235, 0.25);
+    --ink: #0F172A; --surface: #FFFFFF;
+    --gray-50: #F8FAFC; --gray-100: #F1F5F9; --gray-200: #E2E8F0; --gray-300: #CBD5E1;
+    --gray-400: #94A3B8; --gray-500: #64748B; --gray-600: #475569; --gray-700: #334155;
+    --green: #10B981; --green-bg: #ECFDF5; --amber: #F59E0B; --amber-bg: #FFFBEB;
+    --red: #EF4444; --red-bg: #FEF2F2;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', -apple-system, sans-serif; color: var(--ink); background: var(--gray-50); line-height: 1.6; -webkit-font-smoothing: antialiased; }
+  .fade-up { opacity: 0; transform: translateY(24px); transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1), transform 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
+  .fade-up.visible { opacity: 1; transform: translateY(0); }
+
+  /* ===== HERO ===== */
+  .hero { background: linear-gradient(160deg, #0B1120 0%, #0F172A 40%, #131C2E 100%); color: white; padding: 76px 40px 60px; text-align: center; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; top: -40%; left: -20%; width: 140%; height: 180%; background: radial-gradient(ellipse 600px 400px at 25% 30%, rgba(37, 99, 235, 0.18) 0%, transparent 70%), radial-gradient(ellipse 500px 500px at 75% 70%, rgba(59, 130, 246, 0.1) 0%, transparent 60%), radial-gradient(ellipse 300px 300px at 50% 50%, rgba(16, 185, 129, 0.06) 0%, transparent 50%); animation: heroPulse 10s ease-in-out infinite alternate; }
+  @keyframes heroPulse { 0% { opacity: 0.5; transform: scale(1); } 100% { opacity: 1; transform: scale(1.05); } }
+  .hero::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(37, 99, 235, 0.3), transparent); }
+  .hero-content { position: relative; z-index: 1; max-width: 760px; margin: 0 auto; }
+  .hero-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(37, 99, 235, 0.12); border: 1px solid rgba(37, 99, 235, 0.25); border-radius: 100px; padding: 6px 16px; font-size: 12px; font-weight: 600; color: #93C5FD; margin-bottom: 26px; letter-spacing: 1px; text-transform: uppercase; backdrop-filter: blur(8px); animation: badgeFade 1s ease-out; }
+  @keyframes badgeFade { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+  .hero-client { display: block; margin: 0 auto 26px; height: 42px; width: auto; animation: badgeFade 1s ease-out; }
+  .hero h1 { font-size: 44px; font-weight: 800; line-height: 1.12; margin-bottom: 18px; letter-spacing: -1px; animation: heroTitle 0.8s ease-out 0.1s both; }
+  @keyframes heroTitle { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  .hero h1 span { background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 50%, #2563EB 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .hero p { font-size: 17px; color: #94A3B8; max-width: 600px; margin: 0 auto 30px; line-height: 1.75; animation: heroTitle 0.8s ease-out 0.25s both; }
+  .hero-logos { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 30px; flex-wrap: wrap; animation: heroTitle 0.8s ease-out 0.4s both; }
+  .hero-logos img { width: 40px; height: 40px; border-radius: 10px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); padding: 6px; object-fit: contain; transition: transform 0.3s, box-shadow 0.3s; }
+  .hero-logos img:hover { transform: scale(1.1); box-shadow: 0 0 20px var(--blue-glow); }
+  .hero-logos .plus { color: var(--gray-500); font-size: 18px; font-weight: 300; }
+
+  /* ===== RESULTS ===== */
+  .results { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; background: var(--surface); border: 1px solid var(--gray-200); border-radius: 18px; overflow: hidden; margin: -44px auto 0; position: relative; z-index: 5; box-shadow: 0 12px 40px rgba(15, 23, 42, 0.12); }
+  .result { padding: 26px 18px; text-align: center; border-right: 1px solid var(--gray-100); }
+  .result:last-child { border-right: none; }
+  .result .r-num { font-size: 32px; font-weight: 800; letter-spacing: -1px; background: linear-gradient(135deg, var(--blue-light), var(--blue-dark)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1.2; }
+  .result .r-label { font-size: 12.5px; color: var(--gray-500); margin-top: 6px; line-height: 1.45; }
+  @media (max-width: 700px) { .results { grid-template-columns: 1fr 1fr; } .result:nth-child(2) { border-right: none; } .result:nth-child(1), .result:nth-child(2) { border-bottom: 1px solid var(--gray-100); } }
+
+  .container { max-width: 800px; margin: 0 auto; padding: 0 24px; }
+
+  /* ===== CLIENT CARD ===== */
+  .client-card { display: flex; align-items: center; gap: 22px; background: var(--surface); border: 1px solid var(--gray-200); border-radius: 16px; padding: 22px 26px; margin-top: 40px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+  .client-card .cc-logo { background: #101418; border-radius: 12px; padding: 14px 18px; flex-shrink: 0; }
+  .client-card .cc-logo img { height: 24px; width: auto; display: block; }
+  .client-card .cc-text h4 { font-size: 16px; margin-bottom: 4px; }
+  .client-card .cc-text p { font-size: 14px; color: var(--gray-500); line-height: 1.6; }
+  @media (max-width: 640px) { .client-card { flex-direction: column; text-align: center; } }
+
+  /* ===== SECTIONS ===== */
+  .divider { height: 1px; background: linear-gradient(90deg, transparent, var(--gray-300), transparent); margin: 52px 0; }
+  .section-title { font-size: 26px; font-weight: 800; text-align: center; margin-bottom: 8px; letter-spacing: -0.5px; }
+  .section-subtitle { text-align: center; color: var(--gray-500); font-size: 15px; margin-bottom: 32px; max-width: 580px; margin-left: auto; margin-right: auto; }
+
+  .chapter { background: var(--surface); border: 1px solid var(--gray-200); border-radius: 16px; margin-bottom: 28px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.02); }
+  .chapter-header { display: flex; align-items: center; gap: 16px; padding: 26px 32px; border-bottom: 1px solid var(--gray-100); background: linear-gradient(180deg, var(--gray-50) 0%, var(--surface) 100%); }
+  .chapter-tag { padding: 6px 14px; border-radius: 100px; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; flex-shrink: 0; }
+  .chapter-tag.pain { background: var(--red-bg); color: #B91C1C; border: 1px solid #FECACA; }
+  .chapter-tag.solution { background: #EFF6FF; color: var(--blue-dark); border: 1px solid #BFDBFE; }
+  .chapter-tag.impact { background: var(--green-bg); color: #065F46; border: 1px solid #A7F3D0; }
+  .chapter-header h2 { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
+  .chapter-body { padding: 28px 32px; }
+  .chapter-body p { font-size: 15px; color: var(--gray-600); margin-bottom: 16px; line-height: 1.75; }
+  .chapter-body p:last-child { margin-bottom: 0; }
+  .chapter-body h3 { font-size: 16px; margin: 26px 0 12px; color: var(--ink); }
+  .chapter-body ul { list-style: none; margin-bottom: 20px; }
+  .chapter-body ul li { position: relative; padding-left: 28px; margin-bottom: 11px; font-size: 15px; color: var(--gray-600); line-height: 1.65; }
+  .chapter-body ul li::before { content: '\2192'; position: absolute; left: 0; color: var(--blue); font-weight: 600; }
+  .chapter-body ul.pain-list li::before { content: '\00D7'; color: var(--red); font-weight: 700; }
+  .chapter-body strong { color: var(--ink); }
+
+  /* ===== IMPACT CARDS ===== */
+  .impact-grid { display: grid; grid-template-columns: 1fr; gap: 16px; margin: 22px 0; }
+  .impact-card { border: 1px solid var(--gray-200); border-radius: 14px; padding: 22px 24px; background: linear-gradient(135deg, #F0FDF4 0%, var(--gray-50) 100%); }
+  .impact-card .ic-top { display: flex; align-items: baseline; gap: 12px; margin-bottom: 8px; flex-wrap: wrap; }
+  .impact-card .ic-num { font-size: 26px; font-weight: 800; color: #047857; letter-spacing: -0.6px; }
+  .impact-card .ic-title { font-size: 16px; font-weight: 700; color: var(--ink); }
+  .impact-card p { font-size: 14.5px; color: var(--gray-600); line-height: 1.7; margin: 0; }
+
+  /* ===== TIMELINE ===== */
+  .timeline { display: flex; gap: 0; margin: 24px 0; flex-wrap: wrap; }
+  .tl-step { flex: 1; min-width: 140px; padding: 16px 14px; border-left: 3px solid var(--blue); background: var(--gray-50); margin-right: 8px; border-radius: 0 10px 10px 0; }
+  .tl-step:last-child { margin-right: 0; border-left-color: var(--green); }
+  .tl-step .tl-day { font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 600; color: var(--blue); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 5px; }
+  .tl-step:last-child .tl-day { color: var(--green); }
+  .tl-step .tl-what { font-size: 13.5px; color: var(--gray-600); line-height: 1.55; }
+
+  /* ===== QUOTE ===== */
+  .quote { display: flex; gap: 24px; align-items: center; background: var(--surface); border: 1px solid var(--gray-200); border-left: 4px solid var(--blue); border-radius: 16px; padding: 28px 30px; margin: 32px 0; box-shadow: 0 4px 20px rgba(0,0,0,0.04); }
+  .quote img { width: 92px; height: 92px; border-radius: 50%; object-fit: cover; flex-shrink: 0; border: 3px solid var(--gray-100); background: #fff; }
+  .quote blockquote { font-size: 17px; line-height: 1.65; color: var(--ink); font-weight: 500; margin-bottom: 12px; letter-spacing: -0.2px; }
+  .quote .q-author { font-size: 13.5px; color: var(--gray-500); }
+  .quote .q-author b { color: var(--ink); display: block; font-size: 14.5px; }
+  @media (max-width: 640px) { .quote { flex-direction: column; text-align: center; } }
+
+  /* ===== OLD STACK (before Detrics) ===== */
+  .old-stack { background: linear-gradient(135deg, #FEF2F2 0%, var(--gray-50) 100%); border: 1px solid #FECACA; border-radius: 14px; padding: 24px 20px 18px; margin: 22px 0; }
+  .old-stack .flow-node .flow-icon { border-color: #FECACA; }
+  .old-stack .flow-arrow { color: #FCA5A5; }
+  .dead-end { width: 64px; height: 64px; border-radius: 16px; border: 2px dashed #FCA5A5; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #EF4444; background: #FFF5F5; }
+  .old-stack .os-caption { text-align: center; font-size: 13px; color: #B91C1C; font-weight: 600; margin-top: 6px; }
+
+  /* ===== BEFORE / AFTER ===== */
+  .ba { display: grid; grid-template-columns: 1fr; gap: 14px; margin: 24px 0; }
+  .ba-row { border: 1px solid var(--gray-200); border-radius: 14px; padding: 18px 20px; background: var(--surface); }
+  .ba-row.before { border-color: #FECACA; background: linear-gradient(135deg, #FEF2F2 0%, var(--surface) 100%); }
+  .ba-row.after { border-color: #A7F3D0; background: linear-gradient(135deg, #ECFDF5 0%, var(--surface) 100%); }
+  .ba-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+  .ba-row.before .ba-label { color: #B91C1C; }
+  .ba-row.after .ba-label { color: #047857; }
+  .ba-stack { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 14px; font-weight: 600; color: var(--gray-700); }
+  .ba-stack img { height: 24px; width: auto; max-width: 90px; object-fit: contain; }
+  .ba-stack .ba-sep { color: var(--gray-300); font-weight: 300; }
+  .ba-stack .ba-none { color: #B91C1C; font-weight: 700; }
+
+  /* ===== SCREENSHOTS ===== */
+  .screenshot { border: 1px solid var(--gray-200); border-radius: 12px; overflow: hidden; margin: 20px auto; background: var(--gray-50); cursor: pointer; transition: box-shadow 0.3s; position: relative; max-width: 460px; }
+  .screenshot:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+  .screenshot::after { content: 'Click to enlarge'; position: absolute; bottom: 0; left: 0; right: 0; padding: 6px; background: linear-gradient(transparent, rgba(0,0,0,0.5)); color: white; font-size: 11px; text-align: center; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+  .screenshot:hover::after { opacity: 1; }
+  .screenshot img { width: 100%; display: block; object-fit: contain; max-height: 320px; }
+  .screenshot-caption { padding: 10px 16px; font-size: 12px; color: var(--gray-400); text-align: center; border-top: 1px solid var(--gray-100); font-style: italic; background: var(--surface); }
+
+  .lightbox { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 9999; cursor: zoom-out; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s; }
+  .lightbox.active { opacity: 1; visibility: visible; }
+  .lightbox img { max-width: 92%; max-height: 90vh; border-radius: 12px; box-shadow: 0 8px 40px rgba(0,0,0,0.4); transform: scale(0.95); transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1); }
+  .lightbox.active img { transform: scale(1); }
+  .lightbox-close { position: absolute; top: 24px; right: 28px; color: white; font-size: 32px; font-weight: 300; cursor: pointer; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(255,255,255,0.1); transition: background 0.2s; }
+  .lightbox-close:hover { background: rgba(255,255,255,0.2); }
+
+  /* ===== PLATFORM CHIPS ===== */
+  .platform-chips { display: flex; gap: 10px; flex-wrap: wrap; margin: 18px 0; }
+  .chip { display: inline-flex; align-items: center; gap: 8px; background: var(--surface); border: 1px solid var(--gray-200); border-radius: 10px; padding: 9px 15px; font-size: 14px; font-weight: 500; color: var(--gray-700); transition: border-color 0.2s, box-shadow 0.2s; }
+  .chip:hover { border-color: var(--blue-light); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.06); }
+  .chip img { width: 22px; height: 22px; border-radius: 4px; object-fit: contain; }
+
+  /* ===== FLOW ===== */
+  .flow { display: flex; align-items: flex-start; justify-content: center; gap: 0; margin: 28px 0; flex-wrap: wrap; }
+  .flow-node { display: flex; flex-direction: column; align-items: center; gap: 10px; transition: transform 0.3s; }
+  .flow-node:hover { transform: translateY(-4px); }
+  .flow-node .flow-icon { width: 64px; height: 64px; border-radius: 16px; background: var(--surface); border: 1px solid var(--gray-200); display: flex; align-items: center; justify-content: center; transition: box-shadow 0.3s, border-color 0.3s; }
+  .flow-node:hover .flow-icon { box-shadow: 0 4px 16px rgba(0,0,0,0.08); border-color: var(--gray-300); }
+  .flow-node .flow-icon img { width: 32px; height: 32px; border-radius: 6px; object-fit: contain; }
+  .flow-node .flow-label { font-size: 12px; color: var(--gray-500); font-weight: 600; }
+  .flow-arrow { color: var(--gray-300); font-size: 20px; font-weight: 300; height: 64px; display: flex; align-items: center; padding: 0 12px; }
+
+  /* ===== QUICK FACTS ===== */
+  .facts { background: var(--surface); border: 1px solid var(--gray-200); border-radius: 16px; padding: 26px 30px; margin: 32px 0; }
+  .facts h4 { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--gray-400); margin-bottom: 18px; }
+  .facts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 28px; }
+  .fact { display: flex; justify-content: space-between; gap: 12px; font-size: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--gray-100); }
+  .fact .f-key { color: var(--gray-500); }
+  .fact .f-val { color: var(--ink); font-weight: 600; text-align: right; }
+  @media (max-width: 640px) { .facts-grid { grid-template-columns: 1fr; } }
+
+  /* ===== TRUST ===== */
+  .trust { text-align: center; padding: 52px 0 24px; }
+  .trust h3 { font-size: 26px; font-weight: 800; color: var(--gray-600); margin-bottom: 32px; letter-spacing: -0.5px; }
+  .trust h3 b { color: var(--blue); }
+  .trust-logos { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 26px 34px; max-width: 720px; margin: 0 auto; }
+  .trust-logos img { height: 26px; width: auto; max-width: 120px; object-fit: contain; filter: grayscale(1); opacity: 0.6; transition: filter 0.2s, opacity 0.2s; }
+  .trust-logos img:hover { filter: grayscale(0); opacity: 1; }
+  @media (max-width: 640px) { .trust-logos { gap: 18px 22px; } .trust-logos img { height: 20px; } }
+
+  /* ===== CTA ===== */
+  .cta-section { text-align: center; padding: 56px 0 80px; }
+  .cta-section h2 { font-size: 30px; font-weight: 800; margin-bottom: 12px; letter-spacing: -0.5px; }
+  .cta-section p { font-size: 16px; color: var(--gray-500); margin-bottom: 28px; }
+  .cta-button { display: inline-flex; align-items: center; gap: 10px; background: linear-gradient(135deg, var(--blue) 0%, var(--blue-dark) 100%); color: white; text-decoration: none; padding: 16px 36px; border-radius: 12px; font-weight: 600; font-size: 16px; transition: all 0.3s; box-shadow: 0 4px 16px var(--blue-glow); }
+  .cta-button:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(37, 99, 235, 0.35); }
+  .cta-button svg { width: 18px; height: 18px; fill: white; }
+
+  .footer { text-align: center; padding: 40px 0; border-top: 1px solid var(--gray-200); font-size: 13px; color: var(--gray-400); }
+  .footer a { color: var(--blue); text-decoration: none; }
+
+  /* ===== STICKY BAR ===== */
+  .sticky-cta { position: fixed; top: 0; left: 0; right: 0; z-index: 8000; display: flex; align-items: center; justify-content: space-between; padding: 10px 22px; background: rgba(255,255,255,0.92); backdrop-filter: blur(10px); border-bottom: 1px solid var(--gray-200); box-shadow: 0 2px 12px rgba(0,0,0,0.05); transform: translateY(-110%); transition: transform 0.3s ease; }
+  .sticky-cta.visible { transform: translateY(0); }
+  .sticky-cta .sc-btn { background: linear-gradient(135deg, var(--blue), var(--blue-dark)); color: #fff; text-decoration: none; padding: 9px 20px; border-radius: 10px; font-weight: 600; font-size: 14px; box-shadow: 0 2px 10px var(--blue-glow); transition: transform 0.2s; }
+  .sticky-cta .sc-btn:hover { transform: translateY(-1px); }
+
+  @media (max-width: 640px) { .hero { padding: 48px 20px 40px; } .hero h1 { font-size: 28px; letter-spacing: -0.5px; } .chapter-header { padding: 20px; flex-direction: column; align-items: flex-start; gap: 10px; } .chapter-body { padding: 20px; } .container { padding: 0 16px; } .sticky-cta { padding: 8px 14px; } .screenshot { max-width: 100%; } }
+  @media print { body { background: white; } .hero { padding: 40px 20px 30px; } .hero h1 { font-size: 32px; } .chapter { break-inside: avoid; } .sticky-cta { display: none; } .fade-up { opacity: 1 !important; transform: none !important; } }
+</style>
+</head>
+<body>
+
+<!-- Sticky book-a-demo bar (slides in after the first chapter) -->
+<div class="sticky-cta" id="stickyCta">
+  <img src="https://detrics.io/_astro/detrics-logo.C-sT4k0h_ZovnhR.svg" alt="Detrics" style="height:22px; width:auto;">
+  <a class="sc-btn" href="https://detrics.io/demo/book/" target="_blank" rel="noopener">Book a demo</a>
+</div>
+
+<!-- Lightbox overlay -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <div class="lightbox-close">&times;</div>
+  <img id="lightbox-img" src="" alt="">
+</div>
+
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-badge">Success case</div>
+    <img class="hero-client" src="images/loymark/loymark-logo.png" alt="Loymark">
+    <h1>300+ ad accounts moved to BigQuery in 14 days, and <span>25% less churn</span></h1>
+    <p>Loymark runs paid media for 100+ clients across Central America. Their reporting ran on Supermetrics and Google Sheets, and a problem surfaced only when the client called. This is how they rebuilt it on their own data warehouse.</p>
+    <div class="hero-logos">
+      <img src="https://storage.googleapis.com/detrics-static/public/img/meta-ads-logo.png" alt="Meta Ads">
+      <img src="https://storage.googleapis.com/detrics-static/public/img/google-ads-logo.png" alt="Google Ads">
+      <img src="https://storage.googleapis.com/detrics-static/public/img/tiktok-logo.png" alt="TikTok Ads">
+      <img src="https://storage.googleapis.com/detrics-static/public/img/linkedin-ads-logo.png" alt="LinkedIn Ads">
+      <img src="https://storage.googleapis.com/detrics-static/public/img/google-analytics-4-logo.png" alt="Google Analytics 4">
+      <img src="https://storage.googleapis.com/detrics-static/public/img/google-search-console-logo.png" alt="Search Console">
+      <img src="https://storage.googleapis.com/detrics-static/public/img/google-dv-360-logo.png" alt="DV360">
+      <span class="plus">&rarr;</span>
+      <img src="https://storage.googleapis.com/detrics-static/public/img/big-query-icon.png" alt="BigQuery">
+      <span class="plus">&rarr;</span>
+      <img src="https://storage.googleapis.com/detrics-static/public/img/slack-logo.png" alt="Slack">
+      <img src="images/gmail-logo.png" alt="Email">
+    </div>
+  </div>
+</section>
+
+<div class="container">
+
+<!-- ============ RESULTS ============ -->
+<div class="results">
+  <div class="result">
+    <div class="r-num">-25%</div>
+    <div class="r-label">Client churn, after budget alarms went live</div>
+  </div>
+  <div class="result">
+    <div class="r-num">2h</div>
+    <div class="r-label">Recovered per analyst every week (30% of reporting time)</div>
+  </div>
+  <div class="result">
+    <div class="r-num">300+</div>
+    <div class="r-label">Ad accounts consolidated into one data lake</div>
+  </div>
+  <div class="result">
+    <div class="r-num">14</div>
+    <div class="r-label">Days to migrate, with service running throughout</div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ============ WHO THEY ARE ============ -->
+<div class="chapter fade-up" id="stickyTrigger">
+  <div class="chapter-header">
+    <span class="chapter-tag solution">Who they are</span>
+    <h2>One of Central America's largest digital consultancies</h2>
+  </div>
+  <div class="chapter-body">
+    <p><strong>Loymark</strong> is part of <strong>Grupo Garnier</strong>, one of the biggest communications groups in Central America. Five hundred people, based in Costa Rica, running paid media and analytics for more than a hundred clients.</p>
+    <p>That means <strong>300+ ad accounts across seven platforms</strong>: Meta, Google Ads, TikTok, LinkedIn Ads, DV360, GA4 and Search Console. Every one of those accounts has a budget to hit, a client who reads the report, and an analyst who owns it. At that scale, the data infrastructure stops being a back-office concern and becomes the thing the service is built on.</p>
+    
+    <div class="facts">
+      <h4>In short</h4>
+      <div class="facts-grid">
+        <div class="fact"><span class="f-key">Company</span><span class="f-val">Loymark (Grupo Garnier)</span></div>
+        <div class="fact"><span class="f-key">Country</span><span class="f-val">Costa Rica</span></div>
+        <div class="fact"><span class="f-key">Team</span><span class="f-val">500 people</span></div>
+        <div class="fact"><span class="f-key">Clients</span><span class="f-val">100+</span></div>
+        <div class="fact"><span class="f-key">Ad accounts</span><span class="f-val">300+</span></div>
+        <div class="fact"><span class="f-key">Platforms</span><span class="f-val">7</span></div>
+        <div class="fact"><span class="f-key">Old stack</span><span class="f-val">Supermetrics + Sheets</span></div>
+        <div class="fact"><span class="f-key">New stack</span><span class="f-val">Detrics + their own BigQuery</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ THE OLD STACK ============ -->
+<div class="chapter fade-up">
+  <div class="chapter-header">
+    <span class="chapter-tag pain">Before Detrics</span>
+    <h2>Supermetrics moved the data. Sheets stored it. Nothing watched it.</h2>
+  </div>
+  <div class="chapter-body">
+    <p>Loymark ran on <strong>Supermetrics and Google Sheets</strong>. Supermetrics pulled each platform into a spreadsheet, and the spreadsheet was the end of the line. One file per client, one analyst per file, and above all of it, nothing.</p>
+
+    <div class="old-stack">
+      <div class="flow" style="margin: 8px 0 0;">
+        <div class="flow-node"><div class="flow-icon" style="width:auto; padding:0 12px; gap:8px;"><img src="https://storage.googleapis.com/detrics-static/public/img/meta-ads-logo.png" alt="Meta Ads" style="width:24px;height:24px;"><img src="https://storage.googleapis.com/detrics-static/public/img/google-ads-logo.png" alt="Google Ads" style="width:24px;height:24px;"><img src="https://storage.googleapis.com/detrics-static/public/img/tiktok-logo.png" alt="TikTok Ads" style="width:24px;height:24px;"></div><span class="flow-label">300+ ad accounts</span></div>
+        <span class="flow-arrow">&rarr;</span>
+        <div class="flow-node"><div class="flow-icon" style="width:auto; padding:0 14px;"><img src="images/loymark/supermetrics-logo.png" alt="Supermetrics" style="width:auto; height:26px; border-radius:0;"></div><span class="flow-label">Supermetrics</span></div>
+        <span class="flow-arrow">&rarr;</span>
+        <div class="flow-node"><div class="flow-icon"><img src="https://storage.googleapis.com/detrics-static/public/img/sheets-logo.png" alt="Google Sheets"></div><span class="flow-label">100+ spreadsheets</span></div>
+        <span class="flow-arrow">&rarr;</span>
+        <div class="flow-node"><div class="dead-end">&times;</div><span class="flow-label">Nothing</span></div>
+      </div>
+      <div class="os-caption">No warehouse, no consolidation, no alarms</div>
+    </div>
+
+    <p>A spreadsheet is a place to put numbers. It has no opinion about them. Nobody was going to be told that a campaign had stopped investing: someone had to open the right file, on the right day, and notice.</p>
+  </div>
+</div>
+
+<!-- ============ THE COST ============ -->
+<div class="chapter fade-up">
+  <div class="chapter-header">
+    <span class="chapter-tag pain">What it cost them</span>
+    <h2>A reactive team loses clients</h2>
+  </div>
+  <div class="chapter-body">
+    <p>At ten clients that stack works. At a hundred clients and 300+ ad accounts, it turns into a tax on the whole team.</p>
+    <ul class="pain-list">
+      <li><strong>Data scattered across a hundred spreadsheets.</strong> No single place to answer "how is this client doing", and no way to compare clients side by side.</li>
+      <li><strong>Google Sheets hit its ceiling: 10 million cells.</strong> Once a sheet reaches the limit it stops accepting rows. The team trimmed history and dimensions to make things fit, so they were analyzing half the picture.</li>
+      <li><strong>One change had to be made a hundred times.</strong> Adding a metric or fixing a formula meant opening every client's file, one by one.</li>
+      <li><strong>AI had nothing to stand on.</strong> With no warehouse, no model could read the marketing data. Asking AI about an account produced invented answers, because it was never connected to the real numbers.</li>
+      <li><strong>The team found out last.</strong> A campaign stalling, a budget burning at twice the pace, an investment that stopped overnight: all of it surfaced when the client called to ask, days later.</li>
+      <li><strong>And that is what drove churn.</strong> By the time the problem showed up in the monthly report, the client had already lost confidence. Accounts left.</li>
+    </ul>
+    <p>The gap was structural. The old stack had nowhere to run an alarm from, so the team was reactive by design.</p>
+  </div>
+</div>
+
+<!-- ============ SOLUTION ============ -->
+<div class="chapter fade-up">
+  <div class="chapter-header">
+    <span class="chapter-tag solution">What we built</span>
+    <h2>One warehouse, one client map, alarms on top</h2>
+  </div>
+  <div class="chapter-body">
+    <p>Detrics led the migration end to end. We moved every ad account into <strong>Loymark's own BigQuery project</strong>, consolidated 100+ clients into a single data lake, and built the alarm layer on top of it.</p>
+
+    <div class="ba">
+      <div class="ba-row before">
+        <div class="ba-label">Before</div>
+        <div class="ba-stack">
+          <img src="images/loymark/supermetrics-logo.png" alt="Supermetrics">
+          <span class="ba-sep">&rarr;</span>
+          <img src="https://storage.googleapis.com/detrics-static/public/img/sheets-logo.png" alt="Google Sheets" style="height:22px;">
+          <span>Google Sheets</span>
+          <span class="ba-sep">&rarr;</span>
+          <span class="ba-none">nothing watching it</span>
+        </div>
+      </div>
+      <div class="ba-row after">
+        <div class="ba-label">After</div>
+        <div class="ba-stack">
+          <img src="https://detrics.io/_astro/detrics-logo.C-sT4k0h_ZovnhR.svg" alt="Detrics" style="height:22px;">
+          <span class="ba-sep">&rarr;</span>
+          <img src="https://storage.googleapis.com/detrics-static/public/img/big-query-icon.png" alt="BigQuery" style="height:22px;">
+          <span>Their own BigQuery</span>
+          <span class="ba-sep">&rarr;</span>
+          <img src="https://storage.googleapis.com/detrics-static/public/img/slack-logo.png" alt="Slack" style="height:22px;">
+          <span>alarms + AI agents</span>
+        </div>
+      </div>
+    </div>
+
+    <h3>The platforms we connected</h3>
+    <div class="platform-chips">
+      <div class="chip"><img src="https://storage.googleapis.com/detrics-static/public/img/meta-ads-logo.png" alt="Meta Ads"> Meta Ads</div>
+      <div class="chip"><img src="https://storage.googleapis.com/detrics-static/public/img/google-ads-logo.png" alt="Google Ads"> Google Ads</div>
+      <div class="chip"><img src="https://storage.googleapis.com/detrics-static/public/img/tiktok-logo.png" alt="TikTok Ads"> TikTok Ads</div>
+      <div class="chip"><img src="https://storage.googleapis.com/detrics-static/public/img/linkedin-ads-logo.png" alt="LinkedIn Ads"> LinkedIn Ads</div>
+      <div class="chip"><img src="https://storage.googleapis.com/detrics-static/public/img/google-analytics-4-logo.png" alt="Google Analytics 4"> Google Analytics 4</div>
+      <div class="chip"><img src="https://storage.googleapis.com/detrics-static/public/img/google-search-console-logo.png" alt="Search Console"> Search Console</div>
+      <div class="chip"><img src="https://storage.googleapis.com/detrics-static/public/img/google-dv-360-logo.png" alt="DV360"> DV360</div>
+    </div>
+
+    <h3>The flow</h3>
+    <div class="flow">
+      <div class="flow-node"><div class="flow-icon" style="width:auto; padding:0 12px; gap:8px;"><img src="https://storage.googleapis.com/detrics-static/public/img/meta-ads-logo.png" alt="Meta Ads" style="width:24px;height:24px;"><img src="https://storage.googleapis.com/detrics-static/public/img/google-ads-logo.png" alt="Google Ads" style="width:24px;height:24px;"><img src="https://storage.googleapis.com/detrics-static/public/img/tiktok-logo.png" alt="TikTok Ads" style="width:24px;height:24px;"></div><span class="flow-label">300+ ad accounts</span></div>
+      <span class="flow-arrow">&rarr;</span>
+      <div class="flow-node"><div class="flow-icon" style="border-color: var(--blue); background: #EFF6FF;"><img src="https://detrics.io/_astro/detrics-logo.C-sT4k0h_ZovnhR.svg" alt="Detrics" style="width: 40px; height: 32px;"></div><span class="flow-label">Detrics</span></div>
+      <span class="flow-arrow">&rarr;</span>
+      <div class="flow-node"><div class="flow-icon"><img src="https://storage.googleapis.com/detrics-static/public/img/big-query-icon.png" alt="BigQuery"></div><span class="flow-label">Their BigQuery</span></div>
+      <span class="flow-arrow">&rarr;</span>
+      <div class="flow-node"><div class="flow-icon" style="border-color: var(--green); background: var(--green-bg);"><img src="https://storage.googleapis.com/detrics-static/public/img/slack-logo.png" alt="Slack"></div><span class="flow-label">Slack + email alarms</span></div>
+      <span class="flow-arrow">&rarr;</span>
+      <div class="flow-node"><div class="flow-icon" style="border-color: var(--blue); background: #EFF6FF;"><img src="https://storage.googleapis.com/detrics-static/public/img/claude-logo.png" alt="AI agents"></div><span class="flow-label">AI agents</span></div>
+    </div>
+
+    <h3>14 days, with the service running the whole time</h3>
+    <p>Loymark kept Supermetrics live until the Detrics pipelines were filling BigQuery and validated. The switch happened once the new infrastructure was proven, so no client waited on a report during the migration.</p>
+    <div class="timeline">
+      <div class="tl-step">
+        <div class="tl-day">Days 1-4</div>
+        <div class="tl-what">Connect the 300+ ad accounts across the 7 platforms and point them at Loymark's BigQuery project.</div>
+      </div>
+      <div class="tl-step">
+        <div class="tl-day">Days 5-9</div>
+        <div class="tl-what">Consolidate every client into one schema with a shared client map, so one change applies to all.</div>
+      </div>
+      <div class="tl-step">
+        <div class="tl-day">Days 10-14</div>
+        <div class="tl-what">Alarms in Slack and email, AI agents connected to the warehouse, old stack retired.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ IMPACT ============ -->
+<div class="chapter fade-up">
+  <div class="chapter-header">
+    <span class="chapter-tag impact">The impact</span>
+    <h2>Proactive team, one source of truth, faster analysis</h2>
+  </div>
+  <div class="chapter-body">
+    <div class="impact-grid">
+      <div class="impact-card">
+        <div class="ic-top"><span class="ic-num">-25%</span><span class="ic-title">churn</span></div>
+        <p>Slack and email alarms fire on the delta between budget and actual investment. The team hears about a stalled campaign or a runaway budget the morning it happens, fixes it, and tells the client before the client asks. Accounts that used to leak away now stay.</p>
+      </div>
+      <div class="impact-card">
+        <div class="ic-top"><span class="ic-num">2h / week</span><span class="ic-title">back per analyst</span></div>
+        <p>One centralized data lake holds every client. A change to a metric, a new dimension, a fixed formula: it is done once and it applies everywhere. That gave each analyst back around 30% of the time they spent maintaining reports.</p>
+      </div>
+      <div class="impact-card">
+        <div class="ic-top"><span class="ic-num">AI</span><span class="ic-title">on top of the warehouse</span></div>
+        <p>With the data in BigQuery, Loymark connected AI agents straight to the warehouse. The answers now come from each account's real numbers. The paid media team asks questions in plain language and gets the analysis and the report back in minutes, instead of queueing work with an analyst.</p>
+      </div>
+    </div>
+
+    <h3>What the alarms look like</h3>
+    <p>Every morning, before anyone opens a dashboard, the alarm is already in the team channel and in the inbox: investment per client, day over day, month to date against budget, and the campaigns that stopped or spiked.</p>
+    <div class="screenshot" onclick="openLightbox(this)">
+      <img src="images/alarm-daily-slack.png" alt="Daily investment alarm posted to Slack">
+      <div class="screenshot-caption">Daily alarm in Slack: investment per client, day over day, month to date vs budget, plus campaign outliers (anonymized sample)</div>
+    </div>
+    <div class="screenshot" onclick="openLightbox(this)">
+      <img src="images/alarm-weekly-email.png" alt="Weekly investment summary email">
+      <div class="screenshot-caption">Monday summary by email: last 7 days vs the previous 7, per client, with the week's biggest movers (anonymized sample)</div>
+    </div>
+  </div>
+</div>
+
+<!-- JOSÉ COTO QUOTE: pending his approval. Draft wording is in README.md.
+     Once he signs off (or sends his own), paste the .quote block back here with images/loymark/jose-coto.png. -->
+
+<!-- ============ TRUST ============ -->
+<div class="trust fade-up">
+  <h3><b>1,000+ agencies</b> already trust Detrics</h3>
+  <div class="trust-logos">
+    <img src="images/brands/abn.svg" alt="ABN">
+    <img src="images/brands/ad_astra.svg" alt="Ad Astra">
+    <img src="images/brands/belo.svg" alt="Belo">
+    <img src="images/brands/blend.svg" alt="Blend">
+    <img src="images/brands/calm.svg" alt="Calm">
+    <img src="images/brands/despegar.svg" alt="Despegar">
+    <img src="images/brands/elevva.svg" alt="Elevva">
+    <img src="images/brands/estropical.svg" alt="Estropical">
+    <img src="images/brands/fanatiz.svg" alt="Fanatiz">
+    <img src="images/brands/frubis.svg" alt="Frubis">
+    <img src="images/brands/fz_sports.svg" alt="FZ Sports">
+    <img src="images/brands/genex_mkt.svg" alt="Genex">
+    <img src="images/brands/hyppo.svg" alt="Hyppo">
+    <img src="images/brands/johnfoos.svg" alt="John Foos">
+    <img src="images/brands/marketify.svg" alt="Marketify">
+    <img src="images/brands/snippet.svg" alt="Snippet">
+    <img src="images/brands/turismo_city.svg" alt="Turismo City">
+    <img src="images/brands/uke.svg" alt="Uke">
+  </div>
+</div>
+
+<!-- ============ CTA ============ -->
+<div class="cta-section fade-up">
+  <h2>Want the same setup for your agency?</h2>
+  <p>We lead the migration. Your data lands in your own BigQuery, with alarms on top.</p>
+  <div style="display:flex; gap:14px; justify-content:center; flex-wrap:wrap;">
+    <a href="https://detrics.io/demo/book/" target="_blank" rel="noopener" class="cta-button">
+      Book a demo
+      <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </a>
+    <a href="https://app.detrics.io/bigquery/destinations/new" target="_blank" rel="noopener" class="cta-button" style="background:transparent; color:var(--blue); border:1.5px solid var(--blue); box-shadow:none;">
+      Create free account
+    </a>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<!-- ============ FOOTER ============ -->
+<div class="footer">
+  <p><a href="https://detrics.io" target="_blank" rel="noopener">detrics.io</a> &middot; We've reduced churn for 1,000+ marketing agencies across LATAM</p>
+</div>
+
+<script>
+  // Sticky book-a-demo bar: show once the reader scrolls past the first chapter.
+  var stickyTrigger = document.getElementById('stickyTrigger');
+  var stickyCta = document.getElementById('stickyCta');
+  window.addEventListener('scroll', function() {
+    if (stickyTrigger && stickyCta) stickyCta.classList.toggle('visible', stickyTrigger.getBoundingClientRect().top < 0);
+  });
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 80);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+  function openLightbox(el) {
+    const img = el.querySelector('img');
+    if (!img) return;
+    document.getElementById('lightbox-img').src = img.src;
+    document.getElementById('lightbox').classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('active');
+    document.body.style.overflow = '';
+  }
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLightbox(); });
+</script>
+
+</body>
+</html>
