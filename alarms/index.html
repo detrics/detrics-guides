@@ -446,6 +446,11 @@
   <div class="step-body">
     <p>Detrics gives you one table per platform. This query stacks them into a single <code>consolidated_ad_performance</code> table and joins <code>client_map</code> so every row carries its <strong>client</strong>. Run it as a <strong>scheduled query</strong> in BigQuery so it rebuilds every morning after the data syncs.</p>
 
+    <div class="tip amber">
+      <span class="tip-icon">&#9733;</span>
+      <span><strong>Before you run this query:</strong> the <code>client_map</code> table doesn't exist in BigQuery yet. The Step 5 script creates it from your Sheet. Jump to Step 5, paste the script, enable the BigQuery advanced service, and run <code>syncClientMapToBigQuery</code> once. Then come back here, run the query and schedule it, and pick up Step 5 at <code>dryRunDaily</code>. From then on the script syncs the mapping every day: you edit the Sheet and that's it.</span>
+    </div>
+
     <p>Fill in your details once below. The SQL here <strong>and</strong> the Apps Script in Step 5 update automatically, so you never edit code by hand. Add one <code>SELECT</code> per platform you connected.</p>
 
     <div class="cfg-panel">

@@ -444,6 +444,11 @@
   <div class="step-body">
     <p>Detrics te da una tabla por plataforma. Esta query las apila en una sola tabla <code>consolidated_ad_performance</code> y hace join con <code>client_map</code> para que cada fila lleve su <strong>cliente</strong>. Correla como <strong>scheduled query</strong> en BigQuery para que se reconstruya cada mañana, después de que entra la data.</p>
 
+    <div class="tip amber">
+      <span class="tip-icon">&#9733;</span>
+      <span><strong>Antes de correr esta query:</strong> la tabla <code>client_map</code> todavía no existe en BigQuery. La crea el script del Paso 5 a partir de tu Sheet. Andá al Paso 5, pegá el script, activá el servicio de BigQuery y ejecutá <code>syncClientMapToBigQuery</code> una vez. Después volvé acá, corré la query y programala, y seguí con el <code>dryRunDaily</code> del Paso 5. De ahí en adelante el script sincroniza el mapeo todos los días: vos editás el Sheet y listo.</span>
+    </div>
+
     <p>Cargá tus datos una sola vez abajo. La SQL de acá <strong>y</strong> el Apps Script del Paso 5 se actualizan solos, así no editás código a mano. Agregá un <code>SELECT</code> por cada plataforma que conectaste.</p>
 
     <div class="cfg-panel">
