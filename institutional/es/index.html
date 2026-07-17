@@ -1022,6 +1022,42 @@
         .step-card h3 { font-size: 17px; font-weight: 600; color: var(--ink); margin-bottom: 6px; }
         .step-card p { font-size: 14px; color: var(--ink-50); line-height: 1.5; }
 
+        /* ── Agency trust bar (below hero) ── */
+        .agency-trust { padding: 56px 0 44px; text-align: center; }
+        .agency-trust h3 {
+            font-family: var(--sans);
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            color: var(--ink-50);
+            margin-bottom: 34px;
+        }
+        .agency-trust h3 b { color: var(--accent); font-weight: 700; }
+        .agency-logos {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 26px 40px;
+            max-width: 860px;
+            margin: 0 auto;
+        }
+        .agency-logos img {
+            height: 26px;
+            width: auto;
+            max-width: 124px;
+            object-fit: contain;
+            filter: grayscale(1);
+            opacity: 0.55;
+            transition: filter 0.2s var(--ease-out), opacity 0.2s var(--ease-out);
+        }
+        .agency-logos img:hover { filter: grayscale(0); opacity: 1; }
+        @media (max-width: 640px) {
+            .agency-trust { padding: 40px 0 32px; }
+            .agency-logos { gap: 20px 26px; }
+            .agency-logos img { height: 20px; max-width: 96px; }
+        }
+
         /* ── Trust ── */
         .trust {
             padding: 100px 0;
@@ -1310,6 +1346,33 @@
                 <a href="https://detrics.io/get-started" class="btn-main">Empieza gratis &rarr;</a>
                 <a href="https://detrics.io/demo/book/" class="btn-ghost">Agendar demo</a>
             </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══ Agency trust bar ═══ -->
+<section class="agency-trust">
+    <div class="container">
+        <h3 class="reveal"><b>+1.000 agencias</b> ya confían en Detrics</h3>
+        <div class="agency-logos reveal reveal-d1">
+            <img src="https://guides.detrics.io/institutional/images/brands/abn.svg" alt="ABN">
+            <img src="https://guides.detrics.io/institutional/images/brands/ad_astra.svg" alt="Ad Astra">
+            <img src="https://guides.detrics.io/institutional/images/brands/belo.svg" alt="Belo">
+            <img src="https://guides.detrics.io/institutional/images/brands/blend.svg" alt="Blend">
+            <img src="https://guides.detrics.io/institutional/images/brands/calm.svg" alt="Calm">
+            <img src="https://guides.detrics.io/institutional/images/brands/despegar.svg" alt="Despegar">
+            <img src="https://guides.detrics.io/institutional/images/brands/elevva.svg" alt="Elevva">
+            <img src="https://guides.detrics.io/institutional/images/brands/estropical.svg" alt="Estropical">
+            <img src="https://guides.detrics.io/institutional/images/brands/fanatiz.svg" alt="Fanatiz">
+            <img src="https://guides.detrics.io/institutional/images/brands/frubis.svg" alt="Frubis">
+            <img src="https://guides.detrics.io/institutional/images/brands/fz_sports.svg" alt="FZ Sports">
+            <img src="https://guides.detrics.io/institutional/images/brands/genex_mkt.svg" alt="Genex">
+            <img src="https://guides.detrics.io/institutional/images/brands/hyppo.svg" alt="Hyppo">
+            <img src="https://guides.detrics.io/institutional/images/brands/johnfoos.svg" alt="John Foos">
+            <img src="https://guides.detrics.io/institutional/images/brands/marketify.svg" alt="Marketify">
+            <img src="https://guides.detrics.io/institutional/images/brands/snippet.svg" alt="Snippet">
+            <img src="https://guides.detrics.io/institutional/images/brands/turismo_city.svg" alt="Turismo City">
+            <img src="https://guides.detrics.io/institutional/images/brands/uke.svg" alt="Uke">
         </div>
     </div>
 </section>
