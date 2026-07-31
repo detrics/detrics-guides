@@ -919,6 +919,20 @@
         .p-detail { font-size: 12px; color: var(--ink-30); margin-top: 2px; }
         .p-price { font-size: 22px; font-weight: 700; color: var(--accent); }
         .p-price span { font-size: 13px; font-weight: 400; color: var(--ink-30); }
+        .p-claude {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--ink-50);
+            background: var(--surface);
+            border: 1px solid var(--ink-08);
+            border-radius: 100px;
+            padding: 5px 12px 5px 6px;
+        }
+        .p-claude img { width: 16px; height: 16px; display: block; }
 
         .pricing-note {
             text-align: center;
@@ -1209,6 +1223,8 @@
             .int-grid, .dest-grid { grid-template-columns: 1fr; }
             .b-grid, .b-row2, .steps-row { grid-template-columns: 1fr; }
             .clients-grid { grid-template-columns: repeat(2, 1fr); }
+            .p-claude { padding: 5px; }
+            .p-claude span { display: none; }
             .trust-row { flex-direction: column; gap: 32px; }
             .hero { padding: 130px 0 80px; }
         }
@@ -1854,15 +1870,18 @@
                     </div>
                     <div class="p-card">
                         <div><div class="p-name">Growth</div><div class="p-detail">1,250 actualizaciones/mes</div></div>
+                        <span class="p-claude" title="Incluye acceso completo a Detrics for Claude"><img src="https://storage.googleapis.com/detrics-static/public/img/claude-logo.png" alt="Claude"><span>Claude</span></span>
                         <div><span class="p-price">$49.99<span>/mes</span></span></div>
                     </div>
                     <div class="p-card popular">
                         <span class="p-popular-tag">Más popular</span>
                         <div><div class="p-name">Pro — Multi User</div><div class="p-detail">5,000 actualizaciones/mes</div></div>
+                        <span class="p-claude" title="Incluye acceso completo a Detrics for Claude"><img src="https://storage.googleapis.com/detrics-static/public/img/claude-logo.png" alt="Claude"><span>Claude</span></span>
                         <div><span class="p-price">$99.99<span>/mes</span></span></div>
                     </div>
                     <div class="p-card">
                         <div><div class="p-name">Business — Multi User</div><div class="p-detail">Actualizaciones ilimitadas</div></div>
+                        <span class="p-claude" title="Incluye acceso completo a Detrics for Claude"><img src="https://storage.googleapis.com/detrics-static/public/img/claude-logo.png" alt="Claude"><span>Claude</span></span>
                         <div><span class="p-price">$149.99<span>/mes</span></span></div>
                     </div>
                 </div>
@@ -1932,7 +1951,7 @@
                     <span><strong>+20 agencias</strong> ya migraron a Detrics &nbsp;&middot;&nbsp; Arrancá tu migración &rarr;</span>
                 </a>
             </div>
-            <div class="reveal reveal-d3" style="margin-top: 10px;"><span class="migration-sub-tag">Incluido en planes Pro y Business</span></div>
+            <div class="reveal reveal-d3" style="margin-top: 10px;"><span class="migration-sub-tag">Incluido en planes BigQuery</span></div>
         </div>
         <div class="steps-row">
             <div class="step-card reveal">
