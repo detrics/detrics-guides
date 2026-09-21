@@ -977,51 +977,11 @@
     <p>Ahora conectamos Claude con Detrics. El MCP (Model Context Protocol) le da a Claude acceso directo a tus datos de marketing. No necesitas instalar nada &mdash; se configura desde claude.ai.</p>
 
     <ol class="substeps">
-      <li>Abri <a href="https://claude.ai" target="_blank" rel="noopener"><strong>claude.ai</strong></a> y logueate con tu cuenta</li>
-      <li>Click en tu perfil (abajo a la izquierda) &rarr; <strong>Settings</strong>
+      <li>Abri el <a href="https://claude.ai/directory/detrics" target="_blank" rel="noopener"><strong>directorio de Claude</strong></a> y logueate con tu cuenta</li>
+      <li>Click en <strong>Connect</strong> en el listado de Detrics
         <div class="screenshot" onclick="openLightbox(this)" style="margin-top: 12px;">
-          <img src="../images/claude-settings.png" alt="Claude - click en Settings desde el menu de perfil">
-          <div class="screenshot-caption">Abri Settings desde el menu de tu perfil</div>
-        </div>
-      </li>
-      <li>En el sidebar, click en <strong>Connectors</strong>
-        <div class="screenshot" onclick="openLightbox(this)" style="margin-top: 12px;">
-          <img src="../images/claude-connectors-page.png" alt="Pagina de Connectors en Claude Settings">
-          <div class="screenshot-caption">Pagina de Connectors en Claude Settings</div>
-        </div>
-      </li>
-      <li>Click en <strong>"Add custom connector"</strong>
-        <div class="screenshot" onclick="openLightbox(this)" style="margin-top: 12px;">
-          <img src="../images/add-custom-connector-btn.png" alt="Boton Add custom connector en la pagina de Connectors">
-          <div class="screenshot-caption">Click en "Add custom connector" al final de la lista</div>
-        </div>
-      </li>
-      <li>Ingresa los datos del connector:
-        <div class="field-input">
-          <div>
-            <div class="field-label">Name</div>
-            <div class="field-value">
-              <span class="text">Detrics</span>
-              <button class="copy-btn-light" onclick="copyText('Detrics',this)">Copiar</button>
-            </div>
-          </div>
-          <div style="flex: 2; min-width: 280px;">
-            <div class="field-label">URL</div>
-            <div class="field-value url">
-              <span class="text">https://mcp.detrics.io</span>
-              <button class="copy-btn-light" onclick="copyText('https://mcp.detrics.io',this)">Copiar</button>
-            </div>
-          </div>
-        </div>
-        <div class="screenshot" onclick="openLightbox(this)" style="margin-top: 12px;">
-          <img src="../images/add-custom-connector.png" alt="Dialogo Add custom connector en Claude con Name: Detrics y URL: https://mcp.detrics.io">
-          <div class="screenshot-caption">Ingresa "Detrics" como nombre y "https://mcp.detrics.io" como URL</div>
-        </div>
-      </li>
-      <li>Click en <strong>Connect</strong>
-        <div class="screenshot" onclick="openLightbox(this)" style="margin-top: 12px;">
-          <img src="../images/detrics-connect.png" alt="Detrics aparece como custom connector - click en Connect">
-          <div class="screenshot-caption">Detrics aparece como connector custom &mdash; click en "Connect"</div>
+          <img src="../images/claude-directory-connect.png" alt="Listado de Detrics en el directorio de Claude - click en Connect">
+          <div class="screenshot-caption">Click en "Connect" en el listado de Detrics</div>
         </div>
       </li>
       <li><strong>Autoriza</strong> el acceso &mdash; segui el flujo de autorizacion de Detrics
@@ -1030,10 +990,10 @@
           <div class="screenshot-caption">Autoriza a Claude para acceder a tus datos de Detrics</div>
         </div>
       </li>
-      <li>Verifica que funciona: abri un chat nuevo y preguntale a Claude <code>Que contextos ves para Detrics?</code>
+      <li>Verifica que funciona: abri un chat nuevo y preguntale a Claude <code>Que plataformas tengo conectadas?</code> Deberias ver la lista de tus fuentes de datos conectadas.
         <div class="screenshot" onclick="openLightbox(this)" style="margin-top: 12px;">
-          <img src="../images/claude-connectors.png" alt="Connectors en Claude con Detrics activado">
-          <div class="screenshot-caption">Detrics aparece como connector activo (toggle azul) en Claude</div>
+          <img src="../images/claude-verify-platforms.png" alt="Claude lista las plataformas conectadas en Detrics">
+          <div class="screenshot-caption">Claude lista tus plataformas y cuentas conectadas</div>
         </div>
       </li>
     </ol>
