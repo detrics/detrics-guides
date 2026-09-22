@@ -542,6 +542,11 @@
   .check input:checked ~ .txt { color: var(--gray-400); text-decoration: line-through; }
   .check input:focus-visible + .box { outline: 2px solid var(--blue); outline-offset: 2px; }
   .check .txt small { display: block; font-size: 12.5px; color: var(--gray-400); text-decoration: none; }
+  .check .txt { flex: 1; }
+  .check .owner { margin-top: 1px; }
+  .check-group { font-size: 13px; font-weight: 700; color: var(--gray-500); padding: 14px 16px 4px; }
+  .check-group:first-child { padding-top: 8px; }
+  @media (max-width: 480px) { .check { flex-wrap: wrap; } .check .owner { margin-left: 34px; } }
   .progress { font-size: 13px; color: var(--gray-500); margin: 0 0 12px; }
   .progress b { color: var(--ink); }
 
@@ -996,16 +1001,35 @@
 <!-- ============ CHECKLIST ============ -->
 <section class="section" id="checklist">
   <div class="container">
-    <h2 class="section-title">Checklist de Carat</h2>
-    <p class="section-lead">Lo que necesitamos del equipo de Carat en la primera semana. Las marcas quedan guardadas en este navegador.</p>
+    <h2 class="section-title">Checklist del proyecto</h2>
+    <p class="section-lead">Todos los pasos, de la reunión de inicio a la última sesión con Tom. Las marcas quedan guardadas en este navegador.</p>
     <p class="progress" aria-live="polite"><b id="done">0</b> de <b id="total">0</b> completos</p>
     <div class="checklist" id="list">
-      <label class="check"><input type="checkbox" data-k="kickoff"><span class="box"></span><span class="txt">Reunión de inicio con el administrador de Google Cloud presente<small>Paso 1</small></span></label>
-      <label class="check"><input type="checkbox" data-k="invite"><span class="box"></span><span class="txt">support@detrics.io invitado al workspace como Owner<small>Paso 2.1</small></span></label>
-      <label class="check"><input type="checkbox" data-k="sources"><span class="box"></span><span class="txt">Las 10 fuentes conectadas<small>Paso 2.2</small></span></label>
-      <label class="check"><input type="checkbox" data-k="map"><span class="box"></span><span class="txt">Mapa de clientes completo y compartido como Editor<small>Pasos 3.1 a 3.3</small></span></label>
-      <label class="check"><input type="checkbox" data-k="looker"><span class="box"></span><span class="txt">Informe de Looker Studio creado y compartido<small>Paso 4.1</small></span></label>
-      <label class="check"><input type="checkbox" data-k="reports"><span class="box"></span><span class="txt">Dashboards actuales compartidos como Editor<small>Paso 4.2</small></span></label>
+      <div class="check-group">Día 1 · Reunión de inicio</div>
+      <label class="check"><input type="checkbox" data-k="plan"><span class="box"></span><span class="txt">Plan de Detrics contratado<small>Paso 1.1</small></span><span class="owner both">Carat y Detrics</span></label>
+      <label class="check"><input type="checkbox" data-k="gcp"><span class="box"></span><span class="txt">Proyecto de Google Cloud creado<small>Paso 1.2</small></span><span class="owner both">Carat y Detrics</span></label>
+      <label class="check"><input type="checkbox" data-k="billing"><span class="box"></span><span class="txt">Facturación activa en el proyecto<small>Paso 1.3</small></span><span class="owner both">Carat y Detrics</span></label>
+      <label class="check"><input type="checkbox" data-k="iam"><span class="box"></span><span class="txt">Acceso de Administrador de BigQuery para los tres correos de Detrics y API de Data Transfer habilitada<small>Paso 1.4</small></span><span class="owner both">Carat y Detrics</span></label>
+      <label class="check"><input type="checkbox" data-k="dest"><span class="box"></span><span class="txt">BigQuery conectado a Detrics y conexión probada<small>Paso 1.5</small></span><span class="owner both">Carat y Detrics</span></label>
+      <label class="check"><input type="checkbox" data-k="agenda"><span class="box"></span><span class="txt">Dashboard elegido, reuniones agendadas y canal de Slack abierto<small>Paso 1.6</small></span><span class="owner both">Carat y Detrics</span></label>
+      <div class="check-group">Semana 1 · Carat</div>
+      <label class="check"><input type="checkbox" data-k="invite"><span class="box"></span><span class="txt">support@detrics.io invitado al workspace como Owner<small>Paso 2.1</small></span><span class="owner carat">Carat</span></label>
+      <label class="check"><input type="checkbox" data-k="sources"><span class="box"></span><span class="txt">Las 10 fuentes conectadas<small>Paso 2.2</small></span><span class="owner carat">Carat</span></label>
+      <label class="check"><input type="checkbox" data-k="mapcopy"><span class="box"></span><span class="txt">Copia de la plantilla del mapa de clientes<small>Paso 3.1</small></span><span class="owner carat">Carat</span></label>
+      <label class="check"><input type="checkbox" data-k="mapfill"><span class="box"></span><span class="txt">Mapa de clientes completo, una fila por cuenta<small>Paso 3.2</small></span><span class="owner carat">Carat</span></label>
+      <label class="check"><input type="checkbox" data-k="mapshare"><span class="box"></span><span class="txt">Mapa compartido con support@detrics.io como Editor<small>Paso 3.3</small></span><span class="owner carat">Carat</span></label>
+      <label class="check"><input type="checkbox" data-k="looker"><span class="box"></span><span class="txt">Informe de Looker Studio creado y compartido como Editor<small>Paso 4.1</small></span><span class="owner carat">Carat</span></label>
+      <label class="check"><input type="checkbox" data-k="reports"><span class="box"></span><span class="txt">Dashboards actuales compartidos como Editor<small>Paso 4.2</small></span><span class="owner carat">Carat</span></label>
+      <div class="check-group">Semanas 2 a 4 · Detrics</div>
+      <label class="check"><input type="checkbox" data-k="transfers"><span class="box"></span><span class="txt">Transferencias creadas y carga histórica completa<small>Paso 5</small></span><span class="owner detrics">Detrics</span></label>
+      <label class="check"><input type="checkbox" data-k="names"><span class="box"></span><span class="txt">Tabla de nombres validada por Carat en la reunión 2<small>Paso 5</small></span><span class="owner both">Carat y Detrics</span></label>
+      <label class="check"><input type="checkbox" data-k="tables"><span class="box"></span><span class="txt">Tablas consolidadas validadas contra Supermetrics en la reunión 3<small>Paso 6</small></span><span class="owner both">Carat y Detrics</span></label>
+      <label class="check"><input type="checkbox" data-k="dash"><span class="box"></span><span class="txt">Dashboard multicliente entregado en la reunión 4<small>Paso 7</small></span><span class="owner both">Carat y Detrics</span></label>
+      <div class="check-group">Meses 2 a 4 · Consultoría con Tom</div>
+      <label class="check"><input type="checkbox" data-k="s1"><span class="box"></span><span class="txt">Sesión 1: el warehouse por dentro<small>Consultoría</small></span><span class="owner both">Carat y Detrics</span></label>
+      <label class="check"><input type="checkbox" data-k="s2"><span class="box"></span><span class="txt">Sesión 2: clientes y cuentas nuevas<small>Consultoría</small></span><span class="owner both">Carat y Detrics</span></label>
+      <label class="check"><input type="checkbox" data-k="s3"><span class="box"></span><span class="txt">Sesión 3: replicar y modificar reportes<small>Consultoría</small></span><span class="owner both">Carat y Detrics</span></label>
+      <label class="check"><input type="checkbox" data-k="s4"><span class="box"></span><span class="txt">Sesión 4: revisión y próximos pasos<small>Consultoría</small></span><span class="owner both">Carat y Detrics</span></label>
     </div>
   </div>
 </section>
