@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-zuCELNdykQVu7pCwZ6FfMr2InMBoD85I+NhHE+K0jKw='; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://storage.googleapis.com; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="robots" content="noindex, nofollow">
+<title>Onboarding Carat: data warehouse en BigQuery</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="apple-touch-icon" href="/favicon.png">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue: #2563EB;
+    --blue-dark: #1D4ED8;
+    --blue-light: #3B82F6;
+    --blue-soft: #EFF6FF;
+    --blue-glow: rgba(37, 99, 235, 0.25);
+    --ink: #0F172A;
+    --surface: #FFFFFF;
+    --gray-50: #F8FAFC;
+    --gray-100: #F1F5F9;
+    --gray-200: #E2E8F0;
+    --gray-300: #CBD5E1;
+    --gray-400: #94A3B8;
+    --gray-500: #64748B;
+    --gray-600: #475569;
+    --gray-700: #334155;
+    --green: #10B981;
+    --green-dark: #047857;
+    --green-bg: #ECFDF5;
+    --amber-bg: #FFFBEB;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    color: var(--ink);
+    background: var(--gray-50);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--blue); }
+  :focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; border-radius: 4px; }
+
+  /* ── Hero ── */
+  .hero {
+    background: linear-gradient(160deg, #0B1120 0%, #0F172A 45%, #131C2E 100%);
+    color: #fff;
+    padding: 72px 24px 64px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: -40% -20%;
+    background:
+      radial-gradient(ellipse 620px 400px at 22% 30%, rgba(37, 99, 235, 0.18) 0%, transparent 70%),
+      radial-gradient(ellipse 520px 480px at 78% 72%, rgba(59, 130, 246, 0.10) 0%, transparent 60%);
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(37, 99, 235, 0.35), transparent);
+  }
+  .hero-content { position: relative; z-index: 1; max-width: 760px; margin: 0 auto; }
+  .hero-client {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #93C5FD;
+    margin-bottom: 26px;
+  }
+  .hero-client img { height: 22px; width: 22px; border-radius: 6px; }
+  .hero-client span { color: var(--gray-500); }
+  .hero h1 {
+    font-size: 46px;
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -1.2px;
+    margin-bottom: 18px;
+  }
+  .hero p {
+    font-size: 17px;
+    color: #94A3B8;
+    max-width: 560px;
+    margin: 0 auto;
+    line-height: 1.75;
+  }
+  .hero-flow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 40px;
+  }
+  .hero-flow .logos { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+  .hero-flow img {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 6px;
+    object-fit: contain;
+  }
+  .hero-flow .dests { display: inline-flex; align-items: center; gap: 10px; white-space: nowrap; }
+  .hero-flow .arrow { color: var(--gray-500); font-size: 18px; padding: 0 6px; }
+  .hero-flow .dest img { width: 44px; height: 44px; background: rgba(37, 99, 235, 0.14); border-color: rgba(37, 99, 235, 0.35); }
+  /* one orchestrated load moment */
+  @media (prefers-reduced-motion: no-preference) {
+    .hero-client, .hero h1, .hero p, .hero-flow { animation: rise 0.8s cubic-bezier(0.22, 1, 0.36, 1) both; }
+    .hero h1 { animation-delay: 0.08s; }
+    .hero p { animation-delay: 0.18s; }
+    .hero-flow { animation-delay: 0.3s; }
+    @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+  }
+
+  /* ── Layout ── */
+  .container { max-width: 800px; margin: 0 auto; padding: 0 24px; }
+  .wide { max-width: 1000px; margin: 0 auto; padding: 0 24px; }
+
+  .facts {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    margin: -34px auto 0;
+    position: relative;
+    z-index: 2;
+    background: var(--surface);
+    border: 1px solid var(--gray-200);
+    border-radius: 16px;
+    box-shadow: 0 8px 28px rgba(15, 23, 42, 0.06);
+    overflow: hidden;
+  }
+  .fact { padding: 22px 24px; }
+  .fact + .fact { border-left: 1px solid var(--gray-100); }
+  .fact strong { display: block; font-size: 22px; font-weight: 800; letter-spacing: -0.4px; }
+  .fact span { font-size: 13px; color: var(--gray-500); }
+
+  .section { padding: 72px 0 0; }
+  .section-title {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.6px;
+    margin-bottom: 10px;
+  }
+  .section-lead {
+    font-size: 16px;
+    color: var(--gray-600);
+    max-width: 640px;
+    line-height: 1.75;
+    margin-bottom: 28px;
+  }
+
+  /* ── Gantt ── */
+  .gantt-wrap {
+    background: var(--surface);
+    border: 1px solid var(--gray-200);
+    border-radius: 18px;
+    padding: 24px 26px 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.02);
+  }
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 22px;
+    font-size: 13px;
+    color: var(--gray-600);
+    padding-bottom: 16px;
+    margin-bottom: 14px;
+    border-bottom: 1px solid var(--gray-100);
+  }
+  .legend span { display: inline-flex; align-items: center; gap: 8px; }
+  .sw { width: 22px; height: 12px; border-radius: 4px; display: inline-block; }
+  .sw.carat { background: var(--ink); }
+  .sw.detrics { background: linear-gradient(135deg, var(--blue), var(--blue-dark)); }
+  .sw.sess { background: var(--green-bg); border: 1.5px solid var(--green); }
+  .sw.diamond { width: 12px; height: 12px; border-radius: 3px; background: var(--ink); transform: rotate(45deg); }
+  .gantt-scroll { overflow-x: auto; }
+  .gantt { min-width: 760px; }
+  .g-row {
+    display: grid;
+    grid-template-columns: 210px 1fr;
+    align-items: center;
+    min-height: 44px;
+  }
+  .g-row + .g-row { border-top: 1px solid var(--gray-100); }
+  .g-label { font-size: 13px; font-weight: 600; color: var(--gray-700); padding-right: 14px; line-height: 1.35; }
+  .g-label small { display: block; font-size: 11.5px; font-weight: 500; color: var(--gray-400); }
+  /* 4 weeks × 5 days + 12 units for the 3 post-delivery months */
+  .g-track {
+    display: grid;
+    grid-template-columns: repeat(20, 1fr) repeat(12, 0.9fr);
+    height: 100%;
+    align-items: center;
+    background-image:
+      linear-gradient(90deg, transparent 0 calc(20 / 30.8 * 100%), rgba(16, 185, 129, 0.05) calc(20 / 30.8 * 100%) 100%),
+      linear-gradient(90deg, transparent calc(5 / 30.8 * 100% - 1px), var(--gray-100) calc(5 / 30.8 * 100% - 1px) calc(5 / 30.8 * 100%), transparent calc(5 / 30.8 * 100%)),
+      linear-gradient(90deg, transparent calc(10 / 30.8 * 100% - 1px), var(--gray-100) calc(10 / 30.8 * 100% - 1px) calc(10 / 30.8 * 100%), transparent calc(10 / 30.8 * 100%)),
+      linear-gradient(90deg, transparent calc(15 / 30.8 * 100% - 1px), var(--gray-100) calc(15 / 30.8 * 100% - 1px) calc(15 / 30.8 * 100%), transparent calc(15 / 30.8 * 100%)),
+      linear-gradient(90deg, transparent calc(20 / 30.8 * 100% - 1px), #A7F3D0 calc(20 / 30.8 * 100% - 1px) calc(20 / 30.8 * 100% + 1px), transparent calc(20 / 30.8 * 100% + 1px));
+  }
+  .g-head .g-track { background-image: none; }
+  .wk { text-align: center; font-size: 12px; font-weight: 700; color: var(--gray-700); }
+  .wk span { display: block; font-size: 11px; font-weight: 500; color: var(--gray-400); }
+  .wk.post { color: var(--green-dark); }
+  .wk.post span { color: #6EE7B7; color: var(--green); }
+  .bar {
+    height: 26px;
+    margin: 0 2px;
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .bar.carat { background: var(--ink); }
+  .bar.detrics { background: linear-gradient(135deg, var(--blue), var(--blue-dark)); }
+  .bar.session { background: var(--green-bg); border: 1.5px solid var(--green); color: var(--green-dark); }
+  .pin { display: flex; justify-content: center; }
+  .pin i {
+    width: 18px; height: 18px;
+    border-radius: 5px;
+    background: var(--ink);
+    transform: rotate(45deg);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.25);
+  }
+  .pin i b { transform: rotate(-45deg); color: #fff; font-size: 9.5px; font-weight: 800; font-style: normal; }
+  .pin.s i { background: var(--surface); border: 1.5px solid var(--green); border-radius: 50%; transform: none; box-shadow: none; }
+  .pin.s i b { transform: none; color: var(--green-dark); }
+
+  .miles {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-top: 18px;
+  }
+  .mile {
+    background: var(--surface);
+    border: 1px solid var(--gray-200);
+    border-radius: 14px;
+    padding: 16px 18px;
+  }
+  .mile-top { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .mile-top .pin i { width: 16px; height: 16px; }
+  .mile-top em { font-style: normal; font-size: 12px; font-weight: 600; color: var(--gray-400); }
+  .mile h3 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .mile p { font-size: 13px; color: var(--gray-500); line-height: 1.55; }
+
+  /* ── Steps ── */
+  .phase-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin: 56px 0 18px;
+  }
+  .phase-head h3 { font-size: 20px; font-weight: 800; letter-spacing: -0.3px; }
+  .owner {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 11px;
+    border-radius: 100px;
+    white-space: nowrap;
+  }
+  .owner::before { content: ''; width: 7px; height: 7px; border-radius: 50%; }
+  .owner.carat { background: var(--gray-100); color: var(--ink); }
+  .owner.carat::before { background: var(--ink); }
+  .owner.detrics { background: var(--blue-soft); color: var(--blue-dark); }
+  .owner.detrics::before { background: var(--blue); }
+  .owner.both { background: var(--green-bg); color: var(--green-dark); }
+  .owner.both::before { background: var(--green); }
+
+  .step {
+    background: var(--surface);
+    border: 1px solid var(--gray-200);
+    border-radius: 16px;
+    margin-bottom: 20px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.02);
+  }
+  .step-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 22px 28px;
+    border-bottom: 1px solid var(--gray-100);
+    background: linear-gradient(180deg, var(--gray-50) 0%, var(--surface) 100%);
+  }
+  .step-number {
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--blue) 0%, var(--blue-dark) 100%);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 17px;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px var(--blue-glow);
+  }
+  .step.is-carat .step-number { background: var(--ink); box-shadow: 0 2px 8px rgba(15, 23, 42, 0.2); }
+  .step-header h4 { font-size: 18px; font-weight: 700; letter-spacing: -0.2px; flex: 1; }
+  .step-header h4 small { display: block; font-size: 13px; font-weight: 400; color: var(--gray-400); margin-top: 2px; }
+  .step-body { padding: 24px 28px 26px; }
+  .step-body > p { font-size: 15px; color: var(--gray-600); margin-bottom: 16px; line-height: 1.7; }
+  .step-body > p:last-child { margin-bottom: 0; }
+  .step-body ul.plain { list-style: none; margin-bottom: 16px; }
+  .step-body ul.plain li {
+    position: relative;
+    padding-left: 22px;
+    margin-bottom: 8px;
+    font-size: 15px;
+    color: var(--gray-600);
+  }
+  .step-body ul.plain li::before {
+    content: '';
+    position: absolute;
+    left: 4px; top: 10px;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--blue);
+  }
+
+  .substeps { counter-reset: sub; list-style: none; }
+  .substeps > li {
+    counter-increment: sub;
+    position: relative;
+    padding: 0 0 22px 50px;
+    font-size: 15px;
+    color: var(--gray-600);
+  }
+  .substeps > li:last-child { padding-bottom: 0; }
+  .substeps > li::before {
+    content: attr(data-n);
+    position: absolute;
+    left: 0; top: -1px;
+    min-width: 34px; height: 28px;
+    padding: 0 6px;
+    border-radius: 9px;
+    background: var(--gray-100);
+    border: 1px solid var(--gray-200);
+    color: var(--ink);
+    font-weight: 700;
+    font-size: 12px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .substeps > li > strong:first-child { display: block; color: var(--ink); font-size: 15px; margin-bottom: 3px; }
+  .substeps li ol { margin: 8px 0 0 18px; }
+  .substeps li ol li { margin-bottom: 4px; font-size: 14.5px; }
+
+  .url-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: linear-gradient(135deg, var(--blue-soft) 0%, var(--gray-50) 100%);
+    border: 1px solid rgba(37, 99, 235, 0.15);
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin: 10px 0 4px;
+  }
+  .url-box .url-icon {
+    width: 26px; height: 26px;
+    background: var(--blue);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .url-box .url-icon svg { width: 14px; height: 14px; fill: #fff; }
+  .url-box a {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--blue);
+    text-decoration: none;
+    word-break: break-all;
+    font-weight: 500;
+  }
+  .url-box a:hover { text-decoration: underline; }
+  .url-box a.label-link { font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; }
+
+  .copyable {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin: 8px 0 4px;
+  }
+  .copyable .label { font-size: 12px; font-weight: 600; color: var(--gray-400); min-width: 64px; }
+  .copyable code { flex: 1; font-family: 'DM Mono', monospace; font-size: 13px; color: var(--ink); word-break: break-all; background: none; border: 0; padding: 0; }
+  .copy-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--gray-500);
+    background: var(--gray-100);
+    border: 1px solid var(--gray-200);
+    border-radius: 6px;
+    padding: 3px 10px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .copy-btn:hover { background: #DBEAFE; border-color: var(--blue-light); color: var(--blue); }
+
+  code {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    background: var(--blue-soft);
+    border: 1px solid rgba(37, 99, 235, 0.12);
+    border-radius: 6px;
+    padding: 1px 7px;
+    color: var(--blue-dark);
+  }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 4px; }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--gray-200);
+    border-radius: 10px;
+    padding: 7px 12px;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--gray-700);
+  }
+  .chip img { width: 20px; height: 20px; object-fit: contain; border-radius: 4px; }
+
+  .tip {
+    display: flex;
+    gap: 12px;
+    padding: 14px 18px;
+    border-radius: 12px;
+    margin-top: 14px;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .tip.green { background: var(--green-bg); border: 1px solid #A7F3D0; color: #065F46; }
+  .tip.amber { background: var(--amber-bg); border: 1px solid #FDE68A; color: #92400E; }
+  .tip.blue { background: var(--blue-soft); border: 1px solid #BFDBFE; color: #1E3A8A; }
+  .tip-icon { font-size: 16px; flex-shrink: 0; line-height: 1.5; }
+
+  /* mini sheet preview */
+  .sheet {
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    overflow: hidden;
+    margin: 12px 0 4px;
+    font-size: 12.5px;
+  }
+  .sheet-scroll { overflow-x: auto; }
+  .sheet table { border-collapse: collapse; width: 100%; min-width: 560px; }
+  .sheet th {
+    background: var(--ink);
+    color: #fff;
+    font-weight: 600;
+    padding: 8px 10px;
+    text-align: center;
+    white-space: nowrap;
+  }
+  .sheet th:first-child, .sheet td:first-child { text-align: left; }
+  .sheet td {
+    padding: 7px 10px;
+    border-top: 1px solid var(--gray-100);
+    color: var(--gray-600);
+    text-align: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  .sheet td:first-child { font-family: 'Inter', sans-serif; font-weight: 600; color: var(--ink); font-size: 12.5px; }
+  .sheet td.empty { color: var(--gray-300); }
+
+  /* ── Sessions ── */
+  .sessions {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+  .session {
+    background: var(--surface);
+    border: 1px solid var(--gray-200);
+    border-radius: 14px;
+    padding: 18px 20px;
+    display: flex;
+    gap: 14px;
+  }
+  .session .pin.s i { width: 28px; height: 28px; }
+  .session .pin.s i b { font-size: 12px; }
+  .session h4 { font-size: 15px; font-weight: 700; margin-bottom: 3px; }
+  .session p { font-size: 13.5px; color: var(--gray-500); line-height: 1.55; }
+  .session em { font-style: normal; font-size: 12px; font-weight: 600; color: var(--green-dark); display: block; margin-bottom: 4px; }
+
+  /* ── Checklist ── */
+  .checklist {
+    background: var(--surface);
+    border: 1px solid var(--gray-200);
+    border-radius: 16px;
+    padding: 8px 8px;
+  }
+  .check {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 15px;
+    color: var(--gray-700);
+  }
+  .check:hover { background: var(--gray-50); }
+  .check input { position: absolute; opacity: 0; pointer-events: none; }
+  .box {
+    width: 20px; height: 20px;
+    border-radius: 6px;
+    border: 1.5px solid var(--gray-300);
+    flex-shrink: 0;
+    margin-top: 2px;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .check input:checked + .box { background: var(--green); border-color: var(--green); }
+  .check input:checked + .box::after { content: ''; width: 5px; height: 10px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg) translate(-1px, -1px); }
+  .check input:checked ~ .txt { color: var(--gray-400); text-decoration: line-through; }
+  .check input:focus-visible + .box { outline: 2px solid var(--blue); outline-offset: 2px; }
+  .check .txt small { display: block; font-size: 12.5px; color: var(--gray-400); text-decoration: none; }
+  .progress { font-size: 13px; color: var(--gray-500); margin: 0 0 12px; }
+  .progress b { color: var(--ink); }
+
+  /* ── Contacts ── */
+  .contacts {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr 1fr;
+    gap: 14px;
+  }
+  .contact {
+    background: var(--surface);
+    border: 1px solid var(--gray-200);
+    border-radius: 14px;
+    padding: 18px 20px;
+  }
+  .contact h4 { font-size: 15px; font-weight: 700; margin-bottom: 2px; }
+  .contact .role { font-size: 13px; color: var(--gray-400); margin-bottom: 10px; }
+  .contact p { font-size: 13.5px; color: var(--gray-600); line-height: 1.55; }
+  .contact a { font-family: 'DM Mono', monospace; font-size: 13px; text-decoration: none; }
+  .contact a:hover { text-decoration: underline; }
+
+  .footer {
+    text-align: center;
+    padding: 40px 0;
+    margin-top: 80px;
+    border-top: 1px solid var(--gray-200);
+    font-size: 13px;
+    color: var(--gray-400);
+  }
+  .footer a { text-decoration: none; }
+
+  @media (max-width: 760px) {
+    .hero { padding: 52px 16px 56px; }
+    .hero h1 { font-size: 31px; letter-spacing: -0.6px; }
+    .container, .wide { padding: 0 16px; }
+    .facts { grid-template-columns: 1fr; }
+    .fact + .fact { border-left: 0; border-top: 1px solid var(--gray-100); }
+    .miles { grid-template-columns: 1fr 1fr; }
+    .sessions, .contacts { grid-template-columns: 1fr; }
+    .step-header, .step-body { padding-left: 18px; padding-right: 18px; }
+    .substeps > li { padding-left: 44px; }
+    .gantt-wrap { padding: 18px 14px; }
+    .g-row { grid-template-columns: 150px 1fr; }
+    .gantt { min-width: 700px; }
+  }
+  @media (max-width: 480px) { .miles { grid-template-columns: 1fr; } }
+
+  @media print {
+    body { background: #fff; }
+    .hero { padding: 40px 20px; }
+    .step, .mile, .session, .gantt-wrap, .contact { break-inside: avoid; }
+    .copy-btn { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ HERO ============ -->
+<header class="hero">
+  <div class="hero-content">
+    <div class="hero-client">
+      <img src="https://storage.googleapis.com/detrics-static/public/img/detrics-round-logo.png" alt="">
+      Detrics <span>para</span> Carat / House Dentsu
+    </div>
+    <h1>Del contrato firmado al dashboard multicliente en 4 semanas</h1>
+    <p>Los pasos para poner en marcha el data warehouse de Carat en BigQuery: qué hace el equipo de Carat, qué hace Detrics y en qué semana.</p>
+    <div class="hero-flow" aria-label="Las 9 fuentes de Carat llegan a BigQuery y alimentan el dashboard">
+      <div class="logos">
+        <img src="https://storage.googleapis.com/detrics-static/public/img/google-ads-logo.png" alt="Google Ads">
+        <img src="https://storage.googleapis.com/detrics-static/public/img/google-dv-360-logo.png" alt="DV360">
+        <img src="https://storage.googleapis.com/detrics-static/public/img/facebook-ads-logo.png" alt="Facebook Ads">
+        <img src="https://storage.googleapis.com/detrics-static/public/img/meta-ads-logo.png" alt="Facebook Insights">
+        <img src="https://storage.googleapis.com/detrics-static/public/img/instagram-logo.png" alt="Instagram Insights">
+        <img src="https://storage.googleapis.com/detrics-static/public/img/tiktok-logo.png" alt="TikTok Ads y TikTok Orgánico">
+        <img src="https://storage.googleapis.com/detrics-static/public/img/x-ads-logo.png" alt="X Ads">
+        <img src="https://storage.googleapis.com/detrics-static/public/img/linkedin-ads-logo.png" alt="LinkedIn Ads">
+      </div>
+      <span class="dests">
+        <span class="arrow" aria-hidden="true">&rarr;</span>
+        <span class="dest"><img src="https://storage.googleapis.com/detrics-static/public/img/big-query-icon.png" alt="BigQuery"></span>
+        <span class="arrow" aria-hidden="true">&rarr;</span>
+        <span class="dest"><img src="https://storage.googleapis.com/detrics-static/public/img/looker-logo.png" alt="Looker Studio"></span>
+      </span>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="facts">
+    <div class="fact"><strong>4 semanas</strong><span>desde la reunión de inicio hasta el dashboard entregado</span></div>
+    <div class="fact"><strong>9 fuentes</strong><span>y hasta 200 cuentas, en el Google Cloud de Carat</span></div>
+    <div class="fact"><strong>4 sesiones</strong><span>de 1,5 h con Tom, en los 3 meses siguientes a la entrega</span></div>
+  </div>
+</div>
+
+<!-- ============ ROADMAP ============ -->
+<section class="section" id="roadmap">
+  <div class="wide">
+    <h2 class="section-title">Roadmap</h2>
+    <p class="section-lead">El primer día armamos juntos el proyecto de Google Cloud. El resto de la primera semana es de Carat: fuentes conectadas, mapa de clientes y dashboards actuales. Desde la segunda, Detrics construye. Cada hito es una reunión corta para revisar lo hecho.</p>
+
+    <div class="gantt-wrap">
+      <div class="legend">
+        <span><i class="sw carat"></i>Equipo de Carat</span>
+        <span><i class="sw detrics"></i>Equipo de Detrics</span>
+        <span><i class="sw sess"></i>Consultoría con Tom</span>
+        <span><i class="sw diamond"></i>Reunión de revisión</span>
+      </div>
+      <div class="gantt-scroll">
+        <div class="gantt" role="table" aria-label="Cronograma de implementación">
+          <div class="g-row g-head" role="row">
+            <div></div>
+            <div class="g-track">
+              <div class="wk" style="grid-column: 1 / 6;">Semana 1<span>Accesos</span></div>
+              <div class="wk" style="grid-column: 6 / 11;">Semana 2<span>Transferencias</span></div>
+              <div class="wk" style="grid-column: 11 / 16;">Semana 3<span>Consolidación</span></div>
+              <div class="wk" style="grid-column: 16 / 21;">Semana 4<span>Dashboard</span></div>
+              <div class="wk post" style="grid-column: 21 / 33;">Meses 2 a 4<span>Consultoría</span></div>
+            </div>
+          </div>
+          <div class="g-row" role="row">
+            <div class="g-label">Reuniones</div>
+            <div class="g-track">
+              <div class="pin" style="grid-column: 1 / 2;" title="Reunión de inicio"><i><b>1</b></i></div>
+              <div class="pin" style="grid-column: 10 / 11;" title="Revisión de datos"><i><b>2</b></i></div>
+              <div class="pin" style="grid-column: 15 / 16;" title="Revisión de tablas"><i><b>3</b></i></div>
+              <div class="pin" style="grid-column: 20 / 21;" title="Entrega del dashboard"><i><b>4</b></i></div>
+              <div class="pin s" style="grid-column: 22 / 23;" title="Sesión 1 con Tom"><i><b>1</b></i></div>
+              <div class="pin s" style="grid-column: 25 / 26;" title="Sesión 2 con Tom"><i><b>2</b></i></div>
+              <div class="pin s" style="grid-column: 28 / 29;" title="Sesión 3 con Tom"><i><b>3</b></i></div>
+              <div class="pin s" style="grid-column: 31 / 32;" title="Sesión 4 con Tom"><i><b>4</b></i></div>
+            </div>
+          </div>
+          <div class="g-row" role="row">
+            <div class="g-label">Workspace y fuentes<small>Paso 2</small></div>
+            <div class="g-track"><div class="bar carat" style="grid-column: 1 / 6;">Carat</div></div>
+          </div>
+          <div class="g-row" role="row">
+            <div class="g-label">Mapa de clientes y dashboards<small>Pasos 3 y 4</small></div>
+            <div class="g-track"><div class="bar carat" style="grid-column: 1 / 6;">Carat</div></div>
+          </div>
+          <div class="g-row" role="row">
+            <div class="g-label">Transferencias y nombres<small>Paso 5</small></div>
+            <div class="g-track"><div class="bar detrics" style="grid-column: 6 / 11;">Detrics</div></div>
+          </div>
+          <div class="g-row" role="row">
+            <div class="g-label">Tablas consolidadas<small>Paso 6</small></div>
+            <div class="g-track"><div class="bar detrics" style="grid-column: 11 / 16;">Detrics</div></div>
+          </div>
+          <div class="g-row" role="row">
+            <div class="g-label">Dashboard multicliente<small>Paso 7</small></div>
+            <div class="g-track"><div class="bar detrics" style="grid-column: 16 / 21;">Detrics</div></div>
+          </div>
+          <div class="g-row" role="row">
+            <div class="g-label">Consultoría con Tom<small>Después de la entrega</small></div>
+            <div class="g-track"><div class="bar session" style="grid-column: 21 / 33;">4 sesiones de 1,5 h</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="miles">
+      <div class="mile">
+        <div class="mile-top"><span class="pin"><i><b>1</b></i></span><em>Día 1</em></div>
+        <h3>Reunión de inicio</h3>
+        <p>Plan contratado, proyecto de Google Cloud creado y accesos para Detrics.</p>
+      </div>
+      <div class="mile">
+        <div class="mile-top"><span class="pin"><i><b>2</b></i></span><em>Fin de la semana 2</em></div>
+        <h3>Revisión de datos</h3>
+        <p>Las 9 fuentes en BigQuery y la tabla de nombres para validar.</p>
+      </div>
+      <div class="mile">
+        <div class="mile-top"><span class="pin"><i><b>3</b></i></span><em>Fin de la semana 3</em></div>
+        <h3>Revisión de tablas</h3>
+        <p>Tablas consolidadas con los nombres de Carat, validadas contra Supermetrics.</p>
+      </div>
+      <div class="mile">
+        <div class="mile-top"><span class="pin"><i><b>4</b></i></span><em>Fin de la semana 4</em></div>
+        <h3>Entrega del dashboard</h3>
+        <p>Recorrido del dashboard multicliente con el equipo y validación final.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ STEPS ============ -->
+<section class="section" id="pasos">
+  <div class="container">
+    <h2 class="section-title">Paso a paso</h2>
+    <p class="section-lead">El paso 1 lo hacemos juntos en la reunión de inicio. Los pasos 2 a 4 los completa el equipo de Carat durante la primera semana. Con eso, Detrics avanza con los pasos 5 a 7.</p>
+
+    <!-- STEP 1 -->
+    <div class="phase-head"><h3>Día 1</h3><span class="owner both">Carat y Detrics</span></div>
+    <div class="step">
+      <div class="step-header">
+        <div class="step-number">1</div>
+        <h4>Reunión de inicio <small>1 hora, en vivo, con pantalla compartida</small></h4>
+      </div>
+      <div class="step-body">
+        <p>En esta reunión dejamos lista la base del proyecto. Además de Katherine y Valentina, necesitamos a la persona de Carat que administra Google Cloud y la facturación, porque varios pasos piden sus permisos.</p>
+        <ol class="substeps">
+          <li data-n="1.1">
+            <strong>Contratamos el plan de Detrics</strong>
+            Desde el usuario de Carat en Detrics, registrado con el correo corporativo de quien administra las cuentas publicitarias. Si todavía no existe, lo creamos en ese momento.
+            <div class="url-box">
+              <div class="url-icon"><svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg></div>
+              <a href="https://app.detrics.io/account" target="_blank" rel="noopener">app.detrics.io/account</a>
+            </div>
+          </li>
+          <li data-n="1.2">
+            <strong>Creamos el proyecto de Google Cloud</strong>
+            El proyecto queda a nombre de Carat, dentro de su organización de Google. Los datos son de Carat desde el primer día.
+            <ol>
+              <li>Entramos a la consola de Google Cloud con la cuenta corporativa del administrador.</li>
+              <li>En <strong>Nombre del proyecto</strong> escribimos <code>carat-data-warehouse</code> (o el nombre que prefieran).</li>
+              <li>En <strong>Organización</strong> elegimos la de Carat o House Dentsu y hacemos click en <strong>Crear</strong>.</li>
+              <li>Anotamos el <strong>ID del proyecto</strong>: aparece debajo del nombre, en minúsculas.</li>
+            </ol>
+            <div class="url-box">
+              <div class="url-icon"><svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg></div>
+              <a href="https://console.cloud.google.com/projectcreate" target="_blank" rel="noopener">console.cloud.google.com/projectcreate</a>
+            </div>
+          </li>
+          <li data-n="1.3">
+            <strong>Activamos la facturación</strong>
+            Vinculamos el proyecto a una cuenta de facturación de la empresa, o creamos una nueva con la tarjeta corporativa. Google le factura BigQuery directamente a Carat. Con el volumen de hoy estimamos menos de USD 100 por mes.
+            <div class="url-box">
+              <div class="url-icon"><svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg></div>
+              <a href="https://console.cloud.google.com/billing/linkedaccount" target="_blank" rel="noopener">console.cloud.google.com/billing</a>
+            </div>
+            <div class="tip amber"><span class="tip-icon">&#9888;</span><span>Sin facturación activa, BigQuery no acepta cargas de datos y las transferencias fallan.</span></div>
+          </li>
+          <li data-n="1.4">
+            <strong>Damos acceso al equipo de Detrics</strong>
+            En <strong>IAM y administración &rsaquo; IAM</strong>, con <strong>Otorgar acceso</strong>, sumamos estos tres correos con el rol <strong>Administrador de BigQuery</strong>. Con ese acceso el equipo crea las tablas consolidadas, las vistas, las rutinas y las consultas programadas del warehouse.
+            <div class="copyable"><span class="label">Correo</span><code>support@detrics.io</code><button class="copy-btn" type="button" data-copy="support@detrics.io">Copiar</button></div>
+            <div class="copyable"><span class="label">Correo</span><code>tomas@detrics.io</code><button class="copy-btn" type="button" data-copy="tomas@detrics.io">Copiar</button></div>
+            <div class="copyable"><span class="label">Correo</span><code>ignacio.goyanes@detrics.io</code><button class="copy-btn" type="button" data-copy="ignacio.goyanes@detrics.io">Copiar</button></div>
+            <div class="url-box">
+              <div class="url-icon"><svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg></div>
+              <a href="https://console.cloud.google.com/iam-admin/iam" target="_blank" rel="noopener">console.cloud.google.com/iam-admin/iam</a>
+            </div>
+            <p style="margin-top:12px;">Las consultas programadas usan la API de BigQuery Data Transfer. La habilitamos en ese momento, con el administrador conectado:</p>
+            <div class="url-box">
+              <div class="url-icon"><svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg></div>
+              <a href="https://console.cloud.google.com/apis/library/bigquerydatatransfer.googleapis.com" target="_blank" rel="noopener">console.cloud.google.com/apis/library/bigquerydatatransfer.googleapis.com</a>
+            </div>
+            <div class="tip blue"><span class="tip-icon">&#9432;</span><span>Carat puede quitar estos accesos cuando quiera desde la misma pantalla. Los datos quedan en su proyecto.</span></div>
+          </li>
+          <li data-n="1.5">
+            <strong>Conectamos BigQuery a Detrics</strong>
+            En Detrics, en <strong>Data Warehouse &rsaquo; Destinations</strong>, creamos el destino con el ID del proyecto. Detrics muestra una cuenta de servicio: le damos el rol <strong>Usuario de BigQuery</strong> en IAM y probamos la conexión.
+            <div class="url-box">
+              <div class="url-icon"><svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg></div>
+              <a href="https://app.detrics.io/data-warehouse/destinations/new" target="_blank" rel="noopener">app.detrics.io/data-warehouse/destinations</a>
+            </div>
+          </li>
+          <li data-n="1.6">
+            <strong>Cerramos la agenda</strong>
+            Elegimos dónde vive el dashboard (Looker Studio o una aplicación web sobre Vercel), agendamos las reuniones de revisión de las semanas 2, 3 y 4 y abrimos el canal de Slack compartido.
+          </li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="phase-head"><h3>Semana 1</h3><span class="owner carat">Equipo de Carat</span></div>
+    <div class="step is-carat">
+      <div class="step-header">
+        <div class="step-number">2</div>
+        <h4>Workspace de Detrics y fuentes de datos <small>Acceso para Detrics y las 9 fuentes conectadas</small></h4>
+      </div>
+      <div class="step-body">
+        <ol class="substeps">
+          <li data-n="2.1">
+            <strong>Inviten a Detrics a su workspace</strong>
+            En el menú de la izquierda, en <strong>Workspace</strong>, entren a <strong>Team Members</strong>, hagan click en <strong>Invite Team Member</strong> e inviten a este correo:
+            <div class="copyable"><span class="label">Correo</span><code>support@detrics.io</code><button class="copy-btn" type="button" data-copy="support@detrics.io">Copiar</button></div>
+            <p style="margin-top:8px;">Cuando acepte la invitación, cambien su rol a <strong>Owner</strong>. Con ese rol el equipo de Detrics crea y administra las transferencias en su workspace.</p>
+          </li>
+          <li data-n="2.2">
+            <strong>Conecten las 9 fuentes de datos</strong>
+            Entren a <strong>Data Sources</strong> y conecten cada plataforma con un usuario que tenga acceso a todas las cuentas de sus clientes. Verifiquen que cada conexión quede en estado <strong>Connected</strong>.
+            <div class="url-box">
+              <div class="url-icon"><svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg></div>
+              <a href="https://app.detrics.io/datasources" target="_blank" rel="noopener">app.detrics.io/datasources</a>
+            </div>
+            <div class="chips">
+              <span class="chip"><img src="https://storage.googleapis.com/detrics-static/public/img/google-ads-logo.png" alt="">Google Ads</span>
+              <span class="chip"><img src="https://storage.googleapis.com/detrics-static/public/img/google-dv-360-logo.png" alt="">DV360</span>
+              <span class="chip"><img src="https://storage.googleapis.com/detrics-static/public/img/facebook-ads-logo.png" alt="">Facebook Ads</span>
+              <span class="chip"><img src="https://storage.googleapis.com/detrics-static/public/img/meta-ads-logo.png" alt="">Facebook Insights</span>
+              <span class="chip"><img src="https://storage.googleapis.com/detrics-static/public/img/instagram-logo.png" alt="">Instagram Insights</span>
+              <span class="chip"><img src="https://storage.googleapis.com/detrics-static/public/img/tiktok-logo.png" alt="">TikTok Ads</span>
+              <span class="chip"><img src="https://storage.googleapis.com/detrics-static/public/img/tiktok-logo.png" alt="">TikTok Orgánico</span>
+              <span class="chip"><img src="https://storage.googleapis.com/detrics-static/public/img/x-ads-logo.png" alt="">X Ads</span>
+              <span class="chip"><img src="https://storage.googleapis.com/detrics-static/public/img/linkedin-ads-logo.png" alt="">LinkedIn Ads</span>
+            </div>
+            <div class="tip blue"><span class="tip-icon">&#9432;</span><span>Si las cuentas de una plataforma están repartidas entre varios usuarios, conecten cada usuario. Detrics suma todas las cuentas de esa plataforma.</span></div>
+          </li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div class="step is-carat">
+      <div class="step-header">
+        <div class="step-number">3</div>
+        <h4>Mapa de clientes <small>Qué cuenta publicitaria pertenece a qué cliente</small></h4>
+      </div>
+      <div class="step-body">
+        <p>Con este mapa armamos el filtro por cliente del dashboard. Es una planilla con una fila por cuenta y una columna por plataforma.</p>
+        <ol class="substeps">
+          <li data-n="3.1">
+            <strong>Hagan una copia de la plantilla</strong>
+            El link abre Google Sheets y crea la copia en su Drive.
+            <div class="url-box">
+              <div class="url-icon"><svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg></div>
+              <a class="label-link" href="https://docs.google.com/spreadsheets/d/1gm8oF5lsNTLxPFV9r0YMvU0LUAwpaSuciU96iRlYp28/copy" target="_blank" rel="noopener">Copiar la plantilla del mapa de clientes</a>
+            </div>
+          </li>
+          <li data-n="3.2">
+            <strong>Complétenla con sus clientes</strong>
+            El nombre del cliente va en la columna A, tal como quieren verlo en el dashboard, y el ID de la cuenta va en la columna de su plataforma. Si un cliente tiene dos cuentas en la misma plataforma, cada una va en su propia fila, con el nombre del cliente escrito igual. La pestaña <strong>Cómo completarlo</strong> explica dónde encontrar cada ID.
+            <div class="sheet">
+              <div class="sheet-scroll">
+                <table>
+                  <thead><tr><th>Cliente</th><th>Google Ads</th><th>DV360</th><th>Facebook Ads</th><th>Instagram</th><th>TikTok Ads</th><th>&hellip;</th></tr></thead>
+                  <tbody>
+                    <tr><td>Marca Uno</td><td>123-456-7890</td><td>1234567</td><td>act_1234567890</td><td>17841400000</td><td class="empty">vacío</td><td></td></tr>
+                    <tr><td>Marca Uno</td><td class="empty">vacío</td><td class="empty">vacío</td><td>act_9876543210</td><td class="empty">vacío</td><td class="empty">vacío</td><td></td></tr>
+                    <tr><td>Marca Dos</td><td class="empty">vacío</td><td class="empty">vacío</td><td>act_5550001111</td><td>17841400123</td><td>70123456789</td><td></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </li>
+          <li data-n="3.3">
+            <strong>Compártanla con Detrics</strong>
+            Desde <strong>Compartir</strong>, den permiso de <strong>Editor</strong> a:
+            <div class="copyable"><span class="label">Correo</span><code>support@detrics.io</code><button class="copy-btn" type="button" data-copy="support@detrics.io">Copiar</button></div>
+          </li>
+        </ol>
+        <div class="tip green"><span class="tip-icon">&#10003;</span><span>Cuando sumen un cliente o una cuenta, agreguen la fila en esta misma planilla. El dashboard lo toma en la siguiente actualización.</span></div>
+      </div>
+    </div>
+
+    <!-- STEP 4 -->
+    <div class="step is-carat">
+      <div class="step-header">
+        <div class="step-number">4</div>
+        <h4>Looker Studio y dashboards actuales <small>Dónde se arma el dashboard y qué tiene que replicar</small></h4>
+      </div>
+      <div class="step-body">
+        <ol class="substeps">
+          <li data-n="4.1">
+            <strong>Creen un informe vacío en Looker Studio</strong>
+            Si en la reunión de inicio eligieron Looker Studio: creen un informe en blanco con su cuenta corporativa, llámenlo <code>Carat · Dashboard multicliente</code> y compártanlo como <strong>Editor</strong> con <code>support@detrics.io</code>. El dashboard queda en su cuenta desde el primer día.
+            <div class="url-box">
+              <div class="url-icon"><svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg></div>
+              <a href="https://lookerstudio.google.com/reporting/create" target="_blank" rel="noopener">lookerstudio.google.com/reporting/create</a>
+            </div>
+          </li>
+          <li data-n="4.2">
+            <strong>Compartan los dashboards que usan hoy</strong>
+            Den acceso de <strong>Editor</strong> a <code>support@detrics.io</code> en los dashboards de Looker Studio armados con Supermetrics que el nuevo dashboard reemplaza. Con acceso de edición vemos cada fuente, campo y cálculo, y de ahí tomamos las métricas, los nombres y las vistas que usa el equipo.
+          </li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- STEPS 5-7 -->
+    <div class="phase-head"><h3>Semanas 2 a 4</h3><span class="owner detrics">Equipo de Detrics</span></div>
+    <div class="step">
+      <div class="step-header">
+        <div class="step-number">5</div>
+        <h4>Transferencias y tabla de nombres <small>Semana 2</small></h4>
+      </div>
+      <div class="step-body">
+        <ul class="plain">
+          <li>Creamos una transferencia por fuente, con las cuentas del mapa de clientes.</li>
+          <li>Traemos el histórico que cada plataforma pone a disposición, cerca de 3 años. Desde ahí, cada día nuevo queda guardado en su BigQuery.</li>
+          <li>Las transferencias corren todos los días y solo traen los datos nuevos.</li>
+          <li>Armamos la tabla de nombres: a cada campo que entrega Detrics le asignamos el nombre que usa Carat, cruzado contra sus dashboards actuales.</li>
+        </ul>
+        <p>Cierra con la <strong>reunión 2</strong>: revisamos las 9 fuentes sincronizando y Carat valida o ajusta la tabla de nombres.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-header">
+        <div class="step-number">6</div>
+        <h4>Tablas consolidadas <small>Semana 3</small></h4>
+      </div>
+      <div class="step-body">
+        <ul class="plain">
+          <li>Unimos las 9 fuentes en una tabla con las mismas métricas para todas las plataformas.</li>
+          <li>Aplicamos la tabla de nombres de Carat. Un cambio en esa tabla aplica a todos los clientes.</li>
+          <li>Cruzamos con el mapa de clientes para asignar cada cuenta a su cliente.</li>
+          <li>Validamos los números contra los dashboards de Supermetrics.</li>
+        </ul>
+        <p>Cierra con la <strong>reunión 3</strong>: revisamos las tablas y la validación.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-header">
+        <div class="step-number">7</div>
+        <h4>Dashboard multicliente <small>Semana 4</small></h4>
+      </div>
+      <div class="step-body">
+        <ul class="plain">
+          <li>Una vista general con todos los clientes y una vista por plataforma.</li>
+          <li>Filtros por cliente, plataforma y fecha.</li>
+          <li>Construido sobre las tablas consolidadas: un cliente nuevo en el mapa aparece solo.</li>
+        </ul>
+        <p>Cierra con la <strong>reunión 4</strong>: recorremos el dashboard con el equipo, ajustamos lo que haga falta y lo damos por entregado.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SESSIONS ============ -->
+<section class="section" id="consultoria">
+  <div class="container">
+    <h2 class="section-title">Consultoría con Tom</h2>
+    <p class="section-lead">Después de la entrega, Tomás García Piñeiro, Co-Founder y CTO de Detrics, acompaña al equipo en 4 sesiones de 1,5 horas durante los 3 meses siguientes. Los temas se ajustan a lo que el equipo necesite en cada momento.</p>
+    <div class="sessions">
+      <div class="session">
+        <span class="pin s"><i><b>1</b></i></span>
+        <div><em>Semana 1 después de la entrega</em><h4>El warehouse por dentro</h4><p>Cómo están organizadas las tablas, cómo corre cada transferencia y dónde se ve su estado.</p></div>
+      </div>
+      <div class="session">
+        <span class="pin s"><i><b>2</b></i></span>
+        <div><em>Mes 1</em><h4>Clientes y cuentas nuevas</h4><p>Sumar un cliente al mapa, conectar una cuenta nueva y verla en el dashboard.</p></div>
+      </div>
+      <div class="session">
+        <span class="pin s"><i><b>3</b></i></span>
+        <div><em>Mes 2</em><h4>Replicar y modificar reportes</h4><p>Crear vistas nuevas, agregar métricas y armar reportes para un cliente puntual.</p></div>
+      </div>
+      <div class="session">
+        <span class="pin s"><i><b>4</b></i></span>
+        <div><em>Mes 3</em><h4>Revisión y próximos pasos</h4><p>Repaso de lo que usa el equipo, ajustes pendientes y qué sumar al warehouse.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CHECKLIST ============ -->
+<section class="section" id="checklist">
+  <div class="container">
+    <h2 class="section-title">Checklist de Carat</h2>
+    <p class="section-lead">Lo que necesitamos del equipo de Carat en la primera semana. Las marcas quedan guardadas en este navegador.</p>
+    <p class="progress" aria-live="polite"><b id="done">0</b> de <b id="total">0</b> completos</p>
+    <div class="checklist" id="list">
+      <label class="check"><input type="checkbox" data-k="kickoff"><span class="box"></span><span class="txt">Reunión de inicio con el administrador de Google Cloud presente<small>Paso 1</small></span></label>
+      <label class="check"><input type="checkbox" data-k="invite"><span class="box"></span><span class="txt">support@detrics.io invitado al workspace como Owner<small>Paso 2.1</small></span></label>
+      <label class="check"><input type="checkbox" data-k="sources"><span class="box"></span><span class="txt">Las 9 fuentes conectadas<small>Paso 2.2</small></span></label>
+      <label class="check"><input type="checkbox" data-k="map"><span class="box"></span><span class="txt">Mapa de clientes completo y compartido como Editor<small>Pasos 3.1 a 3.3</small></span></label>
+      <label class="check"><input type="checkbox" data-k="looker"><span class="box"></span><span class="txt">Informe de Looker Studio creado y compartido<small>Paso 4.1</small></span></label>
+      <label class="check"><input type="checkbox" data-k="reports"><span class="box"></span><span class="txt">Dashboards actuales compartidos como Editor<small>Paso 4.2</small></span></label>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CONTACTS ============ -->
+<section class="section" id="contacto">
+  <div class="container">
+    <h2 class="section-title">Contacto</h2>
+    <p class="section-lead">Para cualquier duda del proyecto, escriban en el canal de Slack.</p>
+    <div class="contacts">
+      <div class="contact">
+        <h4>Tomás García Piñeiro</h4>
+        <div class="role">Co-Founder y CTO de Detrics, responsable del proyecto</div>
+        <a href="mailto:tomas@detrics.io">tomas@detrics.io</a>
+      </div>
+      <div class="contact">
+        <h4>Canal de Slack</h4>
+        <div class="role">Día a día del proyecto</div>
+        <p>Lo abrimos en la reunión de inicio.</p>
+      </div>
+      <div class="contact">
+        <h4>Soporte</h4>
+        <div class="role">Accesos y cuentas</div>
+        <a href="mailto:support@detrics.io">support@detrics.io</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container"><a href="https://detrics.io" target="_blank" rel="noopener">detrics.io</a></div>
+</footer>
+
+<script>
+  // copy buttons
+  document.querySelectorAll('.copy-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var text = btn.getAttribute('data-copy');
+      var done = function () {
+        var orig = btn.textContent;
+        btn.textContent = 'Copiado';
+        setTimeout(function () { btn.textContent = orig; }, 1800);
+      };
+      if (navigator.clipboard) navigator.clipboard.writeText(text).then(done, function () {});
+    });
+  });
+
+  // checklist, remembered per browser
+  (function () {
+    var KEY = 'detrics-onboarding-carat';
+    var state = {};
+    try { state = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { state = {}; }
+    var boxes = document.querySelectorAll('#list input');
+    document.getElementById('total').textContent = boxes.length;
+    function count() {
+      var n = 0;
+      boxes.forEach(function (b) { if (b.checked) n++; });
+      document.getElementById('done').textContent = n;
+    }
+    boxes.forEach(function (b) {
+      b.checked = !!state[b.dataset.k];
+      b.addEventListener('change', function () {
+        state[b.dataset.k] = b.checked;
+        try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+        count();
+      });
+    });
+    count();
+  })();
+</script>
+
+</body>
+</html>

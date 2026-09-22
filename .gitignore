@@ -1,0 +1,4 @@
+
+# secrets never belong in a public Pages repo
+.env
+.env.*
