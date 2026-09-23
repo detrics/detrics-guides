@@ -782,16 +782,32 @@
             <div class="tip amber"><span class="tip-icon">&#9888;</span><span>Sin facturación activa, BigQuery no acepta cargas de datos y las transferencias fallan.</span></div>
           </li>
           <li data-n="1.4">
-            <strong>Damos acceso al equipo de Detrics</strong>
-            En <strong>IAM y administración &rsaquo; IAM</strong>, con <strong>Otorgar acceso</strong>, sumamos estos tres correos con el rol <strong>Administrador de BigQuery</strong>. Con ese acceso el equipo crea las tablas consolidadas, las vistas, las rutinas y las consultas programadas del warehouse.
-            <div class="copyable"><span class="label">Correo</span><code>support@detrics.io</code><button class="copy-btn" type="button" data-copy="support@detrics.io">Copiar</button></div>
-            <div class="copyable"><span class="label">Correo</span><code>tomas@detrics.io</code><button class="copy-btn" type="button" data-copy="tomas@detrics.io">Copiar</button></div>
-            <div class="copyable"><span class="label">Correo</span><code>ignacio.goyanes@detrics.io</code><button class="copy-btn" type="button" data-copy="ignacio.goyanes@detrics.io">Copiar</button></div>
+            <strong>Damos acceso al equipo de Detrics en Google Cloud</strong>
+            Con estos accesos el equipo de Detrics consulta los datos y construye las tablas consolidadas, las vistas y las rutinas del warehouse.
             <div class="url-box">
               <div class="url-icon"><svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg></div>
               <a href="https://console.cloud.google.com/iam-admin/iam" target="_blank" rel="noopener">console.cloud.google.com/iam-admin/iam</a>
             </div>
-            <div class="tip blue"><span class="tip-icon">&#9432;</span><span>Carat puede quitar estos accesos cuando quiera desde la misma pantalla. Los datos quedan en su proyecto.</span></div>
+            <ol>
+              <li>Abran <strong>IAM</strong> en la consola de Google Cloud y verifiquen arriba, en el selector de proyecto, que esté elegido <code>carat-data-warehouse</code>.</li>
+              <li>Hagan click en <strong>Otorgar acceso</strong>.</li>
+              <li>En <strong>Principales nuevas</strong>, peguen los tres correos de Detrics:</li>
+            </ol>
+            <div class="copyable"><span class="label">Correo</span><code>support@detrics.io</code><button class="copy-btn" type="button" data-copy="support@detrics.io">Copiar</button></div>
+            <div class="copyable"><span class="label">Correo</span><code>tomas@detrics.io</code><button class="copy-btn" type="button" data-copy="tomas@detrics.io">Copiar</button></div>
+            <div class="copyable"><span class="label">Correo</span><code>ignacio.goyanes@detrics.io</code><button class="copy-btn" type="button" data-copy="ignacio.goyanes@detrics.io">Copiar</button></div>
+            <ol start="4">
+              <li>En <strong>Seleccionar un rol</strong>, busquen y elijan <strong>MCP Tool User</strong>.</li>
+              <li>Hagan click en <strong>Agregar otro rol</strong> y elijan <strong>BigQuery Job User</strong>.</li>
+              <li>Otra vez <strong>Agregar otro rol</strong> y elijan <strong>BigQuery Data Editor</strong>.</li>
+              <li>Hagan click en <strong>Guardar</strong>. En la lista de IAM, cada correo tiene que aparecer con los 3 roles.</li>
+            </ol>
+            <div class="copyable"><span class="label">Rol</span><code>roles/mcp.toolUser</code><button class="copy-btn" type="button" data-copy="roles/mcp.toolUser">Copiar</button></div>
+            <div class="copyable"><span class="label">Rol</span><code>roles/bigquery.jobUser</code><button class="copy-btn" type="button" data-copy="roles/bigquery.jobUser">Copiar</button></div>
+            <div class="copyable"><span class="label">Rol</span><code>roles/bigquery.dataEditor</code><button class="copy-btn" type="button" data-copy="roles/bigquery.dataEditor">Copiar</button></div>
+            <div class="tip blue"><span class="tip-icon">&#9432;</span><span>Si la consola está en español, los roles pueden aparecer traducidos. Búsquenlos por <code>mcp</code>, <code>Job User</code> y <code>Data Editor</code>, o por su ID, que figura arriba.</span></div>
+            <div class="tip amber"><span class="tip-icon">&#9888;</span><span>Si Google muestra un error de dominio no permitido, la organización restringe las cuentas externas. El administrador de Google Cloud de Carat tiene que habilitar el dominio <code>detrics.io</code> y después repetir este paso.</span></div>
+            <div class="tip green"><span class="tip-icon">&#10003;</span><span>Carat puede quitar estos accesos cuando quiera desde la misma pantalla. Los datos quedan en su proyecto.</span></div>
           </li>
           <li data-n="1.5">
             <strong>Conectamos BigQuery a Detrics</strong>
@@ -1004,7 +1020,7 @@
       <label class="check"><input type="checkbox" data-k="plan"><span class="box"></span><span class="txt">Plan de Detrics contratado<small>Paso 1.1</small></span><span class="owner both">Carat y Detrics</span></label>
       <label class="check"><input type="checkbox" data-k="gcp"><span class="box"></span><span class="txt">Proyecto de Google Cloud creado<small>Paso 1.2</small></span><span class="owner both">Carat y Detrics</span></label>
       <label class="check"><input type="checkbox" data-k="billing"><span class="box"></span><span class="txt">Facturación activa en el proyecto<small>Paso 1.3</small></span><span class="owner both">Carat y Detrics</span></label>
-      <label class="check"><input type="checkbox" data-k="iam"><span class="box"></span><span class="txt">Acceso de Administrador de BigQuery para los tres correos de Detrics<small>Paso 1.4</small></span><span class="owner both">Carat y Detrics</span></label>
+      <label class="check"><input type="checkbox" data-k="iam"><span class="box"></span><span class="txt">Roles MCP Tool User, BigQuery Job User y BigQuery Data Editor para los tres correos de Detrics<small>Paso 1.4</small></span><span class="owner both">Carat y Detrics</span></label>
       <label class="check"><input type="checkbox" data-k="dest"><span class="box"></span><span class="txt">BigQuery conectado a Detrics y conexión probada<small>Paso 1.5</small></span><span class="owner both">Carat y Detrics</span></label>
       <label class="check"><input type="checkbox" data-k="agenda"><span class="box"></span><span class="txt">Dashboard elegido, reuniones agendadas y canal de Slack abierto<small>Paso 1.6</small></span><span class="owner both">Carat y Detrics</span></label>
       <div class="check-group">Semana 1 · Carat</div>
