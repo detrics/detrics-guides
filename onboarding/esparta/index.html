@@ -684,7 +684,7 @@
             </div>
           </div>
           <div class="g-row" role="row">
-            <div class="g-label">Workspace y fuentes<small>Paso 2</small></div>
+            <div class="g-label">Workspace, fuentes y Destination<small>Paso 2</small></div>
             <div class="g-track"><div class="bar carat" style="grid-column: 1 / 6;">Esparta</div></div>
           </div>
           <div class="g-row" role="row">
@@ -806,7 +806,7 @@
     <div class="step is-carat">
       <div class="step-header">
         <div class="step-number">2</div>
-        <h4>Workspace de Detrics y fuentes de datos <small>Acceso para Detrics y las 15 fuentes conectadas</small></h4>
+        <h4>Workspace de Detrics, fuentes y Destination <small>Acceso para Detrics, las 15 fuentes conectadas y la Destination del warehouse</small></h4>
       </div>
       <div class="step-body">
         <ol class="substeps">
@@ -814,7 +814,7 @@
             <strong>Inviten a Detrics a su workspace</strong>
             En el menú de la izquierda, en <strong>Workspace</strong>, entren a <strong>Team Members</strong>, hagan click en <strong>Invite Team Member</strong> e inviten a este correo:
             <div class="copyable"><span class="label">Correo</span><code>support@detrics.io</code><button class="copy-btn" type="button" data-copy="support@detrics.io">Copiar</button></div>
-            <p style="margin-top:8px;">Cuando acepte la invitación, cambien su rol a <strong>Owner</strong>. Con ese rol el equipo de Detrics crea y administra las transferencias en su workspace.</p>
+            <p style="margin-top:8px;">Cuando acepte la invitación, cambien su rol a <strong>Owner</strong>. Con ese rol el equipo de Detrics crea la Destination y administra las transferencias en su workspace.</p>
           </li>
           <li data-n="2.2">
             <strong>Conecten las 11 fuentes que faltan</strong>
@@ -838,6 +838,18 @@
             </div>
             <div class="tip blue"><span class="tip-icon">&#9432;</span><span>Si las cuentas de una plataforma están repartidas entre varios usuarios, conecten cada usuario. Detrics suma todas las cuentas de esa plataforma.</span></div>
             <div class="tip amber"><span class="tip-icon">&#9888;</span><span>El plan cubre hasta 250 cuentas en total, sumando todas las fuentes. Hoy los transfers de la prueba usan 178.</span></div>
+          </li>
+          <li data-n="2.3">
+            <strong>Nueva Destination en Detrics</strong>
+            Con el acceso al workspace, creamos una Destination nueva en <strong>Data Warehouse &rsaquo; Destinations</strong>, dentro del proyecto <code>espartainformes2026v2</code> y con un dataset propio. Ahí el equipo de Detrics arma toda la infraestructura de datos: transferencias, tablas consolidadas y las vistas que lee el dashboard. La Destination de la prueba queda como está.
+            <div class="url-box">
+              <div class="url-icon"><svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg></div>
+              <a href="https://app.detrics.io/data-warehouse/destinations/new" target="_blank" rel="noopener">app.detrics.io/data-warehouse/destinations</a>
+            </div>
+            <div class="copyable"><span class="label">Proyecto</span><code>espartainformes2026v2</code><button class="copy-btn" type="button" data-copy="espartainformes2026v2">Copiar</button></div>
+            <div class="copyable"><span class="label">Dataset</span><code>detrics_warehouse</code><button class="copy-btn" type="button" data-copy="detrics_warehouse">Copiar</button></div>
+            <div class="copyable"><span class="label">Zona</span><code>Europe/Madrid</code><button class="copy-btn" type="button" data-copy="Europe/Madrid">Copiar</button></div>
+            <div class="tip blue"><span class="tip-icon">&#9432;</span><span>El dataset nuevo va en la misma región que el de la prueba, porque BigQuery solo cruza tablas dentro de una misma región.</span></div>
           </li>
         </ol>
       </div>
@@ -924,8 +936,8 @@
       </div>
       <div class="step-body">
         <ul class="plain">
-          <li>Revisamos las transferencias que armaron en la prueba (GA4, Search Console, Google Ads y Meta Ads) y separamos en varias tablas los campos que hoy dan error de sincronización.</li>
-          <li>Creamos las transferencias de las 11 fuentes nuevas, con las cuentas del mapa de clientes.</li>
+          <li>En la nueva Destination, rearmamos las transferencias de la prueba (GA4, Search Console, Google Ads y Meta Ads) y separamos en varias tablas los campos que hoy dan error de sincronización.</li>
+          <li>Creamos, en la misma Destination, las transferencias de las 11 fuentes nuevas, con las cuentas del mapa de clientes.</li>
           <li>Traemos el histórico que cada plataforma pone a disposición, cerca de 3 años. Desde ahí, cada día nuevo queda guardado en su BigQuery.</li>
           <li>Las transferencias corren todos los días y solo traen los datos nuevos.</li>
           <li>Armamos la tabla de nombres: a cada campo que entrega Detrics le asignamos el nombre que usa Esparta, cruzado contra sus dashboards actuales.</li>
@@ -1004,6 +1016,7 @@
       <div class="check-group">Semana 1 · Esparta</div>
       <label class="check"><input type="checkbox" data-k="invite"><span class="box"></span><span class="txt">support@detrics.io invitado al workspace como Owner<small>Paso 2.1</small></span><span class="owner carat">Esparta</span></label>
       <label class="check"><input type="checkbox" data-k="sources"><span class="box"></span><span class="txt">Las 11 fuentes nuevas conectadas<small>Paso 2.2</small></span><span class="owner carat">Esparta</span></label>
+      <label class="check"><input type="checkbox" data-k="dest"><span class="box"></span><span class="txt">Nueva Destination creada: dataset detrics_warehouse en espartainformes2026v2<small>Paso 2.3</small></span><span class="owner both">Esparta y Detrics</span></label>
       <label class="check"><input type="checkbox" data-k="mapcopy"><span class="box"></span><span class="txt">Copia de la plantilla del mapa de clientes<small>Paso 3.1</small></span><span class="owner carat">Esparta</span></label>
       <label class="check"><input type="checkbox" data-k="mapfill"><span class="box"></span><span class="txt">Mapa de clientes completo, una fila por cuenta<small>Paso 3.2</small></span><span class="owner carat">Esparta</span></label>
       <label class="check"><input type="checkbox" data-k="mapshare"><span class="box"></span><span class="txt">Mapa compartido con support@detrics.io como Editor<small>Paso 3.3</small></span><span class="owner carat">Esparta</span></label>
