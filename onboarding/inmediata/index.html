@@ -827,15 +827,10 @@
         <p>Jonathan ya creó el workspace de Inmediata en Detrics e invitó a Soporte. Falta sumar al equipo y terminar de conectar las fuentes.</p>
         <ol class="substeps">
           <li data-n="2.1">
-            <strong>Den rol de Owner a Soporte de Detrics</strong>
-            En el menú de la izquierda, en <strong>Workspace</strong>, entren a <strong>Team Members</strong>. Cuando <code>support@detrics.io</code> figure como miembro, cambien su rol a <strong>Owner</strong>. Con ese rol el equipo de Detrics crea la Destination y administra las transferencias en su workspace.
-            <div class="copyable"><span class="label">Correo</span><code>support@detrics.io</code><button class="copy-btn" type="button" data-copy="support@detrics.io">Copiar</button></div>
-          </li>
-          <li data-n="2.2">
             <strong>Inviten a su equipo</strong>
             Desde el mismo <strong>Team Members</strong>, con <strong>Invite Team Member</strong>. El plan incluye 5 usuarios. Sumen a N. Cárdenas, así conecta las cuentas que lleva él.
           </li>
-          <li data-n="2.3">
+          <li data-n="2.2">
             <strong>Conecten las fuentes de datos</strong>
             Entren a <strong>Data Sources</strong> y conecten cada fuente con un usuario que tenga acceso a las cuentas de todas las marcas. Verifiquen que cada conexión quede en estado <strong>Connected</strong>.
             <div class="url-box">
@@ -944,7 +939,7 @@
       </div>
       <div class="step-body">
         <ul class="plain">
-          <li>Creamos la Destination de Inmediata en el proyecto nuevo y las transferencias de Meta Ads, Google Ads, TikTok Ads, Google Analytics 4, Facebook Insights e Instagram Insights.</li>
+          <li>En la Destination que Inmediata crea en la reunión de inicio, armamos las transferencias de Meta Ads, Google Ads, TikTok Ads, Google Analytics 4, Facebook Insights e Instagram Insights.</li>
           <li>Traemos el histórico que cada plataforma pone a disposición. Desde ahí, cada día nuevo queda guardado en su BigQuery.</li>
           <li>Las transferencias corren todos los días y solo traen los datos nuevos.</li>
           <li>Armamos la tabla de nombres: a cada campo que entrega Detrics le asignamos el nombre que usa Inmediata, cruzado contra sus reportes actuales.</li>
@@ -1016,9 +1011,8 @@
     <p class="progress" aria-live="polite"><b id="done">0</b> de <b id="total">0</b> completos</p>
     <div class="checklist" id="list">
       <div class="check-group">Antes del lunes · Inmediata</div>
-      <label class="check"><input type="checkbox" data-k="owner"><span class="box"></span><span class="txt">support@detrics.io con rol Owner en el workspace<small>Paso 2.1</small></span><span class="owner carat">Inmediata</span></label>
-      <label class="check"><input type="checkbox" data-k="team"><span class="box"></span><span class="txt">Equipo invitado al workspace, incluido N. Cárdenas<small>Paso 2.2</small></span><span class="owner carat">Inmediata</span></label>
-      <label class="check"><input type="checkbox" data-k="sources"><span class="box"></span><span class="txt">Meta Ads, Google Ads, TikTok Ads, GA4, Facebook Insights e Instagram Insights conectadas<small>Paso 2.3</small></span><span class="owner carat">Inmediata</span></label>
+      <label class="check"><input type="checkbox" data-k="team"><span class="box"></span><span class="txt">Equipo invitado al workspace, incluido N. Cárdenas<small>Paso 2.1</small></span><span class="owner carat">Inmediata</span></label>
+      <label class="check"><input type="checkbox" data-k="sources"><span class="box"></span><span class="txt">Meta Ads, Google Ads, TikTok Ads, GA4, Facebook Insights e Instagram Insights conectadas<small>Paso 2.2</small></span><span class="owner carat">Inmediata</span></label>
       <div class="check-group">Lunes 28 · Reunión de inicio</div>
       <label class="check"><input type="checkbox" data-k="plan"><span class="box"></span><span class="txt">Plan de Detrics activo, hasta 20 cuentas por fuente<small>Paso 1.1</small></span><span class="owner both">Inmediata y Detrics</span></label>
       <label class="check"><input type="checkbox" data-k="gcp"><span class="box"></span><span class="txt">Proyecto de Google Cloud creado, con facturación y API de BigQuery activas<small>Paso 1.2</small></span><span class="owner both">Inmediata y Detrics</span></label>
