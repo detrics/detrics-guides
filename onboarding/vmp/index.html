@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-gYRTCQv2F0wsQC0gi6YJs2j8tw6f9JOg8t3rRy+d5Oc='; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://storage.googleapis.com; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="robots" content="noindex, nofollow">
+<title>Onboarding VMP: dashboard llave en mano en BigQuery</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="apple-touch-icon" href="/favicon.png">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue: #2563EB;
+    --blue-dark: #1D4ED8;
+    --blue-light: #3B82F6;
+    --blue-soft: #EFF6FF;
+    --blue-glow: rgba(37, 99, 235, 0.25);
+    --ink: #0F172A;
+    --surface: #FFFFFF;
+    --gray-50: #F8FAFC;
+    --gray-100: #F1F5F9;
+    --gray-200: #E2E8F0;
+    --gray-300: #CBD5E1;
+    --gray-400: #94A3B8;
+    --gray-500: #64748B;
+    --gray-600: #475569;
+    --gray-700: #334155;
+    --green: #10B981;
+    --green-dark: #047857;
+    --green-bg: #ECFDF5;
+    --amber-bg: #FFFBEB;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    color: var(--ink);
+    background: var(--gray-50);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--blue); }
+  :focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; border-radius: 4px; }
+
+  /* ── Hero ── */
+  .hero {
+    background: linear-gradient(160deg, #0B1120 0%, #0F172A 45%, #131C2E 100%);
+    color: #fff;
+    padding: 72px 24px 64px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: -40% -20%;
+    background:
+      radial-gradient(ellipse 620px 400px at 22% 30%, rgba(37, 99, 235, 0.18) 0%, transparent 70%),
+      radial-gradient(ellipse 520px 480px at 78% 72%, rgba(59, 130, 246, 0.10) 0%, transparent 60%);
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(37, 99, 235, 0.35), transparent);
+  }
+  .hero-content { position: relative; z-index: 1; max-width: 760px; margin: 0 auto; }
+  .hero-client {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #93C5FD;
+    margin-bottom: 26px;
+  }
+  .hero-client img { height: 22px; width: 22px; border-radius: 6px; }
+  .hero-client span { color: var(--gray-500); }
+  .hero h1 {
+    font-size: 46px;
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -1.2px;
+    margin-bottom: 18px;
+  }
+  .hero p {
+    font-size: 17px;
+    color: #94A3B8;
+    max-width: 560px;
+    margin: 0 auto;
+    line-height: 1.75;
+  }
+  .hero-flow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 40px;
+  }
+  .hero-flow .logos { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+  .hero-flow img {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 6px;
+    object-fit: contain;
+  }
+  .hero-flow .dests { display: inline-flex; align-items: center; gap: 10px; white-space: nowrap; }
+  .hero-flow .arrow { color: var(--gray-500); font-size: 18px; padding: 0 6px; }
+  .hero-flow .dest img { width: 44px; height: 44px; background: rgba(37, 99, 235, 0.14); border-color: rgba(37, 99, 235, 0.35); }
+  /* one orchestrated load moment */
+  @media (prefers-reduced-motion: no-preference) {
+    .hero-client, .hero h1, .hero p, .hero-flow { animation: rise 0.8s cubic-bezier(0.22, 1, 0.36, 1) both; }
+    .hero h1 { animation-delay: 0.08s; }
+    .hero p { animation-delay: 0.18s; }
+    .hero-flow { animation-delay: 0.3s; }
+    @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+  }
+
+  /* ── Layout ── */
+  .container { max-width: 800px; margin: 0 auto; padding: 0 24px; }
+  .wide { max-width: 1000px; margin: 0 auto; padding: 0 24px; }
+
+  .facts {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    margin: -34px auto 0;
+    position: relative;
+    z-index: 2;
+    background: var(--surface);
+    border: 1px solid var(--gray-200);
+    border-radius: 16px;
+    box-shadow: 0 8px 28px rgba(15, 23, 42, 0.06);
+    overflow: hidden;
+  }
+  .fact { padding: 22px 24px; }
+  .fact + .fact { border-left: 1px solid var(--gray-100); }
+  .fact strong { display: block; font-size: 22px; font-weight: 800; letter-spacing: -0.4px; }
+  .fact span { font-size: 13px; color: var(--gray-500); }
+
+  .section { padding: 72px 0 0; }
+  .section-title {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.6px;
+    margin-bottom: 10px;
+  }
+  .section-lead {
+    font-size: 16px;
+    color: var(--gray-600);
+    max-width: 640px;
+    line-height: 1.75;
+    margin-bottom: 28px;
+  }
+
+  /* ── Gantt ── */
+  .gantt-wrap {
+    background: var(--surface);
+    border: 1px solid var(--gray-200);
+    border-radius: 18px;
+    padding: 24px 26px 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.02);
+  }
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 22px;
+    font-size: 13px;
+    color: var(--gray-600);
+    padding-bottom: 16px;
+    margin-bottom: 14px;
+    border-bottom: 1px solid var(--gray-100);
+  }
+  .legend span { display: inline-flex; align-items: center; gap: 8px; }
+  .sw { width: 22px; height: 12px; border-radius: 4px; display: inline-block; }
+  .sw.carat { background: var(--ink); }
+  .sw.detrics { background: linear-gradient(135deg, var(--blue), var(--blue-dark)); }
+  .sw.sess { background: var(--green-bg); border: 1.5px solid var(--green); }
+  .sw.diamond { width: 12px; height: 12px; border-radius: 3px; background: var(--ink); transform: rotate(45deg); }
+  .gantt-scroll { overflow-x: auto; }
+  .gantt { min-width: 760px; }
+  .g-row {
+    display: grid;
+    grid-template-columns: 210px 1fr;
+    align-items: center;
+    min-height: 44px;
+  }
+  .g-row + .g-row { border-top: 1px solid var(--gray-100); }
+  .g-label { font-size: 13px; font-weight: 600; color: var(--gray-700); padding-right: 14px; line-height: 1.35; }
+  .g-label small { display: block; font-size: 11.5px; font-weight: 500; color: var(--gray-400); }
+  /* 4 weeks × 5 days + 12 units for the 3 post-delivery months */
+  .g-track {
+    display: grid;
+    grid-template-columns: repeat(20, 1fr) repeat(12, 0.9fr);
+    height: 100%;
+    align-items: center;
+    background-image:
+      linear-gradient(90deg, transparent 0 calc(20 / 30.8 * 100%), rgba(16, 185, 129, 0.05) calc(20 / 30.8 * 100%) 100%),
+      linear-gradient(90deg, transparent calc(5 / 30.8 * 100% - 1px), var(--gray-100) calc(5 / 30.8 * 100% - 1px) calc(5 / 30.8 * 100%), transparent calc(5 / 30.8 * 100%)),
+      linear-gradient(90deg, transparent calc(10 / 30.8 * 100% - 1px), var(--gray-100) calc(10 / 30.8 * 100% - 1px) calc(10 / 30.8 * 100%), transparent calc(10 / 30.8 * 100%)),
+      linear-gradient(90deg, transparent calc(15 / 30.8 * 100% - 1px), var(--gray-100) calc(15 / 30.8 * 100% - 1px) calc(15 / 30.8 * 100%), transparent calc(15 / 30.8 * 100%)),
+      linear-gradient(90deg, transparent calc(20 / 30.8 * 100% - 1px), #A7F3D0 calc(20 / 30.8 * 100% - 1px) calc(20 / 30.8 * 100% + 1px), transparent calc(20 / 30.8 * 100% + 1px));
+  }
+  .g-head .g-track { background-image: none; }
+  .wk { text-align: center; font-size: 12px; font-weight: 700; color: var(--gray-700); }
+  .wk span { display: block; font-size: 11px; font-weight: 500; color: var(--gray-400); }
+  .wk.post { color: var(--green-dark); }
+  .wk.post span { color: #6EE7B7; color: var(--green); }
+  .bar {
+    height: 26px;
+    margin: 0 2px;
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .bar.carat { background: var(--ink); }
+  .bar.detrics { background: linear-gradient(135deg, var(--blue), var(--blue-dark)); }
+  .bar.session { background: var(--green-bg); border: 1.5px solid var(--green); color: var(--green-dark); }
+  .pin { display: flex; justify-content: center; }
+  .pin i {
+    width: 18px; height: 18px;
+    border-radius: 5px;
+    background: var(--ink);
+    transform: rotate(45deg);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.25);
+  }
+  .pin i b { transform: rotate(-45deg); color: #fff; font-size: 9.5px; font-weight: 800; font-style: normal; }
+  .pin.s i { background: var(--surface); border: 1.5px solid var(--green); border-radius: 50%; transform: none; box-shadow: none; }
+  .pin.s i b { transform: none; color: var(--green-dark); }
+
+  .miles {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 18px;
+  }
+  .mile {
+    background: var(--surface);
+    border: 1px solid var(--gray-200);
+    border-radius: 14px;
+    padding: 16px 18px;
+  }
+  .mile-top { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .mile-top .pin i { width: 16px; height: 16px; }
+  .mile-top em { font-style: normal; font-size: 12px; font-weight: 600; color: var(--gray-400); }
+  .mile h3 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .mile p { font-size: 13px; color: var(--gray-500); line-height: 1.55; }
+
+  /* ── Steps ── */
+  .phase-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin: 56px 0 18px;
+  }
+  .phase-head h3 { font-size: 20px; font-weight: 800; letter-spacing: -0.3px; }
+  .owner {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 11px;
+    border-radius: 100px;
+    white-space: nowrap;
+  }
+  .owner::before { content: ''; width: 7px; height: 7px; border-radius: 50%; }
+  .owner.carat { background: var(--gray-100); color: var(--ink); }
+  .owner.carat::before { background: var(--ink); }
+  .owner.detrics { background: var(--blue-soft); color: var(--blue-dark); }
+  .owner.detrics::before { background: var(--blue); }
+  .owner.both { background: var(--green-bg); color: var(--green-dark); }
+  .owner.both::before { background: var(--green); }
+
+  .step {
+    background: var(--surface);
+    border: 1px solid var(--gray-200);
+    border-radius: 16px;
+    margin-bottom: 20px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.02);
+  }
+  .step-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 22px 28px;
+    border-bottom: 1px solid var(--gray-100);
+    background: linear-gradient(180deg, var(--gray-50) 0%, var(--surface) 100%);
+  }
+  .step-number {
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--blue) 0%, var(--blue-dark) 100%);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 17px;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px var(--blue-glow);
+  }
+  .step.is-carat .step-number { background: var(--ink); box-shadow: 0 2px 8px rgba(15, 23, 42, 0.2); }
+  .step-header h4 { font-size: 18px; font-weight: 700; letter-spacing: -0.2px; flex: 1; }
+  .step-header h4 small { display: block; font-size: 13px; font-weight: 400; color: var(--gray-400); margin-top: 2px; }
+  .step-body { padding: 24px 28px 26px; }
+  .step-body > p { font-size: 15px; color: var(--gray-600); margin-bottom: 16px; line-height: 1.7; }
+  .step-body > p:last-child { margin-bottom: 0; }
+  .step-body ul.plain { list-style: none; margin-bottom: 16px; }
+  .step-body ul.plain li {
+    position: relative;
+    padding-left: 22px;
+    margin-bottom: 8px;
+    font-size: 15px;
+    color: var(--gray-600);
+  }
+  .step-body ul.plain li::before {
+    content: '';
+    position: absolute;
+    left: 4px; top: 10px;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--blue);
+  }
+
+  .substeps { counter-reset: sub; list-style: none; }
+  .substeps > li {
+    counter-increment: sub;
+    position: relative;
+    padding: 0 0 22px 50px;
+    font-size: 15px;
+    color: var(--gray-600);
+  }
+  .substeps > li:last-child { padding-bottom: 0; }
+  .substeps > li::before {
+    content: attr(data-n);
+    position: absolute;
+    left: 0; top: -1px;
+    min-width: 34px; height: 28px;
+    padding: 0 6px;
+    border-radius: 9px;
+    background: var(--gray-100);
+    border: 1px solid var(--gray-200);
+    color: var(--ink);
+    font-weight: 700;
+    font-size: 12px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .substeps > li > strong:first-child { display: block; color: var(--ink); font-size: 15px; margin-bottom: 3px; }
+  .substeps li ol { margin: 8px 0 0 18px; }
+  .substeps li ol li { margin-bottom: 4px; font-size: 14.5px; }
+
+  .url-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: linear-gradient(135deg, var(--blue-soft) 0%, var(--gray-50) 100%);
+    border: 1px solid rgba(37, 99, 235, 0.15);
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin: 10px 0 4px;
+  }
+  .url-box .url-icon {
+    width: 26px; height: 26px;
+    background: var(--blue);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .url-box .url-icon svg { width: 14px; height: 14px; fill: #fff; }
+  .url-box a {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--blue);
+    text-decoration: none;
+    word-break: break-all;
+    font-weight: 500;
+  }
+  .url-box a:hover { text-decoration: underline; }
+  .url-box a.label-link { font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; }
+
+  .copyable {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin: 8px 0 4px;
+  }
+  .copyable .label { font-size: 12px; font-weight: 600; color: var(--gray-400); min-width: 64px; }
+  .copyable code { flex: 1; font-family: 'DM Mono', monospace; font-size: 13px; color: var(--ink); word-break: break-all; background: none; border: 0; padding: 0; }
+  .copy-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--gray-500);
+    background: var(--gray-100);
+    border: 1px solid var(--gray-200);
+    border-radius: 6px;
+    padding: 3px 10px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .copy-btn:hover { background: #DBEAFE; border-color: var(--blue-light); color: var(--blue); }
+
+  code {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    background: var(--blue-soft);
+    border: 1px solid rgba(37, 99, 235, 0.12);
+    border-radius: 6px;
+    padding: 1px 7px;
+    color: var(--blue-dark);
+  }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 4px; }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--gray-200);
+    border-radius: 10px;
+    padding: 7px 12px;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--gray-700);
+  }
+  .chip img { width: 20px; height: 20px; object-fit: contain; border-radius: 4px; }
+
+  .tip {
+    display: flex;
+    gap: 12px;
+    padding: 14px 18px;
+    border-radius: 12px;
+    margin-top: 14px;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .tip.green { background: var(--green-bg); border: 1px solid #A7F3D0; color: #065F46; }
+  .tip.amber { background: var(--amber-bg); border: 1px solid #FDE68A; color: #92400E; }
+  .tip.blue { background: var(--blue-soft); border: 1px solid #BFDBFE; color: #1E3A8A; }
+  .tip-icon { font-size: 16px; flex-shrink: 0; line-height: 1.5; }
+
+  /* mini sheet preview */
+  .sheet {
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    overflow: hidden;
+    margin: 12px 0 4px;
+    font-size: 12.5px;
+  }
+  .sheet-scroll { overflow-x: auto; }
+  .sheet table { border-collapse: collapse; width: 100%; min-width: 560px; }
+  .sheet th {
+    background: var(--ink);
+    color: #fff;
+    font-weight: 600;
+    padding: 8px 10px;
+    text-align: center;
+    white-space: nowrap;
+  }
+  .sheet th:first-child, .sheet td:first-child { text-align: left; }
+  .sheet td {
+    padding: 7px 10px;
+    border-top: 1px solid var(--gray-100);
+    color: var(--gray-600);
+    text-align: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  .sheet td:first-child { font-family: 'Inter', sans-serif; font-weight: 600; color: var(--ink); font-size: 12.5px; }
+  .sheet td.empty { color: var(--gray-300); }
+
+  /* ── Sessions ── */
+  .sessions {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+  .session {
+    background: var(--surface);
+    border: 1px solid var(--gray-200);
+    border-radius: 14px;
+    padding: 18px 20px;
+    display: flex;
+    gap: 14px;
+  }
+  .session .pin.s i { width: 28px; height: 28px; }
+  .session .pin.s i b { font-size: 12px; }
+  .session h4 { font-size: 15px; font-weight: 700; margin-bottom: 3px; }
+  .session p { font-size: 13.5px; color: var(--gray-500); line-height: 1.55; }
+  .session em { font-style: normal; font-size: 12px; font-weight: 600; color: var(--green-dark); display: block; margin-bottom: 4px; }
+
+  /* ── Checklist ── */
+  .checklist {
+    background: var(--surface);
+    border: 1px solid var(--gray-200);
+    border-radius: 16px;
+    padding: 8px 8px;
+  }
+  .check {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 15px;
+    color: var(--gray-700);
+  }
+  .check:hover { background: var(--gray-50); }
+  .check input { position: absolute; opacity: 0; pointer-events: none; }
+  .box {
+    width: 20px; height: 20px;
+    border-radius: 6px;
+    border: 1.5px solid var(--gray-300);
+    flex-shrink: 0;
+    margin-top: 2px;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .check input:checked + .box { background: var(--green); border-color: var(--green); }
+  .check input:checked + .box::after { content: ''; width: 5px; height: 10px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg) translate(-1px, -1px); }
+  .check input:checked ~ .txt { color: var(--gray-400); text-decoration: line-through; }
+  .check input:focus-visible + .box { outline: 2px solid var(--blue); outline-offset: 2px; }
+  .check .txt small { display: block; font-size: 12.5px; color: var(--gray-400); text-decoration: none; }
+  .check .txt { flex: 1; }
+  .check .owner { margin-top: 1px; }
+  .check-group { font-size: 13px; font-weight: 700; color: var(--gray-500); padding: 14px 16px 4px; }
+  .check-group:first-child { padding-top: 8px; }
+  @media (max-width: 480px) { .check { flex-wrap: wrap; } .check .owner { margin-left: 34px; } }
+  .progress { font-size: 13px; color: var(--gray-500); margin: 0 0 12px; }
+  .progress b { color: var(--ink); }
+
+  /* ── Contacts ── */
+  .contacts {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr 1fr;
+    gap: 14px;
+  }
+  .contact {
+    background: var(--surface);
+    border: 1px solid var(--gray-200);
+    border-radius: 14px;
+    padding: 18px 20px;
+  }
+  .contact h4 { font-size: 15px; font-weight: 700; margin-bottom: 2px; }
+  .contact .role { font-size: 13px; color: var(--gray-400); margin-bottom: 10px; }
+  .contact p { font-size: 13.5px; color: var(--gray-600); line-height: 1.55; }
+  .contact a { font-family: 'DM Mono', monospace; font-size: 13px; text-decoration: none; }
+  .contact a:hover { text-decoration: underline; }
+
+  .footer {
+    text-align: center;
+    padding: 40px 0;
+    margin-top: 80px;
+    border-top: 1px solid var(--gray-200);
+    font-size: 13px;
+    color: var(--gray-400);
+  }
+  .footer a { text-decoration: none; }
+
+  @media (max-width: 760px) {
+    .hero { padding: 52px 16px 56px; }
+    .hero h1 { font-size: 31px; letter-spacing: -0.6px; }
+    .container, .wide { padding: 0 16px; }
+    .facts { grid-template-columns: 1fr; }
+    .fact + .fact { border-left: 0; border-top: 1px solid var(--gray-100); }
+    .miles { grid-template-columns: 1fr 1fr; }
+    .sessions, .contacts { grid-template-columns: 1fr; }
+    .step-header, .step-body { padding-left: 18px; padding-right: 18px; }
+    .substeps > li { padding-left: 44px; }
+    .gantt-wrap { padding: 18px 14px; }
+    .g-row { grid-template-columns: 150px 1fr; }
+    .gantt { min-width: 700px; }
+  }
+  @media (max-width: 480px) { .miles { grid-template-columns: 1fr; } }
+
+  @media print {
+    body { background: #fff; }
+    .hero { padding: 40px 20px; }
+    .step, .mile, .session, .gantt-wrap, .contact { break-inside: avoid; }
+    .copy-btn { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ HERO ============ -->
+<header class="hero">
+  <div class="hero-content">
+    <div class="hero-client">
+      <img src="https://storage.googleapis.com/detrics-static/public/img/detrics-round-logo.png" alt="">
+      Detrics <span>para</span> VMP
+    </div>
+    <h1>Del BigQuery ya andando al dashboard llave en mano de ACF, NIC y Beauty Web</h1>
+    <p>El setup técnico ya está: las 12 fuentes conectadas, las transferencias corriendo y los datos en el BigQuery de VMP. Faltan dos entregas cortas de VMP y Detrics arma el dashboard.</p>
+    <div class="hero-flow" aria-label="Las fuentes de VMP llegan a BigQuery y alimentan el dashboard">
+      <div class="logos">
+        <img src="https://storage.googleapis.com/detrics-static/public/img/meta-ads-logo.png" alt="Meta Ads">
+        <img src="https://storage.googleapis.com/detrics-static/public/img/facebook-ads-logo.png" alt="Facebook">
+        <img src="https://storage.googleapis.com/detrics-static/public/img/instagram-logo.png" alt="Instagram">
+        <img src="https://storage.googleapis.com/detrics-static/public/img/google-ads-logo.png" alt="Google Ads">
+        <img src="https://storage.googleapis.com/detrics-static/public/img/google-analytics-4-logo.png" alt="Google Analytics 4">
+        <img src="https://storage.googleapis.com/detrics-static/public/img/google-search-console-logo.png" alt="Google Search Console">
+        <img src="https://storage.googleapis.com/detrics-static/public/img/google-merchant-center-logo.svg" alt="Google Merchant Center">
+        <img src="https://storage.googleapis.com/detrics-static/public/img/tiktok-logo.png" alt="TikTok Ads">
+        <img src="https://storage.googleapis.com/detrics-static/public/img/pinterest-logo.png" alt="Pinterest Ads">
+        <img src="https://storage.googleapis.com/detrics-static/public/img/tienda-nube-logo.png" alt="Tiendanube">
+        <img src="https://storage.googleapis.com/detrics-static/public/img/mercado-libre-logo.png" alt="Mercado Ads y Mercado Libre Orgánico">
+      </div>
+      <span class="dests">
+        <span class="arrow" aria-hidden="true">&rarr;</span>
+        <span class="dest"><img src="https://storage.googleapis.com/detrics-static/public/img/big-query-icon.png" alt="BigQuery"></span>
+        <span class="arrow" aria-hidden="true">&rarr;</span>
+        <span class="dest"><img src="https://storage.googleapis.com/detrics-static/public/img/looker-logo.png" alt="Looker Studio"></span>
+      </span>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="facts">
+    <div class="fact"><strong>2 semanas</strong><span>desde el kickoff hasta el dashboard entregado</span></div>
+    <div class="fact"><strong>3 marcas</strong><span>ACF, NIC y Beauty Web en un solo tablero</span></div>
+    <div class="fact"><strong>3 sesiones</strong><span>de 1,5 h con Tom, en los 3 meses siguientes a la entrega</span></div>
+  </div>
+</div>
+
+
+<new_string><!-- ============ ROADMAP ============ -->
+<section class="section" id="roadmap">
+  <div class="wide">
+    <h2 class="section-title">Roadmap</h2>
+    <p class="section-lead">El proyecto de Google Cloud está creado, las 12 fuentes conectadas y las transferencias corriendo. El jueves activamos el plan de BigQuery y arrancamos el dashboard. VMP entrega el mapa de marcas y el acceso al workspace en la primera semana. Detrics arma las tablas consolidadas y el dashboard llave en mano en la segunda.</p>
+
+    <div class="gantt-wrap">
+      <div class="legend">
+        <span><i class="sw carat"></i>Equipo de VMP</span>
+        <span><i class="sw detrics"></i>Equipo de Detrics</span>
+        <span><i class="sw sess"></i>Consultoría con Tom</span>
+        <span><i class="sw diamond"></i>Reunión de revisión</span>
+      </div>
+      <div class="gantt-scroll">
+        <div class="gantt" role="table" aria-label="Cronograma de implementación">
+          <div class="g-row g-head" role="row">
+            <div></div>
+            <div class="g-track">
+              <div class="wk" style="grid-column: 1 / 11;">Semana 1<span>Mapa y accesos</span></div>
+              <div class="wk" style="grid-column: 11 / 21;">Semana 2<span>Consolidación y dashboard</span></div>
+              <div class="wk post" style="grid-column: 21 / 33;">Meses 2 a 4<span>Consultoría</span></div>
+            </div>
+          </div>
+          <div class="g-row" role="row">
+            <div class="g-label">Reuniones</div>
+            <div class="g-track">
+              <div class="pin" style="grid-column: 1 / 2;" title="Kickoff"><i><b>1</b></i></div>
+              <div class="pin" style="grid-column: 10 / 11;" title="Revisión de tablas"><i><b>2</b></i></div>
+              <div class="pin" style="grid-column: 20 / 21;" title="Entrega del dashboard"><i><b>3</b></i></div>
+              <div class="pin s" style="grid-column: 22 / 23;" title="Sesión 1 con Tom"><i><b>1</b></i></div>
+              <div class="pin s" style="grid-column: 26 / 27;" title="Sesión 2 con Tom"><i><b>2</b></i></div>
+              <div class="pin s" style="grid-column: 30 / 31;" title="Sesión 3 con Tom"><i><b>3</b></i></div>
+            </div>
+          </div>
+          <div class="g-row" role="row">
+            <div class="g-label">Activación del plan BigQuery<small>Paso 1.1</small></div>
+            <div class="g-track"><div class="bar detrics" style="grid-column: 1 / 2;">Detrics</div></div>
+          </div>
+          <div class="g-row" role="row">
+            <div class="g-label">Mapa de marcas<small>Paso 2</small></div>
+            <div class="g-track"><div class="bar carat" style="grid-column: 1 / 11;">VMP</div></div>
+          </div>
+          <div class="g-row" role="row">
+            <div class="g-label">Acceso al workspace<small>Paso 3</small></div>
+            <div class="g-track"><div class="bar carat" style="grid-column: 1 / 6;">VMP</div></div>
+          </div>
+          <div class="g-row" role="row">
+            <div class="g-label">Baja de Google Sheets y Looker<small>Paso 4</small></div>
+            <div class="g-track"><div class="bar carat" style="grid-column: 1 / 4;">VMP</div></div>
+          </div>
+          <div class="g-row" role="row">
+            <div class="g-label">Tablas consolidadas por marca<small>Paso 5</small></div>
+            <div class="g-track"><div class="bar detrics" style="grid-column: 6 / 16;">Detrics</div></div>
+          </div>
+          <div class="g-row" role="row">
+            <div class="g-label">Dashboard llave en mano<small>Paso 6</small></div>
+            <div class="g-track"><div class="bar detrics" style="grid-column: 11 / 21;">Detrics</div></div>
+          </div>
+          <div class="g-row" role="row">
+            <div class="g-label">Consultoría con Tom<small>Después de la entrega</small></div>
+            <div class="g-track"><div class="bar session" style="grid-column: 21 / 33;">3 sesiones de 1,5 h</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="miles">
+      <div class="mile">
+        <div class="mile-top"><span class="pin"><i><b>1</b></i></span><em>Jueves 1 de octubre, 14:00 hs</em></div>
+        <h3>Kickoff</h3>
+        <p>Activamos el plan de Detrics para BigQuery en la cuenta de VMP y repasamos el mapa de marcas, los accesos y la baja de las suscripciones anteriores.</p>
+      </div>
+      <div class="mile">
+        <div class="mile-top"><span class="pin"><i><b>2</b></i></span><em>Fin de la semana 1</em></div>
+        <h3>Revisión de tablas</h3>
+        <p>Tablas consolidadas de ACF, NIC y Beauty Web armadas, cruzadas con el mapa de marcas y listas para validar.</p>
+      </div>
+      <div class="mile">
+        <div class="mile-top"><span class="pin"><i><b>3</b></i></span><em>Fin de la semana 2</em></div>
+        <h3>Entrega del dashboard</h3>
+        <p>Recorrido del dashboard llave en mano con Álvaro y el equipo de VMP, y validación final.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ STEPS ============ -->
+<section class="section" id="pasos">
+  <div class="container">
+    <h2 class="section-title">Paso a paso</h2>
+    <p class="section-lead">El paso 1 lo hacemos juntos en el kickoff del jueves. Los pasos 2 a 4 los completa VMP en la primera semana. Con eso, Detrics avanza con los pasos 5 y 6 y entrega el dashboard llave en mano en la segunda.</p>
+
+    <!-- STEP 1 -->
+    <div class="phase-head"><h3>Jueves 1 de octubre, 14:00 hs</h3><span class="owner both">VMP y Detrics</span></div>
+    <div class="step">
+      <div class="step-header">
+        <div class="step-number">1</div>
+        <h4>Kickoff <small>Google Meet, 45 minutos, con pantalla compartida</small></h4>
+      </div>
+      <div class="step-body">
+        <p>El jueves activamos el plan y repasamos los pasos 2, 3 y 4 en la misma llamada. Con eso queda el arranque cerrado y Detrics avanza con las tablas y el dashboard.</p>
+        <ol class="substeps">
+          <li data-n="1.1">
+            <strong>Activamos el plan de Detrics para BigQuery</strong>
+            Ignacio cambia la suscripción de VMP en Detrics del plan Sheets al plan BigQuery. Se factura U$D 299 por mes, con las 12 fuentes ya conectadas y hasta 10 cuentas por fuente. Álvaro no necesita cargar nada de nuevo, la tarjeta que ya está en la cuenta sigue usándose.
+            <div class="url-box">
+              <div class="url-icon"><svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg></div>
+              <a href="https://app.detrics.io/account" target="_blank" rel="noopener">app.detrics.io/account</a>
+            </div>
+            <div class="tip green"><span class="tip-icon">&#10003;</span><span>La oferta incluye el dashboard llave en mano y las 3 sesiones con el equipo experto, bonificados. Válida hasta el 7 de octubre.</span></div>
+          </li>
+          <li data-n="1.2">
+            <strong>Repasamos el mapa de marcas</strong>
+            Álvaro comparte el desglose de cada marca (ACF, NIC, Beauty Web) por fuente: qué cuenta publicitaria pertenece a cada marca y qué queda fuera. Con eso Detrics separa los datos por marca en las tablas consolidadas. Detalle en el paso 2.
+          </li>
+          <li data-n="1.3">
+            <strong>Confirmamos accesos y bajas</strong>
+            Repasamos que support@detrics.io queda invitado al workspace de VMP en Detrics (paso 3) y coordinamos la baja de Google Sheets y de la suscripción vieja de Looker Studio (paso 4).
+          </li>
+          <li data-n="1.4">
+            <strong>Agendamos las reuniones de revisión</strong>
+            Fijamos la reunión 2 para el fin de la semana 1 (revisión de tablas consolidadas) y la reunión 3 para el fin de la semana 2 (entrega del dashboard). Coordinamos el canal por el que seguimos el día a día.
+          </li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="phase-head"><h3>Semana 1</h3><span class="owner carat">Equipo de VMP</span></div>
+    <div class="step is-carat">
+      <div class="step-header">
+        <div class="step-number">2</div>
+        <h4>Mapa de marcas <small>Qué cuentas pertenecen a ACF, NIC y Beauty Web</small></h4>
+      </div>
+      <div class="step-body">
+        <p>Con este mapa Detrics separa los datos de las tres marcas dentro del BigQuery de VMP y arma la vista por marca del dashboard. Álvaro completa la plantilla y la compartimos como <strong>Editor</strong> con <code>support@detrics.io</code>.</p>
+        <div class="sheet">
+          <div class="sheet-scroll">
+            <table>
+              <thead><tr><th>Marca</th><th>Meta Ads</th><th>Google Ads</th><th>GA4</th><th>Search Console</th><th>Merchant Center</th><th>TikTok</th><th>Pinterest</th><th>Tiendanube</th><th>Mercado Libre</th></tr></thead>
+              <tbody>
+                <tr><td>ACF</td><td class="empty">-</td><td class="empty">-</td><td class="empty">-</td><td class="empty">-</td><td class="empty">-</td><td class="empty">-</td><td class="empty">-</td><td class="empty">-</td><td class="empty">-</td></tr>
+                <tr><td>NIC</td><td class="empty">-</td><td class="empty">-</td><td class="empty">-</td><td class="empty">-</td><td class="empty">-</td><td class="empty">-</td><td class="empty">-</td><td class="empty">-</td><td class="empty">-</td></tr>
+                <tr><td>Beauty Web</td><td class="empty">-</td><td class="empty">-</td><td class="empty">-</td><td class="empty">-</td><td class="empty">-</td><td class="empty">-</td><td class="empty">-</td><td class="empty">-</td><td class="empty">-</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <p style="margin-top:12px;">En cada celda va el <strong>nombre o el ID de la cuenta publicitaria</strong> (o cuentas, si son varias) de esa marca en esa fuente. Facebook e Instagram siguen la misma lógica que Meta Ads: si comparten cuentas, se anotan una vez. Si una fuente no aplica para una marca, se deja vacía.</p>
+        <div class="tip blue"><span class="tip-icon">&#9432;</span><span>Si una cuenta publicitaria se comparte entre dos marcas, escribilas separadas por coma en la misma celda y avisanos en el kickoff. En la consolidación separamos los datos por campaña.</span></div>
+        <div class="tip amber"><span class="tip-icon">&#9888;</span><span>Meta Ads y Mercado Libre son las que hoy tienen más cuentas fuera del BigQuery, así que conviene revisarlas primero.</span></div>
+      </div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div class="step is-carat">
+      <div class="step-header">
+        <div class="step-number">3</div>
+        <h4>Acceso al workspace de VMP <small>Sumar a support@detrics.io como miembro</small></h4>
+      </div>
+      <div class="step-body">
+        <p>Con este acceso el equipo de Detrics ve las 12 fuentes, sus cuentas conectadas y los transfers corriendo, y arma el dashboard sobre el BigQuery de VMP. Los datos quedan en el proyecto de Google Cloud de VMP en todo momento.</p>
+        <ol class="substeps">
+          <li data-n="3.1">
+            <strong>Entrar a Team Members</strong>
+            Álvaro abre la sección de miembros del workspace de VMP en Detrics.
+            <div class="url-box">
+              <div class="url-icon"><svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg></div>
+              <a href="https://app.detrics.io/account" target="_blank" rel="noopener">app.detrics.io/account</a>
+            </div>
+          </li>
+          <li data-n="3.2">
+            <strong>Invitar a support@detrics.io</strong>
+            Con <strong>Invite Team Member</strong>, pegar el correo y confirmar. El plan incluye 5 usuarios, así que hay margen para sumar al resto del equipo de VMP cuando quieran.
+            <div class="copyable"><span class="label">Correo</span><code>support@detrics.io</code><button class="copy-btn" type="button" data-copy="support@detrics.io">Copiar</button></div>
+          </li>
+        </ol>
+        <div class="tip green"><span class="tip-icon">&#10003;</span><span>VMP puede quitar este acceso cuando quiera desde la misma pantalla. El BigQuery, las fuentes y las transferencias siguen andando aunque support@ deje de ser miembro.</span></div>
+      </div>
+    </div>
+
+    <!-- STEP 4 -->
+    <div class="step is-carat">
+      <div class="step-header">
+        <div class="step-number">4</div>
+        <h4>Baja de las suscripciones anteriores <small>Google Sheets y Looker Studio</small></h4>
+      </div>
+      <div class="step-body">
+        <p>Una vez activo el plan de BigQuery, dejan de tener sentido las dos suscripciones anteriores. Se dan de baja el mismo jueves 1/10.</p>
+        <ol class="substeps">
+          <li data-n="4.1">
+            <strong>Cancelar el plan de Google Sheets en Detrics</strong>
+            Desde <strong>Manage subscription</strong> en la cuenta de VMP en Detrics. El nuevo plan de BigQuery cubre las mismas fuentes con un límite mucho mayor.
+            <div class="url-box">
+              <div class="url-icon"><svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg></div>
+              <a href="https://app.detrics.io/account" target="_blank" rel="noopener">app.detrics.io/account</a>
+            </div>
+          </li>
+          <li data-n="4.2">
+            <strong>Cancelar la licencia paga de Looker Studio</strong>
+            Looker Studio se conecta gratis a BigQuery, así que la licencia paga deja de aportar. Baja desde la consola de Google donde figura la suscripción.
+            <div class="tip blue"><span class="tip-icon">&#9432;</span><span>Los reportes que ya existen en Looker Studio siguen andando después de la baja. Solo se cancela el cobro mensual.</span></div>
+          </li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- STEPS 5-6 -->
+    <div class="phase-head"><h3>Semanas 1 y 2</h3><span class="owner detrics">Equipo de Detrics</span></div>
+    <div class="step">
+      <div class="step-header">
+        <div class="step-number">5</div>
+        <h4>Tablas consolidadas por marca <small>Semana 1</small></h4>
+      </div>
+      <div class="step-body">
+        <ul class="plain">
+          <li>Unimos las 12 fuentes en tablas con las mismas métricas por plataforma, adentro del BigQuery de VMP.</li>
+          <li>Cruzamos con el mapa de marcas: cada cuenta publicitaria queda asignada a ACF, NIC o Beauty Web.</li>
+          <li>Sumamos las cuentas de Meta Ads de ACF y NIC y las de Mercado Libre, que hoy quedaban afuera del BigQuery original.</li>
+          <li>Validamos los números contra los reportes que Álvaro consulta hoy.</li>
+        </ul>
+        <p>Cierra con la <strong>reunión 2</strong>: revisamos las tablas consolidadas con Álvaro y confirmamos el mapa de marcas.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-header">
+        <div class="step-number">6</div>
+        <h4>Dashboard llave en mano <small>Semana 2</small></h4>
+      </div>
+      <div class="step-body">
+        <ul class="plain">
+          <li>ACF, NIC y Beauty Web en un solo tablero de Looker Studio, con una vista general y una vista por marca.</li>
+          <li>Filtros por marca, plataforma, cuenta y fecha, más el detalle por anuncio.</li>
+          <li>Construido sobre las tablas consolidadas: sumar una marca nueva o una cuenta nueva al mapa la deja disponible en el dashboard sin tocar nada más.</li>
+          <li>Álvaro puede seguir preguntándole a Claude conectado al BigQuery de VMP para los cortes que no estén en el dashboard.</li>
+        </ul>
+        <p>Cierra con la <strong>reunión 3</strong>: recorrido del dashboard con Álvaro y el equipo de VMP, ajustes finales y entrega.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SESSIONS ============ -->
+<section class="section" id="consultoria">
+  <div class="container">
+    <h2 class="section-title">Consultoría con Tom</h2>
+    <p class="section-lead">Después de la entrega, Tomás García Piñeiro, Co-Founder y CTO de Detrics, acompaña al equipo de VMP en 3 sesiones de 1,5 horas durante los 3 meses siguientes, para que quede operando el dashboard por su cuenta. Los temas se ajustan a lo que necesiten en cada momento.</p>
+    <div class="sessions">
+      <div class="session">
+        <span class="pin s"><i><b>1</b></i></span>
+        <div><em>Semana 1 después de la entrega</em><h4>El modelo de datos</h4><p>Cómo están organizadas las tablas de ACF, NIC y Beauty Web, cómo corre cada transferencia y cómo sumar una cuenta nueva o una marca al mapa.</p></div>
+      </div>
+      <div class="session">
+        <span class="pin s"><i><b>2</b></i></span>
+        <div><em>Mes 2</em><h4>Métricas y vistas nuevas</h4><p>Definir métricas propias de VMP (ROAS por marca, mix de canales, cortes de e-commerce) y crear vistas nuevas en el dashboard.</p></div>
+      </div>
+      <div class="session">
+        <span class="pin s"><i><b>3</b></i></span>
+        <div><em>Mes 3</em><h4>Reportes con Claude</h4><p>Dejar a Claude preguntando sobre el BigQuery de VMP: el reporte semanal o mensual de cada marca se arma preguntando.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CHECKLIST ============ -->
+<section class="section" id="checklist">
+  <div class="container">
+    <h2 class="section-title">Checklist del proyecto</h2>
+    <p class="section-lead">Todos los pasos, del kickoff a la última sesión con Tom. Las marcas quedan guardadas en este navegador.</p>
+    <p class="progress" aria-live="polite"><b id="done">0</b> de <b id="total">0</b> completos</p>
+    <div class="checklist" id="list">
+      <div class="check-group">Jueves 1/10 · Kickoff</div>
+      <label class="check"><input type="checkbox" data-k="plan"><span class="box"></span><span class="txt">Plan de Detrics para BigQuery activo, 12 fuentes, hasta 10 cuentas por fuente<small>Paso 1.1</small></span><span class="owner detrics">Detrics</span></label>
+      <label class="check"><input type="checkbox" data-k="mapreview"><span class="box"></span><span class="txt">Mapa de marcas repasado en la llamada<small>Paso 1.2</small></span><span class="owner both">VMP y Detrics</span></label>
+      <label class="check"><input type="checkbox" data-k="agenda"><span class="box"></span><span class="txt">Reuniones 2 y 3 agendadas<small>Paso 1.4</small></span><span class="owner both">VMP y Detrics</span></label>
+      <div class="check-group">Semana 1 · VMP</div>
+      <label class="check"><input type="checkbox" data-k="map"><span class="box"></span><span class="txt">Mapa de marcas de ACF, NIC y Beauty Web completado y compartido con support@detrics.io<small>Paso 2</small></span><span class="owner carat">VMP</span></label>
+      <label class="check"><input type="checkbox" data-k="workspace"><span class="box"></span><span class="txt">support@detrics.io invitado al workspace de VMP en Detrics<small>Paso 3</small></span><span class="owner carat">VMP</span></label>
+      <label class="check"><input type="checkbox" data-k="sheets"><span class="box"></span><span class="txt">Plan de Google Sheets cancelado<small>Paso 4.1</small></span><span class="owner carat">VMP</span></label>
+      <label class="check"><input type="checkbox" data-k="looker"><span class="box"></span><span class="txt">Licencia paga de Looker Studio cancelada<small>Paso 4.2</small></span><span class="owner carat">VMP</span></label>
+      <div class="check-group">Semanas 1 y 2 · Detrics</div>
+      <label class="check"><input type="checkbox" data-k="tables"><span class="box"></span><span class="txt">Tablas consolidadas por marca armadas y validadas en la reunión 2<small>Paso 5</small></span><span class="owner both">VMP y Detrics</span></label>
+      <label class="check"><input type="checkbox" data-k="dash"><span class="box"></span><span class="txt">Dashboard llave en mano de ACF, NIC y Beauty Web entregado en la reunión 3<small>Paso 6</small></span><span class="owner both">VMP y Detrics</span></label>
+      <div class="check-group">Meses 2 a 4 · Consultoría con Tom</div>
+      <label class="check"><input type="checkbox" data-k="s1"><span class="box"></span><span class="txt">Sesión 1: el modelo de datos<small>Consultoría</small></span><span class="owner both">VMP y Detrics</span></label>
+      <label class="check"><input type="checkbox" data-k="s2"><span class="box"></span><span class="txt">Sesión 2: métricas y vistas nuevas<small>Consultoría</small></span><span class="owner both">VMP y Detrics</span></label>
+      <label class="check"><input type="checkbox" data-k="s3"><span class="box"></span><span class="txt">Sesión 3: reportes con Claude<small>Consultoría</small></span><span class="owner both">VMP y Detrics</span></label>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CONTACTS ============ -->
+<section class="section" id="contacto">
+  <div class="container">
+    <h2 class="section-title">Contacto</h2>
+    <p class="section-lead">Para cualquier duda del proyecto, escribinos por mail o al canal que abrimos en el kickoff.</p>
+    <div class="contacts">
+      <div class="contact">
+        <h4>Ignacio Goyanes</h4>
+        <div class="role">Head of Growth de Detrics, contacto comercial</div>
+        <a href="mailto:ignacio.goyanes@detrics.io">ignacio.goyanes@detrics.io</a>
+      </div>
+      <div class="contact">
+        <h4>Tomás García Piñeiro</h4>
+        <div class="role">Co-Founder y CTO de Detrics, responsable del proyecto</div>
+        <a href="mailto:tomas@detrics.io">tomas@detrics.io</a>
+      </div>
+      <div class="contact">
+        <h4>Soporte</h4>
+        <div class="role">Accesos, cuentas y día a día</div>
+        <a href="mailto:support@detrics.io">support@detrics.io</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container"><a href="https://detrics.io" target="_blank" rel="noopener">detrics.io</a></div>
+</footer>
+
+<script>
+  // copy buttons
+  document.querySelectorAll('.copy-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var text = btn.getAttribute('data-copy');
+      var done = function () {
+        var orig = btn.textContent;
+        btn.textContent = 'Copiado';
+        setTimeout(function () { btn.textContent = orig; }, 1800);
+      };
+      if (navigator.clipboard) navigator.clipboard.writeText(text).then(done, function () {});
+    });
+  });
+
+  // checklist, remembered per browser
+  (function () {
+    var KEY = 'detrics-onboarding-vmp';
+    var state = {};
+    try { state = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { state = {}; }
+    var boxes = document.querySelectorAll('#list input');
+    document.getElementById('total').textContent = boxes.length;
+    function count() {
+      var n = 0;
+      boxes.forEach(function (b) { if (b.checked) n++; });
+      document.getElementById('done').textContent = n;
+    }
+    boxes.forEach(function (b) {
+      b.checked = !!state[b.dataset.k];
+      b.addEventListener('change', function () {
+        state[b.dataset.k] = b.checked;
+        try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+        count();
+      });
+    });
+    count();
+  })();
+</script>
+
+</body>
+</html>
