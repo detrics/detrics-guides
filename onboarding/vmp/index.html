@@ -650,7 +650,7 @@
 <section class="section" id="roadmap">
   <div class="wide">
     <h2 class="section-title">Roadmap</h2>
-    <p class="section-lead">El proyecto de Google Cloud está creado, las 12 fuentes conectadas y las transferencias corriendo. El jueves activamos el plan de BigQuery y arrancamos el dashboard. VMP entrega el mapa de marcas y el acceso al workspace en la primera semana. Detrics arma las tablas consolidadas y el dashboard llave en mano en la segunda.</p>
+    <p class="section-lead">El proyecto de Google Cloud está creado, las 12 fuentes conectadas y las transferencias corriendo. El jueves activamos el plan de BigQuery y arrancamos el dashboard. VMP entrega el mapa de marcas y los accesos al workspace y a Google Cloud en la primera semana. Detrics arma las tablas consolidadas y el dashboard llave en mano en la segunda.</p>
 
     <div class="gantt-wrap">
       <div class="legend">
@@ -763,7 +763,7 @@
           </li>
           <li data-n="1.3">
             <strong>Confirmamos accesos y bajas</strong>
-            Repasamos que support@detrics.io queda invitado al workspace de VMP en Detrics (paso 3) y coordinamos la baja de Google Sheets y de la suscripción vieja de Looker Studio (paso 4).
+            Repasamos los accesos del paso 3: support@detrics.io en el workspace de VMP en Detrics y los roles de BigQuery en el proyecto de Google Cloud de VMP. También coordinamos la baja de Google Sheets y de la suscripción vieja de Looker Studio (paso 4).
           </li>
           <li data-n="1.4">
             <strong>Agendamos las reuniones de revisión</strong>
@@ -804,10 +804,10 @@
     <div class="step is-carat">
       <div class="step-header">
         <div class="step-number">3</div>
-        <h4>Acceso al workspace de VMP <small>Sumar a support@detrics.io como miembro</small></h4>
+        <h4>Accesos para Detrics <small>Workspace de Detrics y proyecto de Google Cloud</small></h4>
       </div>
       <div class="step-body">
-        <p>Con este acceso el equipo de Detrics ve las 12 fuentes, sus cuentas conectadas y los transfers corriendo, y arma el dashboard sobre el BigQuery de VMP. Los datos quedan en el proyecto de Google Cloud de VMP en todo momento.</p>
+        <p>Con el acceso al workspace, el equipo de Detrics ve las 12 fuentes, sus cuentas conectadas y las transferencias corriendo. Con los roles de Google Cloud, consulta los datos y construye las tablas consolidadas, las vistas y las rutinas en el BigQuery de VMP. Los datos quedan en el proyecto de Google Cloud de VMP en todo momento.</p>
         <ol class="substeps">
           <li data-n="3.1">
             <strong>Entrar a Team Members</strong>
@@ -822,8 +822,34 @@
             Con <strong>Invite Team Member</strong>, pegar el correo y confirmar. El plan incluye 5 usuarios, así que hay margen para sumar al resto del equipo de VMP cuando quieran.
             <div class="copyable"><span class="label">Correo</span><code>support@detrics.io</code><button class="copy-btn" type="button" data-copy="support@detrics.io">Copiar</button></div>
           </li>
+          <li data-n="3.3">
+            <strong>Dar acceso en Google Cloud a Soporte de Detrics, Tom e Ignacio</strong>
+            Lo hace alguien con rol de Propietario o Administrador de IAM en el proyecto de Google Cloud de VMP, el mismo donde hoy corren las transferencias.
+            <div class="url-box">
+              <div class="url-icon"><svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg></div>
+              <a href="https://console.cloud.google.com/iam-admin/iam" target="_blank" rel="noopener">console.cloud.google.com/iam-admin/iam</a>
+            </div>
+            <ol>
+              <li>Abran <strong>IAM</strong> en la consola de Google Cloud y verifiquen arriba, en el selector de proyecto, que esté elegido el proyecto de BigQuery de VMP.</li>
+              <li>Hagan click en <strong>Otorgar acceso</strong>.</li>
+              <li>En <strong>Principales nuevas</strong>, peguen los tres correos de Detrics:</li>
+            </ol>
+            <div class="copyable"><span class="label">Correo</span><code>support@detrics.io</code><button class="copy-btn" type="button" data-copy="support@detrics.io">Copiar</button></div>
+            <div class="copyable"><span class="label">Correo</span><code>tomas@detrics.io</code><button class="copy-btn" type="button" data-copy="tomas@detrics.io">Copiar</button></div>
+            <div class="copyable"><span class="label">Correo</span><code>ignacio.goyanes@detrics.io</code><button class="copy-btn" type="button" data-copy="ignacio.goyanes@detrics.io">Copiar</button></div>
+            <ol start="4">
+              <li>En <strong>Seleccionar un rol</strong>, busquen y elijan <strong>MCP Tool User</strong>.</li>
+              <li>Hagan click en <strong>Agregar otro rol</strong> y elijan <strong>BigQuery Job User</strong>.</li>
+              <li>Otra vez <strong>Agregar otro rol</strong> y elijan <strong>BigQuery Data Editor</strong>.</li>
+              <li>Hagan click en <strong>Guardar</strong>. En la lista de IAM, cada correo tiene que aparecer con los 3 roles.</li>
+            </ol>
+            <div class="copyable"><span class="label">Rol</span><code>roles/mcp.toolUser</code><button class="copy-btn" type="button" data-copy="roles/mcp.toolUser">Copiar</button></div>
+            <div class="copyable"><span class="label">Rol</span><code>roles/bigquery.jobUser</code><button class="copy-btn" type="button" data-copy="roles/bigquery.jobUser">Copiar</button></div>
+            <div class="copyable"><span class="label">Rol</span><code>roles/bigquery.dataEditor</code><button class="copy-btn" type="button" data-copy="roles/bigquery.dataEditor">Copiar</button></div>
+            <div class="tip blue"><span class="tip-icon">&#9432;</span><span>Si la consola está en español, los roles pueden aparecer traducidos. Búsquenlos por <code>mcp</code>, <code>Job User</code> y <code>Data Editor</code>, o por su ID, que figura arriba.</span></div>
+          </li>
         </ol>
-        <div class="tip green"><span class="tip-icon">&#10003;</span><span>VMP puede quitar este acceso cuando quiera desde la misma pantalla. El BigQuery, las fuentes y las transferencias siguen andando aunque support@ deje de ser miembro.</span></div>
+        <div class="tip green"><span class="tip-icon">&#10003;</span><span>VMP puede quitar estos accesos cuando quiera, desde Team Members en Detrics y desde IAM en Google Cloud. El BigQuery, las fuentes y las transferencias siguen andando aunque se quiten.</span></div>
       </div>
     </div>
 
@@ -924,7 +950,8 @@
       <label class="check"><input type="checkbox" data-k="agenda"><span class="box"></span><span class="txt">Reuniones 2 y 3 agendadas<small>Paso 1.4</small></span><span class="owner both">VMP y Detrics</span></label>
       <div class="check-group">Semana 1 · VMP</div>
       <label class="check"><input type="checkbox" data-k="map"><span class="box"></span><span class="txt">Mapa de marcas de ACF, NIC y Beauty Web completado y compartido con support@detrics.io<small>Paso 2</small></span><span class="owner carat">VMP</span></label>
-      <label class="check"><input type="checkbox" data-k="workspace"><span class="box"></span><span class="txt">support@detrics.io invitado al workspace de VMP en Detrics<small>Paso 3</small></span><span class="owner carat">VMP</span></label>
+      <label class="check"><input type="checkbox" data-k="workspace"><span class="box"></span><span class="txt">support@detrics.io invitado al workspace de VMP en Detrics<small>Paso 3.2</small></span><span class="owner carat">VMP</span></label>
+      <label class="check"><input type="checkbox" data-k="iam"><span class="box"></span><span class="txt">Roles MCP Tool User, BigQuery Job User y BigQuery Data Editor para support@, tomas@ e ignacio.goyanes@detrics.io<small>Paso 3.3</small></span><span class="owner carat">VMP</span></label>
       <label class="check"><input type="checkbox" data-k="sheets"><span class="box"></span><span class="txt">Plan de Google Sheets cancelado<small>Paso 4.1</small></span><span class="owner carat">VMP</span></label>
       <label class="check"><input type="checkbox" data-k="looker"><span class="box"></span><span class="txt">Licencia paga de Looker Studio cancelada<small>Paso 4.2</small></span><span class="owner carat">VMP</span></label>
       <div class="check-group">Semanas 1 y 2 · Detrics</div>
