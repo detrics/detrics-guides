@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-gYRTCQv2F0wsQC0gi6YJs2j8tw6f9JOg8t3rRy+d5Oc='; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://storage.googleapis.com; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WPWUtM7PmG59ok6CrTtsCI0YbikYIirrVAdUvf14CbY='; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://storage.googleapis.com; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="robots" content="noindex, nofollow">
 <title>Onboarding Inmediata: data warehouse en BigQuery</title>
@@ -600,6 +600,65 @@
     .step, .mile, .session, .gantt-wrap, .contact { break-inside: avoid; }
     .copy-btn { display: none; }
   }
+
+  /* ── SQL addendum (step 7 fallback) ── */
+  .sql-addendum { margin-top: 20px; }
+  .sql-intro p { font-size: 15px; color: var(--gray-700); line-height: 1.65; margin-bottom: 10px; }
+  .sql-manual {
+    margin-top: 18px;
+    background: var(--surface);
+    border: 1px solid var(--gray-200);
+    border-radius: 14px;
+    padding: 16px 20px;
+  }
+  .sql-manual summary {
+    cursor: pointer;
+    font-size: 15px;
+    color: var(--ink);
+    padding: 4px 0;
+    user-select: none;
+  }
+  .sql-manual summary::marker { color: var(--blue); }
+  .sql-howto {
+    margin: 16px 0 18px 20px;
+    padding: 0;
+    font-size: 14.5px;
+    color: var(--gray-700);
+    line-height: 1.7;
+  }
+  .sql-howto li { margin-bottom: 6px; }
+  .sql-block {
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    margin-top: 14px;
+    overflow: hidden;
+  }
+  .sql-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--gray-200);
+    background: var(--surface);
+  }
+  .sql-title { flex: 1; }
+  .sql-title strong { display: block; font-size: 14px; color: var(--ink); margin-bottom: 2px; }
+  .sql-title span { font-size: 13px; color: var(--gray-600); line-height: 1.5; }
+  .sql-head .copy-btn { align-self: center; }
+  .sql-block pre {
+    margin: 0;
+    padding: 14px 16px;
+    overflow-x: auto;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    line-height: 1.55;
+    color: var(--ink);
+    background: var(--gray-50);
+    max-height: 320px;
+    overflow-y: auto;
+  }
+  .sql-block pre code { font-family: inherit; background: none; border: 0; padding: 0; color: inherit; font-size: inherit; }
 </style>
 </head>
 <body>
@@ -719,7 +778,7 @@
       <div class="mile">
         <div class="mile-top"><span class="pin"><i><b>2</b></i></span><em>Fin de la semana 2</em></div>
         <h3>Revisión de datos</h3>
-        <p>Las fuentes en BigQuery, el mapa de marcas y la tabla de nombres para validar.</p>
+        <p>Las fuentes en BigQuery y el mapa de marcas para validar.</p>
       </div>
       <div class="mile">
         <div class="mile-top"><span class="pin"><i><b>3</b></i></span><em>Fin de la semana 3</em></div>
@@ -860,6 +919,11 @@
       </div>
       <div class="step-body">
         <p>Con este mapa armamos el filtro por grupo y por marca del dashboard. Es el desglose que nos pasó Jonathan. Con las fuentes conectadas, Detrics asigna cada cuenta publicitaria a su marca y Inmediata lo valida en la reunión 2.</p>
+        <p style="margin-top:10px;">Si tienen que sumar una marca nueva o arrancar un mapa desde cero, pueden hacer una copia de la plantilla y completarla con sus clientes:</p>
+        <div class="url-box">
+          <div class="url-icon"><svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg></div>
+          <a class="label-link" href="https://docs.google.com/spreadsheets/d/1gm8oF5lsNTLxPFV9r0YMvU0LUAwpaSuciU96iRlYp28/copy" target="_blank" rel="noopener">Copiar la plantilla del mapa de clientes</a>
+        </div>
         <div class="sheet">
           <div class="sheet-scroll">
             <table>
@@ -935,16 +999,15 @@
     <div class="step">
       <div class="step-header">
         <div class="step-number">6</div>
-        <h4>Transferencias y tabla de nombres <small>Semana 2</small></h4>
+        <h4>Transferencias <small>Semana 2</small></h4>
       </div>
       <div class="step-body">
         <ul class="plain">
           <li>En la Destination que Inmediata crea en la reunión de inicio, armamos las transferencias de Meta Ads, Google Ads, TikTok Ads, Google Analytics 4, Facebook Insights e Instagram Insights.</li>
           <li>Traemos el histórico que cada plataforma pone a disposición. Desde ahí, cada día nuevo queda guardado en su BigQuery.</li>
           <li>Las transferencias corren todos los días y solo traen los datos nuevos.</li>
-          <li>Armamos la tabla de nombres: a cada campo que entrega Detrics le asignamos el nombre que usa Inmediata, cruzado contra sus reportes actuales.</li>
         </ul>
-        <p>Cierra con la <strong>reunión 2</strong>: revisamos las fuentes sincronizando e Inmediata valida el mapa de marcas y la tabla de nombres.</p>
+        <p>Cierra con la <strong>reunión 2</strong>: revisamos las fuentes sincronizando e Inmediata valida el mapa de marcas.</p>
       </div>
     </div>
 
@@ -956,11 +1019,614 @@
       <div class="step-body">
         <ul class="plain">
           <li>Unimos las fuentes en una tabla con las mismas métricas para todas las plataformas.</li>
-          <li>Aplicamos la tabla de nombres de Inmediata. Un cambio en esa tabla aplica a todas las marcas.</li>
           <li>Cruzamos con el mapa para asignar cada cuenta a su grupo y su marca, incluida la cuenta que comparten dos marcas.</li>
           <li>Validamos los números contra los reportes de Supermetrics.</li>
         </ul>
         <p>Cierra con la <strong>reunión 3</strong>: revisamos las tablas y la validación.</p>
+
+    <!-- STEP 7 SQL ADDENDUM: manual run fallback -->
+    <div class="sql-addendum">
+      <div class="sql-intro">
+        <p>Las 5 vistas y la tabla externa que arman los dashboards las corre Detrics desde su MCP con el rol de <strong>BigQuery Data Editor</strong> del paso 1.3. Si prefieren revisar el SQL antes y correrlo desde la cuenta de Jonathan, abajo están los 6 archivos listos para copiar y pegar en la consola de BigQuery.</p>
+        <div class="tip blue"><span class="tip-icon">&#9432;</span><span>Antes de correr el 00, compartan el sheet <strong>Mapa de clientes</strong> con la cuenta de servicio del proyecto (viewer alcanza). Sin eso, la tabla externa no puede leer el sheet.</span></div>
+      </div>
+
+      <details class="sql-manual">
+        <summary><strong>Cómo correrlo a mano</strong> (clic para expandir)</summary>
+        <ol class="sql-howto">
+          <li>Abrir la consola de BigQuery en <a href="https://console.cloud.google.com/bigquery?project=inmediata-510016" target="_blank" rel="noopener">console.cloud.google.com/bigquery</a> con la cuenta de Jonathan.</li>
+          <li>En el panel izquierdo, bajo <code>inmediata-510016</code>, abrir el dataset <code>test</code>.</li>
+          <li>Arriba a la derecha, clic en <strong>+ Redactar nueva consulta</strong> (Compose new query).</li>
+          <li>Copiar el SQL del archivo <strong>00</strong> con el botón de la derecha, pegarlo en el editor, clic en <strong>Ejecutar</strong> (Run). Esperar el mensaje de éxito.</li>
+          <li>Repetir con <strong>05</strong>, <strong>10</strong>, <strong>30</strong> y <strong>40</strong> en ese orden. Cada uno depende del anterior.</li>
+          <li>El <strong>99</strong> son queries de chequeo. Correrlo al final para validar que no haya cuentas huérfanas o campañas sin cliente.</li>
+        </ol>
+
+        <div class="sql-block">
+          <div class="sql-head">
+            <div class="sql-title">
+              <strong>00 · Mapa de clientes</strong>
+              <span>Crea <code>ext_client_map</code>, una tabla externa que lee el tab Mapa de clientes del Google Sheet en vivo. No copia data, es un puntero.</span>
+            </div>
+            <button class="copy-btn" type="button" data-copy-target="sql-00">Copiar SQL</button>
+          </div>
+          <pre id="sql-00"><code>-- 00_setup.sql
+-- External table que lee el "Mapa de clientes" directo del Google Sheet.
+-- Cambios en el sheet se reflejan en el próximo query sin resync.
+--
+-- Pre-requisito: la service account que corre BigQuery debe tener acceso
+-- de LECTURA al sheet. Jonathan comparte el sheet con la SA del proyecto
+-- (ver IAM Service Accounts → agregar como Viewer en el sheet).
+--
+-- Sheet: 1tvtqVpj30VRhtQXCvYEKzVgI2znOpWyM9gR9LcNBku8
+-- Tab:   Mapa de clientes
+-- Rango: A3:O100 (saltea fila 1 = headers y fila 2 = hints/descripciones)
+--
+-- 15 columnas en el orden que están en el sheet. Todo STRING; la limpieza
+-- (trim, strip de guiones, cast de IDs numéricos) la hace v_client_map.
+
+CREATE OR REPLACE EXTERNAL TABLE `inmediata-510016.test.ext_client_map` (
+  cliente                        STRING,
+  grupo_empresarial              STRING,
+  google_ads_customer_id         STRING,
+  dv360_advertiser_id            STRING,
+  facebook_ads_account_id        STRING,
+  facebook_insights_page_id      STRING,
+  instagram_business_account_id  STRING,
+  tiktok_ads_advertiser_id       STRING,
+  tiktok_organic_handle          STRING,
+  x_ads_account_id               STRING,
+  linkedin_ads_account_id        STRING,
+  ga4_property_id                STRING,
+  notas                          STRING,
+  looker_link                    STRING,
+  campaign_name_prefix           STRING
+)
+OPTIONS (
+  format        = 'GOOGLE_SHEETS',
+  uris          = ['https://docs.google.com/spreadsheets/d/1tvtqVpj30VRhtQXCvYEKzVgI2znOpWyM9gR9LcNBku8'],
+  sheet_range   = 'Mapa de clientes!A3:O100',
+  skip_leading_rows = 0
+);
+
+-- Chequeo rápido: debería devolver 14 clientes.
+-- SELECT COUNT(*) AS clientes FROM `inmediata-510016.test.ext_client_map`;
+</code></pre>
+        </div>
+        <div class="sql-block">
+          <div class="sql-head">
+            <div class="sql-title">
+              <strong>05 · Vista unpivot cliente × plataforma</strong>
+              <span>Crea la vista <code>v_client_map</code>. Toma el sheet en wide (una columna por plataforma) y lo pasa a long (una fila por cliente × plataforma donde hay ID). Normaliza (quita guiones del customer_id de Google, hace TRIM).</span>
+            </div>
+            <button class="copy-btn" type="button" data-copy-target="sql-05">Copiar SQL</button>
+          </div>
+          <pre id="sql-05"><code>-- 05_v_client_map.sql
+-- Unpivot del mapa de clientes: una fila por (cliente × plataforma) donde haya ID.
+-- Normaliza los IDs para que matcheen con _detrics_account_id de cada tabla raw.
+--
+-- Reglas de normalización:
+--   google_ads: strip "-" del customer_id del sheet ("216-201-7617" → "2162017617")
+--   todos:      TRIM, NULLIF('') para descartar celdas vacías
+--
+-- Columnas de salida:
+--   cliente                   nombre tal cual queda en el dashboard
+--   grupo                     grupo empresarial
+--   campaign_name_prefix      prefijo que separa clientes que comparten cuenta
+--                             (ej Google 216-201-7617 → WTA Merida / Queretaro / GDL)
+--                             vacío string '' = sin prefijo (cuenta no compartida)
+--   platform                  token corto: meta | google_ads | tiktok | ga4 |
+--                             instagram | tiktok_organic
+--   platform_account_id       el ID normalizado que matchea con _detrics_account_id
+--
+-- Dependencia: ext_client_map (00_setup.sql).
+
+CREATE OR REPLACE VIEW `inmediata-510016.test.v_client_map` AS
+WITH cleaned AS (
+  SELECT
+    TRIM(cliente)                                          AS cliente,
+    TRIM(grupo_empresarial)                                AS grupo,
+    COALESCE(TRIM(campaign_name_prefix), '')               AS campaign_name_prefix,
+    NULLIF(REGEXP_REPLACE(COALESCE(google_ads_customer_id, ''), r'-', ''), '')
+                                                           AS google_ads_id,
+    NULLIF(TRIM(facebook_ads_account_id), '')              AS meta_id,
+    NULLIF(TRIM(tiktok_ads_advertiser_id), '')             AS tiktok_id,
+    NULLIF(TRIM(ga4_property_id), '')                      AS ga4_id,
+    NULLIF(TRIM(instagram_business_account_id), '')        AS ig_id,
+    NULLIF(TRIM(tiktok_organic_handle), '')                AS tiktok_organic
+  FROM `inmediata-510016.test.ext_client_map`
+  WHERE cliente IS NOT NULL AND TRIM(cliente) != ''
+)
+SELECT cliente, grupo, campaign_name_prefix,
+       'google_ads'     AS platform, google_ads_id   AS platform_account_id
+FROM cleaned WHERE google_ads_id IS NOT NULL
+UNION ALL
+SELECT cliente, grupo, campaign_name_prefix,
+       'meta'           AS platform, meta_id         AS platform_account_id
+FROM cleaned WHERE meta_id IS NOT NULL
+UNION ALL
+SELECT cliente, grupo, campaign_name_prefix,
+       'tiktok'         AS platform, tiktok_id       AS platform_account_id
+FROM cleaned WHERE tiktok_id IS NOT NULL
+UNION ALL
+SELECT cliente, grupo, campaign_name_prefix,
+       'ga4'            AS platform, ga4_id          AS platform_account_id
+FROM cleaned WHERE ga4_id IS NOT NULL
+UNION ALL
+SELECT cliente, grupo, campaign_name_prefix,
+       'instagram'      AS platform, ig_id           AS platform_account_id
+FROM cleaned WHERE ig_id IS NOT NULL
+UNION ALL
+SELECT cliente, grupo, campaign_name_prefix,
+       'tiktok_organic' AS platform, tiktok_organic  AS platform_account_id
+FROM cleaned WHERE tiktok_organic IS NOT NULL;
+
+-- Chequeo esperado hoy:
+--   google_ads : 9 filas (incluye 3 WTAs y 2 Plaza Mexico duplicados por account compartido)
+--   meta       : 12 filas (incluye 2 Plaza Mexico duplicados; falta WTA Queretaro hasta OAuth)
+--   tiktok     : 1 fila  (Nissan)
+--   ga4        : 3 filas (property IDs del mapa — no matchean con las autorizadas, lo flagea 99_control)
+--   instagram  : 1 fila  (Ser Madre con el handle, no el ID real — a corregir cuando Nyuman mande)
+</code></pre>
+        </div>
+        <div class="sql-block">
+          <div class="sql-head">
+            <div class="sql-title">
+              <strong>10 · UNION canónica de las 3 raw</strong>
+              <span>Crea <code>v_paid_ad_daily</code> uniendo Meta <code>meta_ad_daily</code> + Google <code>google_ads_campaign_daily</code> + TikTok <code>tiktok_ad_daily</code> en un solo esquema. Google va a grano campaña con las columnas de creativo en NULL.</span>
+            </div>
+            <button class="copy-btn" type="button" data-copy-target="sql-10">Copiar SQL</button>
+          </div>
+          <pre id="sql-10"><code>-- 10_v_paid_ad_daily.sql
+-- UNION canónica de las 3 raw tables de ads a grano ad. Google va a grano
+-- campaña con ad_* en NULL (sus Search Ads no tienen creativo comparable).
+--
+-- Grano: fecha × platform × account × campaña × ad (Google: ad_* = NULL)
+--
+-- Nombres canónicos (todas las columnas del output):
+--   date, platform, platform_account_id, account_name, currency,
+--   campaign_id, campaign_name,
+--   adset_id, adset_name,                            -- NULL en Google
+--   ad_id, ad_name,                                  -- NULL en Google
+--   ad_image_url, ad_video_url, ad_preview_link,
+--   ad_creative_type, ad_destination_url, ad_copy,   -- NULL en Google
+--   spend, impressions, clicks, ctr, cpc, cpm,
+--   purchases, purchase_value,                       -- Meta tiene; TikTok 0; Google NULL
+--   messaging_conversations, cost_per_messaging,     -- Meta solo (Nissan WhatsApp)
+--   conversions, conversions_value,                  -- Google solo
+--   video_views_p100                                 -- TikTok solo
+--
+-- Notas:
+--   - Detrics convierte google-ads cost_micros a unidades de moneda (no dividir /1e6).
+--   - TikTok usa stat_time_day como columna de fecha; se alias a date.
+--   - meta_ad_daily tiene messaging a partir del resync del 2026-10-02.
+--     Antes de que termine ese resync, messaging solo tiene datos del día actual.
+--
+-- Dependencias: meta_ad_daily, google_ads_campaign_daily, tiktok_ad_daily.
+
+CREATE OR REPLACE VIEW `inmediata-510016.test.v_paid_ad_daily` AS
+
+-- ====== META (ad grain) ====================================================
+SELECT
+  date                                                    AS date,
+  'meta'                                                  AS platform,
+  _detrics_account_id                                     AS platform_account_id,
+  account_name,
+  account_currency                                        AS currency,
+  campaign_id,
+  campaign_name,
+  adset_id,
+  adset_name,
+  ad_id,
+  ad_name,
+  ad_image_url,
+  ad_video_url,
+  ad_preview_shareable_link                               AS ad_preview_link,
+  ad_creative_type,
+  ad_destination_url,
+  instagram_copy                                          AS ad_copy,
+  spend,
+  impressions,
+  clicks,
+  ctr,
+  cpc,
+  cpm,
+  offsite_conversion_fb_pixel_purchase                    AS purchases,
+  offsite_conversion_fb_pixel_purchase_value              AS purchase_value,
+  onsite_conversion_messaging_conversation_started_7d     AS messaging_conversations,
+  cost_per_messaging_conversation_started                 AS cost_per_messaging,
+  CAST(NULL AS FLOAT64)                                   AS conversions,
+  CAST(NULL AS FLOAT64)                                   AS conversions_value,
+  CAST(NULL AS INT64)                                     AS video_views_p100
+FROM `inmediata-510016.test.meta_ad_daily`
+
+UNION ALL
+
+-- ====== GOOGLE (campaign grain, ad_* NULL) =================================
+SELECT
+  date                                                    AS date,
+  'google_ads'                                            AS platform,
+  _detrics_account_id                                     AS platform_account_id,
+  customer_descriptive_name                               AS account_name,
+  customer_currency_code                                  AS currency,
+  campaign_id,
+  campaign_name,
+  CAST(NULL AS STRING)                                    AS adset_id,
+  CAST(NULL AS STRING)                                    AS adset_name,
+  CAST(NULL AS STRING)                                    AS ad_id,
+  CAST(NULL AS STRING)                                    AS ad_name,
+  CAST(NULL AS STRING)                                    AS ad_image_url,
+  CAST(NULL AS STRING)                                    AS ad_video_url,
+  CAST(NULL AS STRING)                                    AS ad_preview_link,
+  CAST(NULL AS STRING)                                    AS ad_creative_type,
+  CAST(NULL AS STRING)                                    AS ad_destination_url,
+  CAST(NULL AS STRING)                                    AS ad_copy,
+  cost_micros                                             AS spend,
+  impressions,
+  clicks,
+  ctr,
+  average_cpc                                             AS cpc,
+  SAFE_DIVIDE(cost_micros * 1000, NULLIF(impressions, 0)) AS cpm,
+  CAST(NULL AS INT64)                                     AS purchases,
+  CAST(NULL AS FLOAT64)                                   AS purchase_value,
+  CAST(NULL AS INT64)                                     AS messaging_conversations,
+  CAST(NULL AS FLOAT64)                                   AS cost_per_messaging,
+  conversions,
+  conversions_value,
+  CAST(NULL AS INT64)                                     AS video_views_p100
+FROM `inmediata-510016.test.google_ads_campaign_daily`
+
+UNION ALL
+
+-- ====== TIKTOK (ad grain) ==================================================
+SELECT
+  stat_time_day                                           AS date,
+  'tiktok'                                                AS platform,
+  _detrics_account_id                                     AS platform_account_id,
+  advertiser_name                                         AS account_name,
+  currency,
+  campaign_id,
+  campaign_name,
+  adgroup_id                                              AS adset_id,
+  adgroup_name                                            AS adset_name,
+  ad_id,
+  ad_name,
+  creative_thumbnail_url                                  AS ad_image_url,
+  creative_preview_url                                    AS ad_video_url,
+  ad_playable_url                                         AS ad_preview_link,
+  CAST(NULL AS STRING)                                    AS ad_creative_type,
+  CAST(NULL AS STRING)                                    AS ad_destination_url,
+  CAST(NULL AS STRING)                                    AS ad_copy,
+  spend,
+  impressions,
+  clicks,
+  ctr,
+  cpc,
+  SAFE_DIVIDE(spend * 1000, NULLIF(impressions, 0))       AS cpm,
+  conversion                                              AS purchases,
+  CAST(NULL AS FLOAT64)                                   AS purchase_value,
+  CAST(NULL AS INT64)                                     AS messaging_conversations,
+  CAST(NULL AS FLOAT64)                                   AS cost_per_messaging,
+  CAST(NULL AS FLOAT64)                                   AS conversions,
+  CAST(NULL AS FLOAT64)                                   AS conversions_value,
+  video_views_p100
+FROM `inmediata-510016.test.tiktok_ad_daily`;
+
+-- Chequeos esperados:
+--   SELECT platform, COUNT(DISTINCT platform_account_id) FROM v_paid_ad_daily GROUP BY 1;
+--   → meta: 11 | google_ads: 9 | tiktok: 1
+</code></pre>
+        </div>
+        <div class="sql-block">
+          <div class="sql-head">
+            <div class="sql-title">
+              <strong>30 · Master consolidado</strong>
+              <span>Crea <code>master_marketing_daily</code>: UNION canónica joinada contra el mapa de clientes, con la lógica de prefijo que separa las cuentas que comparten dos marcas (WTAs en Google, Dimitri y El Flaco en Meta y Google). Es la tabla que Looker lee para la vista general y las vistas por plataforma. Columnas GA4 van vacías hasta que llegan los IDs correctos.</span>
+            </div>
+            <button class="copy-btn" type="button" data-copy-target="sql-30">Copiar SQL</button>
+          </div>
+          <pre id="sql-30"><code>-- 30_master_marketing_daily.sql
+-- Master a grano fecha × cliente × grupo × platform × campaña × ad.
+-- Alimenta Views 1 / 2 / 3 del dashboard. Google: ad_* = NULL.
+--
+-- Join: INNER contra v_client_map. Reglas:
+--   1) Cuenta con UN solo cliente en el mapa (ej. Google 884-679-7888 = Nissan)
+--      → siempre matchea; el prefijo si existe se ignora.
+--   2) Cuenta compartida (más de un cliente para el mismo platform_account_id):
+--      a) Si el cliente tiene campaign_name_prefix != '' en el mapa:
+--         matchea solo las campañas cuyo nombre arranca con ese prefijo.
+--      b) Si el prefijo está vacío → la fila se descarta y 99_control.sql lo flagea.
+--
+-- Cuentas compartidas hoy (según el mapa):
+--   google_ads 2162017617 → WTA Merida ("Merida") + WTA Queretaro ("Guadalajara" — Nyuman revisa) + WTA GDL ("")
+--   google_ads 1941762954 → Dimitri Vegas ("Dimitri Vegas") + Luis Angel el flaco ("El Flaco")
+--   meta        375641674250302 → Dimitri Vegas ("Dimitri Vegas") + Luis Angel el flaco ("El Flaco")
+--
+-- Columnas GA4 (ga4_sessions, ga4_total_revenue, …) quedan NULL hasta que
+-- destraben los property IDs. Están tipadas para que el schema no cambie
+-- cuando se agreguen (solo cambia el SELECT, no la forma del master).
+--
+-- Dependencias: v_paid_ad_daily, v_client_map.
+
+CREATE OR REPLACE VIEW `inmediata-510016.test.master_marketing_daily` AS
+WITH
+  mapping AS (
+    SELECT
+      platform,
+      platform_account_id,
+      cliente,
+      grupo,
+      campaign_name_prefix,
+      COUNT(*) OVER (PARTITION BY platform, platform_account_id) AS clients_in_account
+    FROM `inmediata-510016.test.v_client_map`
+    WHERE platform IN ('meta', 'google_ads', 'tiktok')
+  )
+SELECT
+  p.date,
+  m.cliente,
+  m.grupo,
+  p.platform,
+  p.platform_account_id,
+  p.account_name,
+  p.currency,
+  p.campaign_id,
+  p.campaign_name,
+  p.adset_id,
+  p.adset_name,
+  p.ad_id,
+  p.ad_name,
+  p.ad_image_url,
+  p.ad_video_url,
+  p.ad_preview_link,
+  p.ad_creative_type,
+  p.ad_destination_url,
+  p.ad_copy,
+  p.spend,
+  p.impressions,
+  p.clicks,
+  p.ctr,
+  p.cpc,
+  p.cpm,
+  p.purchases,
+  p.purchase_value,
+  p.messaging_conversations,
+  p.cost_per_messaging,
+  p.conversions,
+  p.conversions_value,
+  p.video_views_p100,
+
+  -- GA4 placeholders (completar en 20_v_ga4_by_campaign.sql cuando destraben IDs)
+  CAST(NULL AS FLOAT64) AS ga4_sessions,
+  CAST(NULL AS FLOAT64) AS ga4_engaged_sessions,
+  CAST(NULL AS FLOAT64) AS ga4_total_revenue,
+  CAST(NULL AS FLOAT64) AS ga4_transactions,
+  CAST(NULL AS STRING)  AS ga4_source_medium
+
+FROM `inmediata-510016.test.v_paid_ad_daily` p
+INNER JOIN mapping m
+  ON  p.platform            = m.platform
+  AND p.platform_account_id = m.platform_account_id
+WHERE
+  -- cuenta con un solo cliente → siempre matchea
+  m.clients_in_account = 1
+  -- cuenta compartida → solo si la campaña arranca con el prefijo del cliente
+  OR (
+    m.clients_in_account &gt; 1
+    AND m.campaign_name_prefix != ''
+    AND STARTS_WITH(LOWER(p.campaign_name), LOWER(m.campaign_name_prefix))
+  );
+
+-- Chequeos esperados:
+--   SELECT cliente, SUM(spend) spend_total, SUM(messaging_conversations) msg
+--   FROM master_marketing_daily
+--   WHERE date BETWEEN DATE '2026-09-01' AND DATE '2026-09-30'
+--   GROUP BY cliente ORDER BY spend_total DESC;
+--
+-- Esperado: 14 clientes aprox (menos los que queden afuera por prefijo faltante).
+-- Nissan con messaging &gt; 0 solo después del resync con messaging en ad_daily.
+</code></pre>
+        </div>
+        <div class="sql-block">
+          <div class="sql-head">
+            <div class="sql-title">
+              <strong>40 · Master de keywords</strong>
+              <span>Crea <code>master_google_keywords_daily</code>: Google keywords × match type a nivel palabra, con cliente y grupo del mapa. Alimenta la vista de keywords del dashboard.</span>
+            </div>
+            <button class="copy-btn" type="button" data-copy-target="sql-40">Copiar SQL</button>
+          </div>
+          <pre id="sql-40"><code>-- 40_master_google_keywords_daily.sql
+-- Master a grano fecha × cliente × campaña × ad_group × keyword × match_type.
+-- Alimenta View 4 del dashboard (Google Keywords).
+--
+-- Misma lógica de prefijos que master_marketing_daily para cuentas compartidas.
+-- Hoy la única cuenta compartida con keywords es Google 2162017617 (3 WTAs).
+--
+-- Dependencias: google_ads_keyword_daily, v_client_map.
+
+CREATE OR REPLACE VIEW `inmediata-510016.test.master_google_keywords_daily` AS
+WITH
+  mapping AS (
+    SELECT
+      platform_account_id,
+      cliente,
+      grupo,
+      campaign_name_prefix,
+      COUNT(*) OVER (PARTITION BY platform_account_id) AS clients_in_account
+    FROM `inmediata-510016.test.v_client_map`
+    WHERE platform = 'google_ads'
+  )
+SELECT
+  k.date,
+  m.cliente,
+  m.grupo,
+  'google_ads'                                        AS platform,
+  k._detrics_account_id                               AS platform_account_id,
+  k.campaign_id,
+  k.campaign_name,
+  k.ad_group_id,
+  k.ad_group_name,
+  k.keyword_text,
+  k.keyword_match_type                                AS match_type,
+  k.cost_micros                                       AS spend,
+  k.impressions,
+  k.clicks,
+  k.ctr,
+  k.average_cpc                                       AS cpc,
+  k.conversions
+FROM `inmediata-510016.test.google_ads_keyword_daily` k
+INNER JOIN mapping m
+  ON k._detrics_account_id = m.platform_account_id
+WHERE
+  m.clients_in_account = 1
+  OR (
+    m.clients_in_account &gt; 1
+    AND m.campaign_name_prefix != ''
+    AND STARTS_WITH(LOWER(k.campaign_name), LOWER(m.campaign_name_prefix))
+  );
+
+-- Chequeos esperados:
+--   SELECT cliente, COUNT(DISTINCT keyword_text) kws, SUM(spend) spend_total
+--   FROM master_google_keywords_daily
+--   WHERE date BETWEEN DATE '2026-09-01' AND DATE '2026-09-30'
+--   GROUP BY cliente ORDER BY spend_total DESC;
+--
+-- Top keywords sep26 por cliente (según sample WTAs):
+--   WTA GDL — gdl open BROAD, guadalajara open boletos BROAD, wta BROAD
+</code></pre>
+        </div>
+        <div class="sql-block">
+          <div class="sql-head">
+            <div class="sql-title">
+              <strong>99 · Chequeos de auditoría</strong>
+              <span>No crea nada: son 5 SELECT para correr después del deploy. Chequean que no haya cuentas en raw sin cliente, cuentas en el mapa sin data, campañas de cuentas compartidas que caigan afuera por falta de prefijo, y totales de spend por plataforma y por cliente.</span>
+            </div>
+            <button class="copy-btn" type="button" data-copy-target="sql-99">Copiar SQL</button>
+          </div>
+          <pre id="sql-99"><code>-- 99_control.sql
+-- Queries de auditoría para correr después de cada deploy del master.
+-- No crea objetos, es solo SELECT. Ejecutar manualmente desde la consola
+-- de BigQuery o pegar en Looker como data source de debug.
+
+-- ============================================================================
+-- 1) Cuentas que están en las raw pero NO en v_client_map
+--    (data cargándose a la que nadie va a poder filtrar por cliente)
+-- ============================================================================
+WITH raw_accounts AS (
+  SELECT DISTINCT 'meta' AS platform, _detrics_account_id AS platform_account_id
+  FROM `inmediata-510016.test.meta_ad_daily`
+  UNION ALL
+  SELECT DISTINCT 'google_ads', _detrics_account_id
+  FROM `inmediata-510016.test.google_ads_campaign_daily`
+  UNION ALL
+  SELECT DISTINCT 'tiktok', _detrics_account_id
+  FROM `inmediata-510016.test.tiktok_ad_daily`
+)
+SELECT r.platform, r.platform_account_id,
+       'account presente en raw sin fila en v_client_map' AS issue
+FROM raw_accounts r
+LEFT JOIN `inmediata-510016.test.v_client_map` c
+  ON r.platform = c.platform AND r.platform_account_id = c.platform_account_id
+WHERE c.platform_account_id IS NULL;
+
+-- ============================================================================
+-- 2) Cuentas en v_client_map SIN data en las raw tables
+--    (puede ser cuenta nueva o fuera del transfer; chequear accountIds del transfer)
+-- ============================================================================
+WITH raw_accounts AS (
+  SELECT DISTINCT 'meta' AS platform, _detrics_account_id AS platform_account_id
+  FROM `inmediata-510016.test.meta_ad_daily`
+  UNION ALL
+  SELECT DISTINCT 'google_ads', _detrics_account_id
+  FROM `inmediata-510016.test.google_ads_campaign_daily`
+  UNION ALL
+  SELECT DISTINCT 'tiktok', _detrics_account_id
+  FROM `inmediata-510016.test.tiktok_ad_daily`
+)
+SELECT c.cliente, c.platform, c.platform_account_id,
+       'mapeado en v_client_map, sin filas en la raw' AS issue
+FROM `inmediata-510016.test.v_client_map` c
+LEFT JOIN raw_accounts r
+  ON r.platform = c.platform AND r.platform_account_id = c.platform_account_id
+WHERE c.platform IN ('meta', 'google_ads', 'tiktok')
+  AND r.platform_account_id IS NULL;
+
+-- ============================================================================
+-- 3) Cuentas compartidas con campañas que NO matchean ningún prefijo
+--    (filas que caen fuera del master porque el prefijo del cliente no coincide
+--     con el campaign_name — típicamente clientes nuevos en la misma cuenta
+--     sin prefijo cargado en el mapa)
+-- ============================================================================
+WITH shared_accounts AS (
+  SELECT platform, platform_account_id
+  FROM `inmediata-510016.test.v_client_map`
+  GROUP BY platform, platform_account_id
+  HAVING COUNT(*) &gt; 1
+),
+raw_campaigns AS (
+  SELECT 'meta' AS platform, _detrics_account_id AS platform_account_id,
+         campaign_name
+  FROM `inmediata-510016.test.meta_ad_daily`
+  UNION ALL
+  SELECT 'google_ads', _detrics_account_id, campaign_name
+  FROM `inmediata-510016.test.google_ads_campaign_daily`
+  UNION ALL
+  SELECT 'tiktok', _detrics_account_id, campaign_name
+  FROM `inmediata-510016.test.tiktok_ad_daily`
+)
+SELECT DISTINCT
+  rc.platform,
+  rc.platform_account_id,
+  rc.campaign_name,
+  'campaña en cuenta compartida sin prefijo que matchee' AS issue
+FROM raw_campaigns rc
+INNER JOIN shared_accounts sa USING (platform, platform_account_id)
+LEFT JOIN `inmediata-510016.test.v_client_map` c
+  ON  c.platform            = rc.platform
+  AND c.platform_account_id = rc.platform_account_id
+  AND c.campaign_name_prefix != ''
+  AND STARTS_WITH(LOWER(rc.campaign_name), LOWER(c.campaign_name_prefix))
+WHERE c.cliente IS NULL;
+
+-- ============================================================================
+-- 4) Health check general del master
+-- ============================================================================
+SELECT
+  platform,
+  COUNT(DISTINCT cliente)                                    AS clientes,
+  COUNT(DISTINCT platform_account_id)                        AS cuentas,
+  COUNT(DISTINCT campaign_id)                                AS campañas,
+  COUNT(*)                                                   AS filas,
+  MIN(date)                                                  AS desde,
+  MAX(date)                                                  AS hasta,
+  SUM(spend)                                                 AS spend_total,
+  SUM(impressions)                                           AS impressions_total,
+  SUM(clicks)                                                AS clicks_total,
+  SUM(COALESCE(purchases, conversions))                      AS results_total,
+  SUM(messaging_conversations)                               AS whatsapp_total
+FROM `inmediata-510016.test.master_marketing_daily`
+GROUP BY platform
+ORDER BY spend_total DESC;
+
+-- ============================================================================
+-- 5) Health check del master de keywords
+-- ============================================================================
+SELECT
+  cliente,
+  COUNT(DISTINCT keyword_text) AS keywords_unicas,
+  COUNT(DISTINCT match_type)   AS match_types,
+  SUM(spend)                   AS spend_total,
+  SUM(clicks)                  AS clicks_total,
+  SUM(conversions)             AS conv_total
+FROM `inmediata-510016.test.master_google_keywords_daily`
+WHERE date BETWEEN DATE_SUB(CURRENT_DATE('America/Mexico_City'), INTERVAL 30 DAY)
+              AND CURRENT_DATE('America/Mexico_City')
+GROUP BY cliente
+ORDER BY spend_total DESC;
+</code></pre>
+        </div>
+      </details>
+    </div>
+
       </div>
     </div>
 
@@ -1025,7 +1691,7 @@
       <div class="check-group">Semanas 1 a 4 · Detrics</div>
       <label class="check"><input type="checkbox" data-k="dsp"><span class="box"></span><span class="txt">Conector de Amazon DSP listo y cuenta conectada<small>Paso 5</small></span><span class="owner both">Inmediata y Detrics</span></label>
       <label class="check"><input type="checkbox" data-k="transfers"><span class="box"></span><span class="txt">Transferencias creadas y carga histórica completa<small>Paso 6</small></span><span class="owner detrics">Detrics</span></label>
-      <label class="check"><input type="checkbox" data-k="names"><span class="box"></span><span class="txt">Mapa de marcas y tabla de nombres validados en la reunión 2<small>Pasos 3 y 6</small></span><span class="owner both">Inmediata y Detrics</span></label>
+      <label class="check"><input type="checkbox" data-k="names"><span class="box"></span><span class="txt">Mapa de marcas validado en la reunión 2<small>Pasos 3 y 6</small></span><span class="owner both">Inmediata y Detrics</span></label>
       <label class="check"><input type="checkbox" data-k="tables"><span class="box"></span><span class="txt">Tablas consolidadas validadas contra Supermetrics en la reunión 3<small>Paso 7</small></span><span class="owner both">Inmediata y Detrics</span></label>
       <label class="check"><input type="checkbox" data-k="dash"><span class="box"></span><span class="txt">Dashboard de las 14 marcas entregado en la reunión 4<small>Paso 8</small></span><span class="owner both">Inmediata y Detrics</span></label>
       <div class="check-group">Meses 2 a 4 · Consultoría con Tom</div>
@@ -1066,10 +1732,15 @@
 </footer>
 
 <script>
-  // copy buttons
+// copy buttons: either data-copy="literal" or data-copy-target="elementId"
   document.querySelectorAll('.copy-btn').forEach(function (btn) {
     btn.addEventListener('click', function () {
       var text = btn.getAttribute('data-copy');
+      if (!text) {
+        var tid = btn.getAttribute('data-copy-target');
+        if (tid) { var el = document.getElementById(tid); if (el) text = el.innerText; }
+      }
+      if (!text) return;
       var done = function () {
         var orig = btn.textContent;
         btn.textContent = 'Copiado';
@@ -1101,6 +1772,7 @@
     });
     count();
   })();
+
 </script>
 
 </body>
