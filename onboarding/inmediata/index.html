@@ -229,6 +229,7 @@
   }
   .bar.carat { background: var(--ink); }
   .bar.detrics { background: linear-gradient(135deg, var(--blue), var(--blue-dark)); }
+  .bar.both { background: linear-gradient(135deg, var(--green), var(--green-dark)); }
   .bar.session { background: var(--green-bg); border: 1.5px solid var(--green); color: var(--green-dark); }
   .pin { display: flex; justify-content: center; }
   .pin i {
@@ -721,9 +722,9 @@
             <div></div>
             <div class="g-track">
               <div class="wk" style="grid-column: 1 / 6;">Semana 1<span>Accesos</span></div>
-              <div class="wk" style="grid-column: 6 / 11;">Semana 2<span>Transferencias</span></div>
-              <div class="wk" style="grid-column: 11 / 16;">Semana 3<span>Consolidación</span></div>
-              <div class="wk" style="grid-column: 16 / 21;">Semana 4<span>Dashboard</span></div>
+              <div class="wk" style="grid-column: 6 / 11;">Semana 2<span>Datos listos</span></div>
+              <div class="wk" style="grid-column: 11 / 16;">Semana 3<span>Dashboard</span></div>
+              <div class="wk" style="grid-column: 16 / 21;">Semana 4<span>Ajustes y entrega</span></div>
               <div class="wk post" style="grid-column: 21 / 33;">Meses 2 a 4<span>Consultoría</span></div>
             </div>
           </div>
@@ -731,8 +732,8 @@
             <div class="g-label">Reuniones</div>
             <div class="g-track">
               <div class="pin" style="grid-column: 1 / 2;" title="Reunión de inicio"><i><b>1</b></i></div>
-              <div class="pin" style="grid-column: 10 / 11;" title="Revisión de datos"><i><b>2</b></i></div>
-              <div class="pin" style="grid-column: 15 / 16;" title="Revisión de tablas"><i><b>3</b></i></div>
+              <div class="pin" style="grid-column: 8 / 9;" title="Accesos, mapa y vistas"><i><b>2</b></i></div>
+              <div class="pin" style="grid-column: 15 / 16;" title="Primera versión del dashboard"><i><b>3</b></i></div>
               <div class="pin" style="grid-column: 20 / 21;" title="Entrega del dashboard"><i><b>4</b></i></div>
               <div class="pin s" style="grid-column: 22 / 23;" title="Sesión 1 con Tom"><i><b>1</b></i></div>
               <div class="pin s" style="grid-column: 26 / 27;" title="Sesión 2 con Tom"><i><b>2</b></i></div>
@@ -756,12 +757,12 @@
             <div class="g-track"><div class="bar detrics" style="grid-column: 6 / 11;">Detrics</div></div>
           </div>
           <div class="g-row" role="row">
-            <div class="g-label">Tablas consolidadas<small>Paso 7</small></div>
-            <div class="g-track"><div class="bar detrics" style="grid-column: 11 / 16;">Detrics</div></div>
+            <div class="g-label">Mapa y tablas consolidadas<small>Paso 7</small></div>
+            <div class="g-track"><div class="bar both" style="grid-column: 6 / 11;">Inmediata y Detrics</div></div>
           </div>
           <div class="g-row" role="row">
             <div class="g-label">Dashboard multicliente<small>Paso 8</small></div>
-            <div class="g-track"><div class="bar detrics" style="grid-column: 16 / 21;">Detrics</div></div>
+            <div class="g-track"><div class="bar detrics" style="grid-column: 11 / 21;">Detrics</div></div>
           </div>
           <div class="g-row" role="row">
             <div class="g-label">Consultoría con Tom<small>Después de la entrega</small></div>
@@ -1011,34 +1012,13 @@
           <li>Las transferencias corren todos los días y solo traen los datos nuevos.</li>
         </ul>
         <p>Cierra con la <strong>reunión 2</strong>: revisamos las fuentes sincronizando e Inmediata valida el mapa de marcas.</p>
-        <div class="todo-call">
-          <h5>Pendientes de la reunión 2 · miércoles 7/10</h5>
-          <div class="checklist todo">
-          <div class="check-group">Jonathan</div>
-          <label class="check"><input type="checkbox" data-k="r2-iam"><span class="box"></span><span class="txt">Roles BigQuery Data Editor y BigQuery Job User para support@, tomas@ e ignacio.goyanes@detrics.io. Sin estos roles, el dataset no aparece al conectar Looker<small>Paso 1.3</small></span><span class="owner carat">Inmediata</span></label>
-          <label class="check"><input type="checkbox" data-k="r2-script"><span class="box"></span><span class="txt">Apps Script del mapa de clientes instalado con su cuenta<small>Paso 7.1</small></span><span class="owner carat">Inmediata</span></label>
-          <label class="check"><input type="checkbox" data-k="r2-looker"><span class="box"></span><span class="txt">Informe de Looker Studio nuevo creado desde jbautista@ y compartido como Editor con los tres correos de Detrics. El informe actual no deja agregar páginas ni gráficos<small>Paso 4.1</small></span><span class="owner carat">Inmediata</span></label>
-          <div class="check-group">N. Cárdenas</div>
-          <label class="check"><input type="checkbox" data-k="r2-wta"><span class="box"></span><span class="txt">Cuenta de Meta 366227476108837 (WTA Querétaro) autorizada en Data Sources<small>Paso 2.2</small></span><span class="owner carat">Inmediata</span></label>
-          <label class="check"><input type="checkbox" data-k="r2-ga4"><span class="box"></span><span class="txt">Property IDs de GA4 del mapa confirmados, o las propiedades correctas autorizadas<small>Paso 2.2</small></span><span class="owner carat">Inmediata</span></label>
-          <label class="check"><input type="checkbox" data-k="r2-ig"><span class="box"></span><span class="txt">Instagram de Ser Madre autorizado en Data Sources<small>Paso 2.2</small></span><span class="owner carat">Inmediata</span></label>
-          <label class="check"><input type="checkbox" data-k="r2-prefix"><span class="box"></span><span class="txt">Prefijos de campaña de WTA Querétaro y WTA GDL corregidos en la columna O del mapa<small>Paso 3</small></span><span class="owner carat">Inmediata</span></label>
-          <div class="check-group">Definimos juntos</div>
-          <label class="check"><input type="checkbox" data-k="r2-ga4scope"><span class="box"></span><span class="txt">GA4: qué evento es conversión para cada cliente, si el utm_campaign coincide con el nombre de la campaña y si usan el autoetiquetado de Google Ads<small>Pasos 6 y 7</small></span><span class="owner both">Inmediata y Detrics</span></label>
-          <label class="check"><input type="checkbox" data-k="r2-nissan"><span class="box"></span><span class="txt">KPI de la vista de leads de Nissan, además del costo por conversación de WhatsApp<small>Paso 8</small></span><span class="owner both">Inmediata y Detrics</span></label>
-          <div class="check-group">Detrics</div>
-          <label class="check"><input type="checkbox" data-k="r2-pages"><span class="box"></span><span class="txt">Looker conectado a las tablas de Meta, Google y TikTok, con una primera versión de cada página<small>Paso 8</small></span><span class="owner detrics">Detrics</span></label>
-          <label class="check"><input type="checkbox" data-k="r2-views"><span class="box"></span><span class="txt">Vistas consolidadas creadas y validadas: ninguna cuenta queda sin cliente<small>Paso 7.2</small></span><span class="owner detrics">Detrics</span></label>
-          </div>
-        </div>
       </div>
     </div>
 
-    <div class="phase-head"><h3>Semana 3</h3><span class="owner detrics">Equipo de Detrics</span></div>
     <div class="step">
       <div class="step-header">
         <div class="step-number">7</div>
-        <h4>Tablas consolidadas <small>Semana 3</small></h4>
+        <h4>Mapa de clientes y tablas consolidadas <small>Semana 2 · se deja listo en la reunión 2</small></h4>
       </div>
       <div class="step-body">
         <ul class="plain">
@@ -1046,7 +1026,7 @@
           <li>Cruzamos con el mapa para asignar cada cuenta a su grupo y su marca, incluida la cuenta que comparten dos marcas.</li>
           <li>Validamos los números contra los reportes de Supermetrics.</li>
         </ul>
-        <p>Cierra con la <strong>reunión 3</strong>: revisamos las tablas y la validación.</p>
+        <p>La validación contra Supermetrics la hacemos sobre el dashboard, en la <strong>reunión 3</strong>.</p>
 
         <ol class="substeps">
           <li data-n="7.1">
@@ -1727,11 +1707,36 @@ ORDER BY spend_total DESC;
       </div>
     </div>
 
-    <div class="phase-head"><h3>Semana 4</h3><span class="owner detrics">Equipo de Detrics</span></div>
+    <div class="step">
+      <div class="step-body">
+        <div class="todo-call" style="margin-top:0">
+          <h5>Pendientes de la reunión 2 · miércoles 7/10</h5>
+          <div class="checklist todo">
+          <div class="check-group">Jonathan</div>
+          <label class="check"><input type="checkbox" data-k="r2-iam"><span class="box"></span><span class="txt">Roles BigQuery Data Editor y BigQuery Job User para support@, tomas@ e ignacio.goyanes@detrics.io. Sin estos roles, el dataset no aparece al conectar Looker<small>Paso 1.3</small></span><span class="owner carat">Inmediata</span></label>
+          <label class="check"><input type="checkbox" data-k="r2-script"><span class="box"></span><span class="txt">Apps Script del mapa de clientes instalado con su cuenta<small>Paso 7.1</small></span><span class="owner carat">Inmediata</span></label>
+          <label class="check"><input type="checkbox" data-k="r2-looker"><span class="box"></span><span class="txt">Informe de Looker Studio nuevo creado desde jbautista@ y compartido como Editor con los tres correos de Detrics. El informe actual no deja agregar páginas ni gráficos<small>Paso 4.1</small></span><span class="owner carat">Inmediata</span></label>
+          <div class="check-group">N. Cárdenas</div>
+          <label class="check"><input type="checkbox" data-k="r2-wta"><span class="box"></span><span class="txt">Cuenta de Meta 366227476108837 (WTA Querétaro) autorizada en Data Sources<small>Paso 2.2</small></span><span class="owner carat">Inmediata</span></label>
+          <label class="check"><input type="checkbox" data-k="r2-ga4"><span class="box"></span><span class="txt">Property IDs de GA4 del mapa confirmados, o las propiedades correctas autorizadas<small>Paso 2.2</small></span><span class="owner carat">Inmediata</span></label>
+          <label class="check"><input type="checkbox" data-k="r2-ig"><span class="box"></span><span class="txt">Instagram de Ser Madre autorizado en Data Sources<small>Paso 2.2</small></span><span class="owner carat">Inmediata</span></label>
+          <label class="check"><input type="checkbox" data-k="r2-prefix"><span class="box"></span><span class="txt">Prefijos de campaña de WTA Querétaro y WTA GDL corregidos en la columna O del mapa<small>Paso 3</small></span><span class="owner carat">Inmediata</span></label>
+          <div class="check-group">Definimos juntos</div>
+          <label class="check"><input type="checkbox" data-k="r2-ga4scope"><span class="box"></span><span class="txt">GA4: qué evento es conversión para cada cliente, si el utm_campaign coincide con el nombre de la campaña y si usan el autoetiquetado de Google Ads<small>Pasos 6 y 7</small></span><span class="owner both">Inmediata y Detrics</span></label>
+          <label class="check"><input type="checkbox" data-k="r2-nissan"><span class="box"></span><span class="txt">KPI de la vista de leads de Nissan, además del costo por conversación de WhatsApp<small>Paso 8</small></span><span class="owner both">Inmediata y Detrics</span></label>
+          <div class="check-group">Detrics</div>
+          <label class="check"><input type="checkbox" data-k="r2-pages"><span class="box"></span><span class="txt">Looker conectado a las tablas de Meta, Google y TikTok, con una primera versión de cada página<small>Paso 8</small></span><span class="owner detrics">Detrics</span></label>
+          <label class="check"><input type="checkbox" data-k="r2-views"><span class="box"></span><span class="txt">Vistas consolidadas creadas y validadas: ninguna cuenta queda sin cliente<small>Paso 7.2</small></span><span class="owner detrics">Detrics</span></label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="phase-head"><h3>Semanas 3 y 4</h3><span class="owner detrics">Equipo de Detrics</span></div>
     <div class="step">
       <div class="step-header">
         <div class="step-number">8</div>
-        <h4>Dashboard multicliente <small>Semana 4</small></h4>
+        <h4>Dashboard multicliente <small>Semanas 3 y 4</small></h4>
       </div>
       <div class="step-body">
         <ul class="plain">
@@ -1740,6 +1745,7 @@ ORDER BY spend_total DESC;
           <li>Construido sobre las tablas consolidadas: una marca nueva en el mapa aparece sola.</li>
         </ul>
         <p><strong>Las fuentes de datos del Looker van con la cuenta de Jonathan.</strong> Mientras construimos, conectamos las tablas con nuestras cuentas. Antes de la entrega, Jonathan pasa cada fuente de datos a sus credenciales: en el informe, <strong>Recurso › Administrar fuentes de datos agregadas › Editar</strong>, clic en las credenciales de arriba a la izquierda y elegir <strong>Credenciales del propietario</strong> con su cuenta. Así el reporte sigue leyendo BigQuery cuando nos quiten los accesos del paso 1.3.</p>
+        <p>En la <strong>reunión 3</strong> revisamos la primera versión y validamos los números contra Supermetrics.</p>
         <p>Cierra con la <strong>reunión 4</strong>: recorremos el dashboard con el equipo, ajustamos lo que haga falta y lo damos por entregado.</p>
       </div>
     </div>
