@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-gYRTCQv2F0wsQC0gi6YJs2j8tw6f9JOg8t3rRy+d5Oc='; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://storage.googleapis.com; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-IB6mVCoazdgnXONBaTLTJ0gk+oojinI7Hmq4/pQ0l4M='; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://storage.googleapis.com; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="robots" content="noindex, nofollow">
 <title>Onboarding VMP: dashboard llave en mano en BigQuery</title>
@@ -848,6 +848,22 @@
             <div class="copyable"><span class="label">Rol</span><code>roles/bigquery.dataEditor</code><button class="copy-btn" type="button" data-copy="roles/bigquery.dataEditor">Copiar</button></div>
             <div class="tip blue"><span class="tip-icon">&#9432;</span><span>Si la consola está en español, los roles pueden aparecer traducidos. Búsquenlos por <code>mcp</code>, <code>Job User</code> y <code>Data Editor</code>, o por su ID, que figura arriba.</span></div>
           </li>
+          <li data-n="3.4">
+            <strong>Crear el informe de Looker Studio en blanco</strong>
+            El dashboard se construye en un informe que es de VMP desde el primer día. Álvaro lo crea con su cuenta y nos lo comparte como Editor.
+            <div class="url-box">
+              <div class="url-icon"><svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg></div>
+              <a href="https://lookerstudio.google.com/" target="_blank" rel="noopener">lookerstudio.google.com</a>
+            </div>
+            <ol>
+              <li>En Looker Studio, clic en <strong>Crear › Informe</strong>. Si se abre la ventana para agregar datos, cerrarla: las tablas las conectamos nosotros.</li>
+              <li>Arriba a la izquierda, cambiarle el nombre a <strong>VMP · Dashboard</strong>.</li>
+              <li>Clic en <strong>Compartir</strong>, pegar los tres correos de Detrics y darles permiso de <strong>Editor</strong>.</li>
+            </ol>
+            <div class="copyable"><span class="label">Correo</span><code>support@detrics.io</code><button class="copy-btn" type="button" data-copy="support@detrics.io">Copiar</button></div>
+            <div class="copyable"><span class="label">Correo</span><code>tomas@detrics.io</code><button class="copy-btn" type="button" data-copy="tomas@detrics.io">Copiar</button></div>
+            <div class="copyable"><span class="label">Correo</span><code>ignacio.goyanes@detrics.io</code><button class="copy-btn" type="button" data-copy="ignacio.goyanes@detrics.io">Copiar</button></div>
+          </li>
         </ol>
         <div class="tip green"><span class="tip-icon">&#10003;</span><span>VMP puede quitar estos accesos cuando quiera, desde Team Members en Detrics y desde IAM en Google Cloud. El BigQuery, las fuentes y las transferencias siguen andando aunque se quiten.</span></div>
       </div>
@@ -883,6 +899,7 @@
           <li>Construido sobre las tablas consolidadas: sumar una marca nueva o una cuenta nueva al mapa la deja disponible en el dashboard sin tocar nada más.</li>
           <li>Álvaro puede seguir preguntándole a Claude conectado al BigQuery de VMP para los cortes que no estén en el dashboard.</li>
         </ul>
+        <p><strong>Las fuentes de datos del Looker van con la cuenta de Álvaro.</strong> Mientras construimos, conectamos las tablas con nuestras cuentas. Antes de la entrega, Álvaro pasa cada fuente de datos a sus credenciales: en el informe, <strong>Recurso › Administrar fuentes de datos agregadas › Editar</strong>, clic en las credenciales de arriba a la izquierda y elegir <strong>Credenciales del propietario</strong> con su cuenta. Así el dashboard sigue leyendo BigQuery cuando nos quiten los accesos del paso 3.3.</p>
         <p>Cierra con la <strong>reunión 3</strong>: recorrido del dashboard con Álvaro y el equipo de VMP, ajustes finales y entrega.</p>
       </div>
     </div>
@@ -926,8 +943,10 @@
       <label class="check"><input type="checkbox" data-k="map"><span class="box"></span><span class="txt">Mapa de marcas de ACF, NIC y Beauty Web completado y compartido con support@detrics.io<small>Paso 2</small></span><span class="owner carat">VMP</span></label>
       <label class="check"><input type="checkbox" data-k="workspace"><span class="box"></span><span class="txt">support@detrics.io invitado al workspace de VMP en Detrics<small>Paso 3.2</small></span><span class="owner carat">VMP</span></label>
       <label class="check"><input type="checkbox" data-k="iam"><span class="box"></span><span class="txt">Roles MCP Tool User, BigQuery Job User y BigQuery Data Editor para support@, tomas@ e ignacio.goyanes@detrics.io<small>Paso 3.3</small></span><span class="owner carat">VMP</span></label>
+      <label class="check"><input type="checkbox" data-k="looker"><span class="box"></span><span class="txt">Informe de Looker Studio en blanco creado y compartido como Editor con support@, tomas@ e ignacio.goyanes@detrics.io<small>Paso 3.4</small></span><span class="owner carat">VMP</span></label>
       <div class="check-group">Semanas 1 y 2 · Detrics</div>
       <label class="check"><input type="checkbox" data-k="tables"><span class="box"></span><span class="txt">Tablas consolidadas por marca armadas y validadas en la reunión 2<small>Paso 4</small></span><span class="owner both">VMP y Detrics</span></label>
+      <label class="check"><input type="checkbox" data-k="lookercreds"><span class="box"></span><span class="txt">Fuentes de datos del Looker con las credenciales de Álvaro<small>Paso 5</small></span><span class="owner carat">VMP</span></label>
       <label class="check"><input type="checkbox" data-k="dash"><span class="box"></span><span class="txt">Dashboard llave en mano de ACF, NIC y Beauty Web entregado en la reunión 3<small>Paso 5</small></span><span class="owner both">VMP y Detrics</span></label>
       <div class="check-group">Meses 2 a 4 · Consultoría con Tom</div>
       <label class="check"><input type="checkbox" data-k="s1"><span class="box"></span><span class="txt">Sesión 1: el modelo de datos<small>Consultoría</small></span><span class="owner both">VMP y Detrics</span></label>
