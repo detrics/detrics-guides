@@ -1417,7 +1417,7 @@ FROM `inmediata-510016.test.tiktok_ad_daily`;
           <div class="sql-head">
             <div class="sql-title">
               <strong>30 · Master consolidado</strong>
-              <span>Crea <code>master_marketing_daily</code>: UNION canónica joinada contra el mapa de clientes, con la lógica de prefijo que separa las cuentas que comparten dos marcas (WTAs en Google, Dimitri y El Flaco en Meta y Google). Es la tabla que Looker lee para la vista general y las vistas por plataforma. Columnas GA4 van vacías hasta que llegan los IDs correctos.</span>
+              <span>Crea <code>master_marketing_daily</code>: une Meta, Google y TikTok y asigna cada campaña a su cliente con el mapa y la pestaña Campaign mapping. Columnas en español, con <strong>Semana</strong> (de lunes a domingo) y <strong>Mes</strong> para pasar los gráficos de días a semanas o meses. Es la tabla que Looker lee para la vista general y las páginas por plataforma. Las columnas de GA4 quedan vacías por ahora.</span>
             </div>
             <button class="copy-btn" type="button" data-copy-target="sql-30">Copiar SQL</button>
           </div>
@@ -1434,7 +1434,9 @@ FROM `inmediata-510016.test.tiktok_ad_daily`;
 --   Las campañas marcadas 'Excluir' no entran. Cuentas fuera del mapa tampoco.
 -- Reemplaza la regla por prefijo de nombre de campaña (2026-10-07): el match es por ID.
 --
--- Columnas GA4 (ga4_sessions, …) quedan NULL hasta 20_v_ga4_by_campaign.sql.
+-- Columnas en español con espacios y tildes (nombres flexibles de BigQuery): Looker las muestra tal cual.
+-- Semana = lunes de cada semana (lunes a domingo); Mes = día 1 del mes.
+-- Columnas GA4 (Sesiones (GA4), …) quedan NULL hasta 20_v_ga4_by_campaign.sql.
 --
 -- Dependencias: v_paid_ad_daily, v_client_map, campaign_map.
 
@@ -1475,55 +1477,60 @@ WITH
       ON CAST(p.campaign_id AS STRING) = c.campaign_id
   )
 SELECT
-  p.date,
-  p.cliente,
-  g.grupo,
-  p.platform,
-  p.platform_account_id,
-  p.account_name,
-  p.currency,
-  p.campaign_id,
-  p.campaign_name,
-  p.adset_id,
-  p.adset_name,
-  p.ad_id,
-  p.ad_name,
-  p.ad_image_url,
-  p.ad_video_url,
-  p.ad_preview_link,
-  p.ad_creative_type,
-  p.ad_destination_url,
-  p.ad_copy,
-  p.spend,
-  p.impressions,
-  p.clicks,
-  p.ctr,
-  p.cpc,
-  p.cpm,
-  p.purchases,
-  p.purchase_value,
-  p.messaging_conversations,
-  p.cost_per_messaging,
-  p.conversions,
-  p.conversions_value,
-  p.video_views_p100,
+  p.date                                 AS Fecha,
+  DATE_TRUNC(p.date, WEEK(MONDAY))       AS Semana,
+  DATE_TRUNC(p.date, MONTH)              AS Mes,
+  p.cliente                              AS Cliente,
+  g.grupo                                AS `Grupo empresarial`,
+  CASE p.platform
+    WHEN 'meta' THEN 'Meta'
+    WHEN 'google_ads' THEN 'Google Ads'
+    WHEN 'tiktok' THEN 'TikTok'
+    ELSE p.platform
+  END                                    AS Plataforma,
+  p.account_name                         AS Cuenta,
+  p.platform_account_id                  AS `ID de cuenta`,
+  p.currency                             AS Moneda,
+  p.campaign_name                        AS `Campaña`,
+  p.campaign_id                          AS `ID de campaña`,
+  p.adset_name                           AS `Conjunto de anuncios`,
+  p.adset_id                             AS `ID de conjunto`,
+  p.ad_name                              AS Anuncio,
+  p.ad_id                                AS `ID de anuncio`,
+  p.ad_image_url                         AS Creativo,
+  p.ad_video_url                         AS `Video del creativo`,
+  p.ad_preview_link                      AS `Vista previa`,
+  p.ad_creative_type                     AS Formato,
+  p.ad_destination_url                   AS `URL de destino`,
+  p.ad_copy                              AS `Texto del anuncio`,
 
-  -- GA4 placeholders (completar en 20_v_ga4_by_campaign.sql cuando destraben IDs)
-  CAST(NULL AS FLOAT64) AS ga4_sessions,
-  CAST(NULL AS FLOAT64) AS ga4_engaged_sessions,
-  CAST(NULL AS FLOAT64) AS ga4_total_revenue,
-  CAST(NULL AS FLOAT64) AS ga4_transactions,
-  CAST(NULL AS STRING)  AS ga4_source_medium
+  -- Solo métricas sumables. CTR, CPC, CPM, ROAS y costos por resultado se calculan en Looker.
+  p.spend                                AS `Inversión`,
+  p.impressions                          AS Impresiones,
+  p.clicks                               AS Clics,
+  p.purchases                            AS Compras,
+  p.purchase_value                       AS `Valor de compras`,
+  p.messaging_conversations              AS `Conversaciones iniciadas`,
+  p.conversions                          AS Conversiones,
+  p.conversions_value                    AS `Valor de conversiones`,
+  p.video_views_p100                     AS `Reproducciones completas`,
+
+  -- GA4 (completar en 20_v_ga4_by_campaign.sql cuando destraben IDs)
+  CAST(NULL AS FLOAT64)                  AS `Sesiones (GA4)`,
+  CAST(NULL AS FLOAT64)                  AS `Sesiones con interacción (GA4)`,
+  CAST(NULL AS FLOAT64)                  AS `Ingresos (GA4)`,
+  CAST(NULL AS FLOAT64)                  AS `Transacciones (GA4)`,
+  CAST(NULL AS STRING)                   AS `Fuente / medio (GA4)`
 
 FROM assigned p
 LEFT JOIN grupos g USING (cliente)
 WHERE p.cliente != 'Excluir';
 
 -- Chequeos esperados:
---   SELECT cliente, SUM(spend) spend_total, SUM(messaging_conversations) msg
+--   SELECT Cliente, SUM(`Inversión`) inversion, SUM(`Conversaciones iniciadas`) conversaciones
 --   FROM master_marketing_daily
---   WHERE date BETWEEN DATE '2026-09-01' AND DATE '2026-09-30'
---   GROUP BY cliente ORDER BY spend_total DESC;
+--   WHERE Fecha BETWEEN DATE '2026-09-01' AND DATE '2026-09-30'
+--   GROUP BY Cliente ORDER BY inversion DESC;
 --
 -- Esperado: 14 clientes aprox, más 'Sin asignar' si quedan campañas sin mapear (ver 99_control #3).
 -- Nissan con messaging &gt; 0 solo después del resync con messaging en ad_daily.
@@ -1533,7 +1540,7 @@ WHERE p.cliente != 'Excluir';
           <div class="sql-head">
             <div class="sql-title">
               <strong>40 · Master de keywords</strong>
-              <span>Crea <code>master_google_keywords_daily</code>: Google keywords × match type a nivel palabra, con cliente y grupo del mapa. Alimenta la vista de keywords del dashboard.</span>
+              <span>Crea <code>master_google_keywords_daily</code>: palabras clave de Google Ads con su concordancia, cliente y grupo, con los mismos nombres de columna, Semana y Mes que el master. Alimenta la tabla de palabras clave del dashboard.</span>
             </div>
             <button class="copy-btn" type="button" data-copy-target="sql-40">Copiar SQL</button>
           </div>
@@ -1543,6 +1550,8 @@ WHERE p.cliente != 'Excluir';
 --
 -- Misma asignación de cliente que master_marketing_daily: campaign_map por ID de campaña,
 -- si no, el cliente único de la cuenta, si no 'Sin asignar'. 'Excluir' no entra.
+--
+-- Columnas en español, mismos nombres que master_marketing_daily. Semana = lunes; Mes = día 1.
 --
 -- Dependencias: google_ads_keyword_daily, v_client_map, campaign_map.
 
@@ -1582,32 +1591,39 @@ WITH
       ON CAST(k.campaign_id AS STRING) = c.campaign_id
   )
 SELECT
-  k.date,
-  k.cliente,
-  g.grupo,
-  'google_ads'                                        AS platform,
-  k._detrics_account_id                               AS platform_account_id,
-  k.campaign_id,
-  k.campaign_name,
-  k.ad_group_id,
-  k.ad_group_name,
-  k.keyword_text,
-  k.keyword_match_type                                AS match_type,
-  k.cost_micros                                       AS spend,
-  k.impressions,
-  k.clicks,
-  k.ctr,
-  k.average_cpc                                       AS cpc,
-  k.conversions
+  k.date                                 AS Fecha,
+  DATE_TRUNC(k.date, WEEK(MONDAY))       AS Semana,
+  DATE_TRUNC(k.date, MONTH)              AS Mes,
+  k.cliente                              AS Cliente,
+  g.grupo                                AS `Grupo empresarial`,
+  'Google Ads'                           AS Plataforma,
+  k._detrics_account_id                  AS `ID de cuenta`,
+  k.campaign_name                        AS `Campaña`,
+  k.campaign_id                          AS `ID de campaña`,
+  k.ad_group_name                        AS `Grupo de anuncios`,
+  k.ad_group_id                          AS `ID de grupo de anuncios`,
+  k.keyword_text                         AS `Palabra clave`,
+  CASE UPPER(k.keyword_match_type)
+    WHEN 'EXACT'  THEN 'Exacta'
+    WHEN 'PHRASE' THEN 'Frase'
+    WHEN 'BROAD'  THEN 'Amplia'
+    ELSE k.keyword_match_type
+  END                                    AS Concordancia,
+
+  -- Solo métricas sumables. CTR, CPC y costo por conversión se calculan en Looker.
+  k.cost_micros                          AS `Inversión`,
+  k.impressions                          AS Impresiones,
+  k.clicks                               AS Clics,
+  k.conversions                          AS Conversiones
 FROM assigned k
 LEFT JOIN grupos g USING (cliente)
 WHERE k.cliente != 'Excluir';
 
 -- Chequeos esperados:
---   SELECT cliente, COUNT(DISTINCT keyword_text) kws, SUM(spend) spend_total
+--   SELECT Cliente, COUNT(DISTINCT `Palabra clave`) kws, SUM(`Inversión`) inversion
 --   FROM master_google_keywords_daily
---   WHERE date BETWEEN DATE '2026-09-01' AND DATE '2026-09-30'
---   GROUP BY cliente ORDER BY spend_total DESC;
+--   WHERE Fecha BETWEEN DATE '2026-09-01' AND DATE '2026-09-30'
+--   GROUP BY Cliente ORDER BY inversion DESC;
 --
 -- Top keywords sep26 por cliente (según sample WTAs):
 --   WTA GDL — gdl open BROAD, guadalajara open boletos BROAD, wta BROAD
@@ -1675,19 +1691,19 @@ WHERE c.platform IN ('meta', 'google_ads', 'tiktok')
 --     pestaña "Campaign mapping", o está sin cliente). Sumarlas al sheet.
 -- ============================================================================
 SELECT
-  platform,
-  platform_account_id,
-  account_name,
-  campaign_id,
-  campaign_name,
-  MIN(date)        AS desde,
-  MAX(date)        AS hasta,
-  SUM(impressions) AS impressions,
-  SUM(spend)       AS spend
+  Plataforma,
+  `ID de cuenta`,
+  Cuenta,
+  `ID de campaña`,
+  `Campaña`,
+  MIN(Fecha)        AS desde,
+  MAX(Fecha)        AS hasta,
+  SUM(Impresiones)  AS impresiones,
+  SUM(`Inversión`) AS inversion
 FROM `inmediata-510016.test.master_marketing_daily`
-WHERE cliente = 'Sin asignar'
+WHERE Cliente = 'Sin asignar'
 GROUP BY 1, 2, 3, 4, 5
-ORDER BY spend DESC;
+ORDER BY inversion DESC;
 
 -- ============================================================================
 -- 3b) Filas de campaign_map con un cliente que no existe en el mapa de clientes
@@ -1704,37 +1720,37 @@ WHERE TRIM(IFNULL(cm.cliente, '')) NOT IN ('', 'Excluir')
 -- 4) Health check general del master
 -- ============================================================================
 SELECT
-  platform,
-  COUNT(DISTINCT cliente)                                    AS clientes,
-  COUNT(DISTINCT platform_account_id)                        AS cuentas,
-  COUNT(DISTINCT campaign_id)                                AS campañas,
+  Plataforma,
+  COUNT(DISTINCT Cliente)                                    AS clientes,
+  COUNT(DISTINCT `ID de cuenta`)                            AS cuentas,
+  COUNT(DISTINCT `ID de campaña`)                           AS campanas,
   COUNT(*)                                                   AS filas,
-  MIN(date)                                                  AS desde,
-  MAX(date)                                                  AS hasta,
-  SUM(spend)                                                 AS spend_total,
-  SUM(impressions)                                           AS impressions_total,
-  SUM(clicks)                                                AS clicks_total,
-  SUM(COALESCE(purchases, conversions))                      AS results_total,
-  SUM(messaging_conversations)                               AS whatsapp_total
+  MIN(Fecha)                                                 AS desde,
+  MAX(Fecha)                                                 AS hasta,
+  SUM(`Inversión`)                                          AS inversion_total,
+  SUM(Impresiones)                                           AS impresiones_total,
+  SUM(Clics)                                                 AS clics_total,
+  SUM(COALESCE(Compras, Conversiones))                       AS resultados_total,
+  SUM(`Conversaciones iniciadas`)                           AS conversaciones_total
 FROM `inmediata-510016.test.master_marketing_daily`
-GROUP BY platform
-ORDER BY spend_total DESC;
+GROUP BY Plataforma
+ORDER BY inversion_total DESC;
 
 -- ============================================================================
 -- 5) Health check del master de keywords
 -- ============================================================================
 SELECT
-  cliente,
-  COUNT(DISTINCT keyword_text) AS keywords_unicas,
-  COUNT(DISTINCT match_type)   AS match_types,
-  SUM(spend)                   AS spend_total,
-  SUM(clicks)                  AS clicks_total,
-  SUM(conversions)             AS conv_total
+  Cliente,
+  COUNT(DISTINCT `Palabra clave`) AS keywords_unicas,
+  COUNT(DISTINCT Concordancia)    AS concordancias,
+  SUM(`Inversión`)               AS inversion_total,
+  SUM(Clics)                      AS clics_total,
+  SUM(Conversiones)               AS conversiones_total
 FROM `inmediata-510016.test.master_google_keywords_daily`
-WHERE date BETWEEN DATE_SUB(CURRENT_DATE('America/Mexico_City'), INTERVAL 30 DAY)
+WHERE Fecha BETWEEN DATE_SUB(CURRENT_DATE('America/Mexico_City'), INTERVAL 30 DAY)
               AND CURRENT_DATE('America/Mexico_City')
-GROUP BY cliente
-ORDER BY spend_total DESC;
+GROUP BY Cliente
+ORDER BY inversion_total DESC;
 </code></pre>
         </div>
       </details>
