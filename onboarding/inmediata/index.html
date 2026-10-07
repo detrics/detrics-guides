@@ -838,7 +838,7 @@
           </li>
           <li data-n="1.3">
             <strong>Dan acceso en Google Cloud a Soporte de Detrics, Tom e Ignacio</strong>
-            Con estos accesos el equipo de Detrics consulta los datos y construye las tablas consolidadas, las vistas y las rutinas del warehouse.
+            Con estos accesos el equipo de Detrics consulta los datos, construye las tablas consolidadas, las vistas y las rutinas del warehouse, y conecta el Looker a las tablas. Sin <strong>BigQuery Data Editor</strong>, el dataset no aparece al agregar datos en Looker.
             <div class="url-box">
               <div class="url-icon"><svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg></div>
               <a href="https://console.cloud.google.com/iam-admin/iam" target="_blank" rel="noopener">console.cloud.google.com/iam-admin/iam</a>
@@ -1714,6 +1714,7 @@ ORDER BY spend_total DESC;
           <li>Filtros por grupo, marca, plataforma y fecha.</li>
           <li>Construido sobre las tablas consolidadas: una marca nueva en el mapa aparece sola.</li>
         </ul>
+        <p><strong>Las fuentes de datos del Looker van con la cuenta de Jonathan.</strong> Mientras construimos, conectamos las tablas con nuestras cuentas. Antes de la entrega, Jonathan pasa cada fuente de datos a sus credenciales: en el informe, <strong>Recurso › Administrar fuentes de datos agregadas › Editar</strong>, clic en las credenciales de arriba a la izquierda y elegir <strong>Credenciales del propietario</strong> con su cuenta. Así el reporte sigue leyendo BigQuery cuando nos quiten los accesos del paso 1.3.</p>
         <p>Cierra con la <strong>reunión 4</strong>: recorremos el dashboard con el equipo, ajustamos lo que haga falta y lo damos por entregado.</p>
       </div>
     </div>
@@ -1767,6 +1768,7 @@ ORDER BY spend_total DESC;
       <label class="check"><input type="checkbox" data-k="mapsync"><span class="box"></span><span class="txt">Apps Script del mapa de clientes instalado: sincroniza el mapa a BigQuery todos los días<small>Paso 7.1</small></span><span class="owner carat">Inmediata</span></label>
       <label class="check"><input type="checkbox" data-k="names"><span class="box"></span><span class="txt">Mapa de marcas validado en la reunión 2<small>Pasos 3 y 6</small></span><span class="owner both">Inmediata y Detrics</span></label>
       <label class="check"><input type="checkbox" data-k="tables"><span class="box"></span><span class="txt">Tablas consolidadas validadas contra Supermetrics en la reunión 3<small>Paso 7</small></span><span class="owner both">Inmediata y Detrics</span></label>
+      <label class="check"><input type="checkbox" data-k="lookercreds"><span class="box"></span><span class="txt">Fuentes de datos del Looker con las credenciales de Jonathan<small>Paso 8</small></span><span class="owner carat">Inmediata</span></label>
       <label class="check"><input type="checkbox" data-k="dash"><span class="box"></span><span class="txt">Dashboard de las 14 marcas entregado en la reunión 4<small>Paso 8</small></span><span class="owner both">Inmediata y Detrics</span></label>
       <div class="check-group">Meses 2 a 4 · Consultoría con Tom</div>
       <label class="check"><input type="checkbox" data-k="s1"><span class="box"></span><span class="txt">Sesión 1: el modelo de datos<small>Consultoría</small></span><span class="owner both">Inmediata y Detrics</span></label>
