@@ -1027,8 +1027,8 @@
     <!-- STEP 7 SQL ADDENDUM: manual run fallback -->
     <div class="sql-addendum">
       <div class="sql-intro">
-        <p>Las 5 vistas y la tabla externa que arman los dashboards las corre Detrics desde su MCP con el rol de <strong>BigQuery Data Editor</strong> del paso 1.3. Si prefieren revisar el SQL antes y correrlo desde la cuenta de Jonathan, abajo están los 6 archivos listos para copiar y pegar en la consola de BigQuery.</p>
-        <div class="tip blue"><span class="tip-icon">&#9432;</span><span>Antes de correr el 00, compartan el sheet <strong>Mapa de clientes</strong> con la cuenta de servicio del proyecto (viewer alcanza). Sin eso, la tabla externa no puede leer el sheet.</span></div>
+        <p>El mapa de clientes y las 5 vistas que arman los dashboards los crea Detrics desde su MCP con el rol de <strong>BigQuery Data Editor</strong> del paso 1.3. Si prefieren revisar el código antes y correrlo desde la cuenta de Jonathan, abajo está el script del mapa y los 5 SQL listos para copiar.</p>
+        <div class="tip blue"><span class="tip-icon">&#9432;</span><span>El mapa llega a BigQuery con un <strong>Apps Script</strong> dentro del sheet <strong>Mapa de clientes</strong>: todos los días a las 3 AM copia la pestaña a la tabla <code>client_map</code>. Para aplicar un cambio al momento, menú <strong>Detrics › Sincronizar mapa ahora</strong>.</span></div>
       </div>
 
       <details class="sql-manual">
@@ -1037,60 +1037,113 @@
           <li>Abrir la consola de BigQuery en <a href="https://console.cloud.google.com/bigquery?project=inmediata-510016" target="_blank" rel="noopener">console.cloud.google.com/bigquery</a> con la cuenta de Jonathan.</li>
           <li>En el panel izquierdo, bajo <code>inmediata-510016</code>, abrir el dataset <code>test</code>.</li>
           <li>Arriba a la derecha, clic en <strong>+ Redactar nueva consulta</strong> (Compose new query).</li>
-          <li>Copiar el SQL del archivo <strong>00</strong> con el botón de la derecha, pegarlo en el editor, clic en <strong>Ejecutar</strong> (Run). Esperar el mensaje de éxito.</li>
-          <li>Repetir con <strong>05</strong>, <strong>10</strong>, <strong>30</strong> y <strong>40</strong> en ese orden. Cada uno depende del anterior.</li>
+          <li>Primero el mapa: en el sheet <strong>Mapa de clientes</strong>, <strong>Extensiones › Apps Script</strong>. Pegar el script <strong>00</strong>, sumar <strong>BigQuery API</strong> en Servicios (+), correr <code>syncClientMapToBigQuery</code> una vez (pide autorización y crea <code>client_map</code>) y después <code>installDailyTrigger</code>.</li>
+          <li>Copiar el SQL del archivo <strong>05</strong> con el botón de la derecha, pegarlo en el editor, clic en <strong>Ejecutar</strong> (Run). Esperar el mensaje de éxito.</li>
+          <li>Repetir con <strong>10</strong>, <strong>30</strong> y <strong>40</strong> en ese orden. Cada uno depende del anterior.</li>
           <li>El <strong>99</strong> son queries de chequeo. Correrlo al final para validar que no haya cuentas huérfanas o campañas sin cliente.</li>
         </ol>
 
         <div class="sql-block">
           <div class="sql-head">
             <div class="sql-title">
-              <strong>00 · Mapa de clientes</strong>
-              <span>Crea <code>ext_client_map</code>, una tabla externa que lee el tab Mapa de clientes del Google Sheet en vivo. No copia data, es un puntero.</span>
+              <strong>00 · Mapa de clientes (Apps Script)</strong>
+              <span>Va en <strong>Extensiones › Apps Script</strong> del sheet, no en BigQuery. Copia la pestaña Mapa de clientes a la tabla <code>client_map</code> todos los días a las 3 AM.</span>
             </div>
-            <button class="copy-btn" type="button" data-copy-target="sql-00">Copiar SQL</button>
+            <button class="copy-btn" type="button" data-copy-target="sql-00">Copiar script</button>
           </div>
-          <pre id="sql-00"><code>-- 00_setup.sql
--- External table que lee el "Mapa de clientes" directo del Google Sheet.
--- Cambios en el sheet se reflejan en el próximo query sin resync.
---
--- Pre-requisito: la service account que corre BigQuery debe tener acceso
--- de LECTURA al sheet. Jonathan comparte el sheet con la SA del proyecto
--- (ver IAM Service Accounts → agregar como Viewer en el sheet).
---
--- Sheet: 1tvtqVpj30VRhtQXCvYEKzVgI2znOpWyM9gR9LcNBku8
--- Tab:   Mapa de clientes
--- Rango: A3:O100 (saltea fila 1 = headers y fila 2 = hints/descripciones)
---
--- 15 columnas en el orden que están en el sheet. Todo STRING; la limpieza
--- (trim, strip de guiones, cast de IDs numéricos) la hace v_client_map.
+          <pre id="sql-00"><code>/**
+ * Sincroniza la pestaña "Mapa de clientes" a la tabla nativa `test.client_map`.
+ *
+ * Vive dentro del sheet del mapa (Extensiones › Apps Script). Mismo patrón que la
+ * guía de alarmas (guides.detrics.io/alarms, syncClientMapToBigQuery): cada corrida
+ * hace CREATE OR REPLACE TABLE con las filas del sheet. v_client_map lee esta tabla.
+ *
+ * Setup (una vez):
+ *   1. Pegar este archivo en Extensiones › Apps Script del sheet.
+ *   2. Servicios (+) › BigQuery API.
+ *   3. Correr syncClientMapToBigQuery una vez (autoriza y crea la tabla).
+ *   4. Correr installDailyTrigger una vez (corrida diaria a las 3 AM, antes del sync de Detrics).
+ *
+ * Quien instala necesita poder escribir en el dataset (BigQuery Data Editor) y crear jobs
+ * en el proyecto (BigQuery Job User o BigQuery User). El trigger corre con su cuenta.
+ * Para aplicar un cambio del sheet al momento: menú Detrics › Sincronizar mapa ahora.
+ */
 
-CREATE OR REPLACE EXTERNAL TABLE `inmediata-510016.test.ext_client_map` (
-  cliente                        STRING,
-  grupo_empresarial              STRING,
-  google_ads_customer_id         STRING,
-  dv360_advertiser_id            STRING,
-  facebook_ads_account_id        STRING,
-  facebook_insights_page_id      STRING,
-  instagram_business_account_id  STRING,
-  tiktok_ads_advertiser_id       STRING,
-  tiktok_organic_handle          STRING,
-  x_ads_account_id               STRING,
-  linkedin_ads_account_id        STRING,
-  ga4_property_id                STRING,
-  notas                          STRING,
-  looker_link                    STRING,
-  campaign_name_prefix           STRING
-)
-OPTIONS (
-  format        = 'GOOGLE_SHEETS',
-  uris          = ['https://docs.google.com/spreadsheets/d/1tvtqVpj30VRhtQXCvYEKzVgI2znOpWyM9gR9LcNBku8'],
-  sheet_range   = 'Mapa de clientes!A3:O100',
-  skip_leading_rows = 0
-);
+const CONFIG = {
+  projectId: 'inmediata-510016',
+  dataset: 'test',
+  table: 'client_map',
+  tab: 'Mapa de clientes',
+  headerRows: 2, // fila 1 = encabezados, fila 2 = descripciones
+  columns: [
+    'cliente',
+    'grupo_empresarial',
+    'google_ads_customer_id',
+    'dv360_advertiser_id',
+    'facebook_ads_account_id',
+    'facebook_insights_page_id',
+    'instagram_business_account_id',
+    'tiktok_ads_advertiser_id',
+    'tiktok_organic_handle',
+    'x_ads_account_id',
+    'linkedin_ads_account_id',
+    'ga4_property_id',
+    'notas',
+    'looker_link',
+    'campaign_name_prefix',
+  ],
+};
 
--- Chequeo rápido: debería devolver 14 clientes.
--- SELECT COUNT(*) AS clientes FROM `inmediata-510016.test.ext_client_map`;
+function onOpen() {
+  SpreadsheetApp.getUi()
+    .createMenu('Detrics')
+    .addItem('Sincronizar mapa ahora', 'syncClientMapToBigQuery')
+    .addToUi();
+}
+
+function syncClientMapToBigQuery() {
+  const sheet = SpreadsheetApp.getActive().getSheetByName(CONFIG.tab);
+  const nRows = sheet.getLastRow() - CONFIG.headerRows;
+  if (nRows &lt; 1) { console.log('Mapa vacío, no se sincroniza.'); return; }
+
+  // getDisplayValues: los IDs largos quedan como texto (sin notación científica).
+  const rows = sheet
+    .getRange(CONFIG.headerRows + 1, 1, nRows, CONFIG.columns.length)
+    .getDisplayValues()
+    .filter((r) =&gt; r[0].trim() !== '');
+  if (!rows.length) { console.log('Mapa vacío, no se sincroniza.'); return; }
+
+  const selects = rows.map((r) =&gt;
+    'SELECT ' + CONFIG.columns.map((c, i) =&gt; `${sqlStr(r[i])} AS ${c}`).join(', ')
+  );
+  const target = `\`${CONFIG.projectId}.${CONFIG.dataset}.${CONFIG.table}\``;
+  bqRun(`CREATE OR REPLACE TABLE ${target} AS\n${selects.join('\nUNION ALL\n')}`);
+  console.log(`${rows.length} filas sincronizadas a ${target}.`);
+}
+
+function installDailyTrigger() {
+  ScriptApp.getProjectTriggers()
+    .filter((t) =&gt; t.getHandlerFunction() === 'syncClientMapToBigQuery')
+    .forEach((t) =&gt; ScriptApp.deleteTrigger(t));
+  ScriptApp.newTrigger('syncClientMapToBigQuery').timeBased().everyDays(1).atHour(3).create();
+}
+
+// Celda vacía → NULL tipado como STRING, así una columna toda vacía no queda INT64.
+function sqlStr(v) {
+  const s = String(v).trim();
+  if (s === '') return 'CAST(NULL AS STRING)';
+  return "'" + s.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n') + "'";
+}
+
+function bqRun(sql) {
+  let res = BigQuery.Jobs.query({ query: sql, useLegacySql: false }, CONFIG.projectId);
+  const jobId = res.jobReference.jobId;
+  const location = res.jobReference.location;
+  while (!res.jobComplete) {
+    Utilities.sleep(1000);
+    res = BigQuery.Jobs.getQueryResults(CONFIG.projectId, jobId, { location });
+  }
+}
 </code></pre>
         </div>
         <div class="sql-block">
@@ -1119,7 +1172,7 @@ OPTIONS (
 --                             instagram | tiktok_organic
 --   platform_account_id       el ID normalizado que matchea con _detrics_account_id
 --
--- Dependencia: ext_client_map (00_setup.sql).
+-- Dependencia: client_map (tabla nativa que escribe apps-script/sync-client-map.gs desde el sheet).
 
 CREATE OR REPLACE VIEW `inmediata-510016.test.v_client_map` AS
 WITH cleaned AS (
@@ -1134,7 +1187,7 @@ WITH cleaned AS (
     NULLIF(TRIM(ga4_property_id), '')                      AS ga4_id,
     NULLIF(TRIM(instagram_business_account_id), '')        AS ig_id,
     NULLIF(TRIM(tiktok_organic_handle), '')                AS tiktok_organic
-  FROM `inmediata-510016.test.ext_client_map`
+  FROM `inmediata-510016.test.client_map`
   WHERE cliente IS NOT NULL AND TRIM(cliente) != ''
 )
 SELECT cliente, grupo, campaign_name_prefix,
