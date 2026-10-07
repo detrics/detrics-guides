@@ -1024,30 +1024,26 @@
         </ul>
         <p>Cierra con la <strong>reunión 3</strong>: revisamos las tablas y la validación.</p>
 
-    <!-- STEP 7 SQL ADDENDUM: manual run fallback -->
-    <div class="sql-addendum">
-      <div class="sql-intro">
-        <p>El mapa de clientes y las 5 vistas que arman los dashboards los crea Detrics desde su MCP con el rol de <strong>BigQuery Data Editor</strong> del paso 1.3. Si prefieren revisar el código antes y correrlo desde la cuenta de Jonathan, abajo está el script del mapa y los 5 SQL listos para copiar.</p>
-        <div class="tip blue"><span class="tip-icon">&#9432;</span><span>El mapa llega a BigQuery con un <strong>Apps Script</strong> dentro del sheet <strong>Mapa de clientes</strong>: todos los días a las 3 AM copia la pestaña a la tabla <code>client_map</code>. Para aplicar un cambio al momento, menú <strong>Detrics › Sincronizar mapa ahora</strong>.</span></div>
-      </div>
-
-      <details class="sql-manual">
-        <summary><strong>Cómo correrlo a mano</strong> (clic para expandir)</summary>
-        <ol class="sql-howto">
-          <li>Abrir la consola de BigQuery en <a href="https://console.cloud.google.com/bigquery?project=inmediata-510016" target="_blank" rel="noopener">console.cloud.google.com/bigquery</a> con la cuenta de Jonathan.</li>
-          <li>En el panel izquierdo, bajo <code>inmediata-510016</code>, abrir el dataset <code>test</code>.</li>
-          <li>Arriba a la derecha, clic en <strong>+ Redactar nueva consulta</strong> (Compose new query).</li>
-          <li>Primero el mapa: en el sheet <strong>Mapa de clientes</strong>, <strong>Extensiones › Apps Script</strong>. Pegar el script <strong>00</strong>, sumar <strong>BigQuery API</strong> en Servicios (+), correr <code>syncClientMapToBigQuery</code> una vez (pide autorización y crea <code>client_map</code>) y después <code>installDailyTrigger</code>.</li>
-          <li>Copiar el SQL del archivo <strong>05</strong> con el botón de la derecha, pegarlo en el editor, clic en <strong>Ejecutar</strong> (Run). Esperar el mensaje de éxito.</li>
-          <li>Repetir con <strong>10</strong>, <strong>30</strong> y <strong>40</strong> en ese orden. Cada uno depende del anterior.</li>
-          <li>El <strong>99</strong> son queries de chequeo. Correrlo al final para validar que no haya cuentas huérfanas o campañas sin cliente.</li>
-        </ol>
-
-        <div class="sql-block">
+        <ol class="substeps">
+          <li data-n="7.1">
+            <strong>Jonathan instala el Apps Script del mapa de clientes</strong>
+            El script copia la pestaña <strong>Mapa de clientes</strong> a la tabla <code>client_map</code> de BigQuery todos los días a las 3 AM. Queda a nombre de Jonathan y corre con su cuenta, así sigue funcionando cuando Detrics ya no tenga acceso al proyecto.
+            <ol>
+              <li>Abrir el sheet <a href="https://docs.google.com/spreadsheets/d/1tvtqVpj30VRhtQXCvYEKzVgI2znOpWyM9gR9LcNBku8/edit" target="_blank" rel="noopener">Mapa de clientes</a> con la cuenta de Jonathan, la dueña del proyecto <code>inmediata-510016</code>.</li>
+              <li>Ir a <strong>Extensiones › Apps Script</strong>. El editor se abre en una pestaña nueva. Borrar el código de ejemplo (<code>function myFunction</code>).</li>
+              <li>Copiar el script con el botón de abajo, pegarlo en el editor y guardar con <strong>Ctrl + S</strong>.</li>
+              <li>En la barra izquierda, clic en <strong>Servicios (+)</strong>, elegir <strong>BigQuery API</strong> y clic en <strong>Agregar</strong>.</li>
+              <li>En el selector de función de arriba, elegir <code>syncClientMapToBigQuery</code> y clic en <strong>Ejecutar</strong>. Google pide autorización: elegir la cuenta de Jonathan, <strong>Configuración avanzada › Ir a (nombre del proyecto)</strong> y <strong>Permitir</strong>.</li>
+              <li>Abajo, en el <strong>Registro de ejecución</strong>, aparece <code>14 filas sincronizadas</code>. La tabla <code>client_map</code> ya está en BigQuery.</li>
+              <li>Elegir <code>installDailyTrigger</code> y clic en <strong>Ejecutar</strong>. En <strong>Activadores</strong> (el ícono de reloj de la barra izquierda) aparece <code>syncClientMapToBigQuery</code>, diario, de 3 a 4 AM.</li>
+              <li>Volver al sheet y recargarlo. Aparece el menú <strong>Detrics › Sincronizar mapa ahora</strong>, para ver un cambio del mapa en el reporte sin esperar a la corrida del día siguiente.</li>
+            </ol>
+            <div class="tip amber"><span class="tip-icon">&#9888;</span><span>El script lee las columnas A a O por posición. Para sumar un dato nuevo al mapa, agréguenlo después de la columna O.</span></div>
+            <div class="sql-block">
           <div class="sql-head">
             <div class="sql-title">
-              <strong>00 · Mapa de clientes (Apps Script)</strong>
-              <span>Va en <strong>Extensiones › Apps Script</strong> del sheet, no en BigQuery. Copia la pestaña Mapa de clientes a la tabla <code>client_map</code> todos los días a las 3 AM.</span>
+              <strong>Apps Script · Mapa de clientes a BigQuery</strong>
+              <span>Se pega en <strong>Extensiones › Apps Script</strong> del sheet. Escribe la tabla <code>client_map</code> en el dataset <code>test</code>.</span>
             </div>
             <button class="copy-btn" type="button" data-copy-target="sql-00">Copiar script</button>
           </div>
@@ -1146,7 +1142,31 @@ function bqRun(sql) {
 }
 </code></pre>
         </div>
-        <div class="sql-block">
+          </li>
+          <li data-n="7.2">
+            <strong>Creamos las vistas consolidadas</strong>
+            Con <code>client_map</code> en BigQuery, armamos las 5 vistas que leen los dashboards. Cuando termine el proyecto pueden sacarnos los roles de Google Cloud: las vistas y el script siguen funcionando.
+          </li>
+        </ol>
+
+    <!-- STEP 7 SQL ADDENDUM: manual run fallback -->
+    <div class="sql-addendum">
+      <div class="sql-intro">
+        <p>Las 5 vistas las crea Detrics desde su MCP con el rol de <strong>BigQuery Data Editor</strong> del paso 1.3. Si prefieren revisar el SQL antes y correrlo desde la cuenta de Jonathan, abajo están los 5 archivos listos para copiar y pegar en la consola de BigQuery. Antes, el paso 7.1 tiene que estar hecho.</p>
+      </div>
+
+      <details class="sql-manual">
+        <summary><strong>Cómo correrlo a mano</strong> (clic para expandir)</summary>
+        <ol class="sql-howto">
+          <li>Abrir la consola de BigQuery en <a href="https://console.cloud.google.com/bigquery?project=inmediata-510016" target="_blank" rel="noopener">console.cloud.google.com/bigquery</a> con la cuenta de Jonathan.</li>
+          <li>En el panel izquierdo, bajo <code>inmediata-510016</code>, abrir el dataset <code>test</code>.</li>
+          <li>Arriba a la derecha, clic en <strong>+ Redactar nueva consulta</strong> (Compose new query).</li>
+          <li>Copiar el SQL del archivo <strong>05</strong> con el botón de la derecha, pegarlo en el editor, clic en <strong>Ejecutar</strong> (Run). Esperar el mensaje de éxito.</li>
+          <li>Repetir con <strong>10</strong>, <strong>30</strong> y <strong>40</strong> en ese orden. Cada uno depende del anterior.</li>
+          <li>El <strong>99</strong> son queries de chequeo. Correrlo al final para validar que no haya cuentas huérfanas o campañas sin cliente.</li>
+        </ol>
+
+                <div class="sql-block">
           <div class="sql-head">
             <div class="sql-title">
               <strong>05 · Vista unpivot cliente × plataforma</strong>
@@ -1744,6 +1764,7 @@ ORDER BY spend_total DESC;
       <div class="check-group">Semanas 1 a 4 · Detrics</div>
       <label class="check"><input type="checkbox" data-k="dsp"><span class="box"></span><span class="txt">Conector de Amazon DSP listo y cuenta conectada<small>Paso 5</small></span><span class="owner both">Inmediata y Detrics</span></label>
       <label class="check"><input type="checkbox" data-k="transfers"><span class="box"></span><span class="txt">Transferencias creadas y carga histórica completa<small>Paso 6</small></span><span class="owner detrics">Detrics</span></label>
+      <label class="check"><input type="checkbox" data-k="mapsync"><span class="box"></span><span class="txt">Apps Script del mapa de clientes instalado: sincroniza el mapa a BigQuery todos los días<small>Paso 7.1</small></span><span class="owner carat">Inmediata</span></label>
       <label class="check"><input type="checkbox" data-k="names"><span class="box"></span><span class="txt">Mapa de marcas validado en la reunión 2<small>Pasos 3 y 6</small></span><span class="owner both">Inmediata y Detrics</span></label>
       <label class="check"><input type="checkbox" data-k="tables"><span class="box"></span><span class="txt">Tablas consolidadas validadas contra Supermetrics en la reunión 3<small>Paso 7</small></span><span class="owner both">Inmediata y Detrics</span></label>
       <label class="check"><input type="checkbox" data-k="dash"><span class="box"></span><span class="txt">Dashboard de las 14 marcas entregado en la reunión 4<small>Paso 8</small></span><span class="owner both">Inmediata y Detrics</span></label>
