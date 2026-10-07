@@ -1031,18 +1031,19 @@
         <ol class="substeps">
           <li data-n="7.1">
             <strong>Jonathan instala el Apps Script del mapa de clientes</strong>
-            El script copia la pestaña <strong>Mapa de clientes</strong> a la tabla <code>client_map</code> de BigQuery todos los días a las 3 AM. Queda a nombre de Jonathan y corre con su cuenta, así sigue funcionando cuando Detrics ya no tenga acceso al proyecto.
+            El script copia dos pestañas del sheet a BigQuery todos los días a las 3 AM: <strong>Mapa de clientes</strong> a la tabla <code>client_map</code> (qué cuenta es de qué cliente) y <strong>Campaign mapping</strong> a <code>campaign_map</code> (qué campaña es de qué cliente, en las cuentas que comparten varios clientes o eventos). Queda a nombre de Jonathan y corre con su cuenta, así sigue funcionando cuando Detrics ya no tenga acceso al proyecto.
             <ol>
               <li>Abrir el sheet <a href="https://docs.google.com/spreadsheets/d/1tvtqVpj30VRhtQXCvYEKzVgI2znOpWyM9gR9LcNBku8/edit" target="_blank" rel="noopener">Mapa de clientes</a> con la cuenta de Jonathan, la dueña del proyecto <code>inmediata-510016</code>.</li>
               <li>Ir a <strong>Extensiones › Apps Script</strong>. El editor se abre en una pestaña nueva. Borrar el código de ejemplo (<code>function myFunction</code>).</li>
               <li>Copiar el script con el botón de abajo, pegarlo en el editor y guardar con <strong>Ctrl + S</strong>.</li>
               <li>En la barra izquierda, clic en <strong>Servicios (+)</strong>, elegir <strong>BigQuery API</strong> y clic en <strong>Agregar</strong>.</li>
               <li>En el selector de función de arriba, elegir <code>syncClientMapToBigQuery</code> y clic en <strong>Ejecutar</strong>. Google pide autorización: elegir la cuenta de Jonathan, <strong>Configuración avanzada › Ir a (nombre del proyecto)</strong> y <strong>Permitir</strong>.</li>
-              <li>Abajo, en el <strong>Registro de ejecución</strong>, aparece <code>14 filas sincronizadas</code>. La tabla <code>client_map</code> ya está en BigQuery.</li>
+              <li>Abajo, en el <strong>Registro de ejecución</strong>, aparecen dos líneas: <code>14 filas sincronizadas a client_map</code> y una con las campañas de <code>campaign_map</code>. Las dos tablas ya están en BigQuery.</li>
               <li>Elegir <code>installDailyTrigger</code> y clic en <strong>Ejecutar</strong>. En <strong>Activadores</strong> (el ícono de reloj de la barra izquierda) aparece <code>syncClientMapToBigQuery</code>, diario, de 3 a 4 AM.</li>
               <li>Volver al sheet y recargarlo. Aparece el menú <strong>Detrics › Sincronizar mapa ahora</strong>, para ver un cambio del mapa en el reporte sin esperar a la corrida del día siguiente.</li>
             </ol>
-            <div class="tip amber"><span class="tip-icon">&#9888;</span><span>El script lee las columnas A a O por posición. Para sumar un dato nuevo al mapa, agréguenlo después de la columna O.</span></div>
+            <div class="tip amber"><span class="tip-icon">&#9888;</span><span>El script lee las columnas por posición: A a O en Mapa de clientes y A a F en Campaign mapping. Para sumar un dato nuevo, agréguenlo a la derecha, y no cambien el nombre de las pestañas.</span></div>
+            <div class="tip blue"><span class="tip-icon">&#9432;</span><span><strong>Campaign mapping:</strong> cada campaña nueva de una cuenta compartida (Plaza México, GS Sports, Guadalajara Open) se suma como fila nueva, con su Campaign id, y se elige el cliente en la columna F. Las que no van al reporte se marcan <strong>Excluir</strong>. Una campaña sin fila aparece en el reporte como <strong>Sin asignar</strong>.</span></div>
             <div class="sql-block">
           <div class="sql-head">
             <div class="sql-title">
@@ -1052,16 +1053,18 @@
             <button class="copy-btn" type="button" data-copy-target="sql-00">Copiar script</button>
           </div>
           <pre id="sql-00"><code>/**
- * Sincroniza la pestaña "Mapa de clientes" a la tabla nativa `test.client_map`.
+ * Sincroniza dos pestañas del sheet a BigQuery como tablas nativas:
+ *   "Mapa de clientes"  → test.client_map    (cuenta → cliente)
+ *   "Campaign mapping"  → test.campaign_map  (campaña → cliente, para cuentas compartidas)
  *
  * Vive dentro del sheet del mapa (Extensiones › Apps Script). Mismo patrón que la
  * guía de alarmas (guides.detrics.io/alarms, syncClientMapToBigQuery): cada corrida
- * hace CREATE OR REPLACE TABLE con las filas del sheet. v_client_map lee esta tabla.
+ * hace CREATE OR REPLACE TABLE con las filas de cada pestaña.
  *
  * Setup (una vez):
  *   1. Pegar este archivo en Extensiones › Apps Script del sheet.
  *   2. Servicios (+) › BigQuery API.
- *   3. Correr syncClientMapToBigQuery una vez (autoriza y crea la tabla).
+ *   3. Correr syncClientMapToBigQuery una vez (autoriza y crea las dos tablas).
  *   4. Correr installDailyTrigger una vez (corrida diaria a las 3 AM, antes del sync de Detrics).
  *
  * Quien instala necesita poder escribir en el dataset (BigQuery Data Editor) y crear jobs
@@ -1069,30 +1072,40 @@
  * Para aplicar un cambio del sheet al momento: menú Detrics › Sincronizar mapa ahora.
  */
 
-const CONFIG = {
-  projectId: 'inmediata-510016',
-  dataset: 'test',
-  table: 'client_map',
-  tab: 'Mapa de clientes',
-  headerRows: 2, // fila 1 = encabezados, fila 2 = descripciones
-  columns: [
-    'cliente',
-    'grupo_empresarial',
-    'google_ads_customer_id',
-    'dv360_advertiser_id',
-    'facebook_ads_account_id',
-    'facebook_insights_page_id',
-    'instagram_business_account_id',
-    'tiktok_ads_advertiser_id',
-    'tiktok_organic_handle',
-    'x_ads_account_id',
-    'linkedin_ads_account_id',
-    'ga4_property_id',
-    'notas',
-    'looker_link',
-    'campaign_name_prefix',
-  ],
-};
+const PROJECT_ID = 'inmediata-510016';
+const DATASET = 'test';
+
+const TABLES = [
+  {
+    table: 'client_map',
+    tab: 'Mapa de clientes',
+    headerRows: 2, // fila 1 = encabezados, fila 2 = descripciones
+    columns: [
+      'cliente',
+      'grupo_empresarial',
+      'google_ads_customer_id',
+      'dv360_advertiser_id',
+      'facebook_ads_account_id',
+      'facebook_insights_page_id',
+      'instagram_business_account_id',
+      'tiktok_ads_advertiser_id',
+      'tiktok_organic_handle',
+      'x_ads_account_id',
+      'linkedin_ads_account_id',
+      'ga4_property_id',
+      'notas',
+      'looker_link',
+      'campaign_name_prefix',
+    ],
+  },
+  {
+    table: 'campaign_map',
+    tab: 'Campaign mapping',
+    headerRows: 1,
+    keyColumn: 3, // una fila cuenta si tiene Campaign id
+    columns: ['grupo', 'plataforma', 'campana', 'campaign_id', 'cuenta', 'cliente'],
+  },
+];
 
 function onOpen() {
   SpreadsheetApp.getUi()
@@ -1102,21 +1115,27 @@ function onOpen() {
 }
 
 function syncClientMapToBigQuery() {
-  const sheet = SpreadsheetApp.getActive().getSheetByName(CONFIG.tab);
-  const nRows = sheet.getLastRow() - CONFIG.headerRows;
-  if (nRows &lt; 1) { console.log('Mapa vacío, no se sincroniza.'); return; }
+  TABLES.forEach(syncTab);
+}
+
+function syncTab(cfg) {
+  const sheet = SpreadsheetApp.getActive().getSheetByName(cfg.tab);
+  if (!sheet) { console.log(`Falta la pestaña "${cfg.tab}", no se sincroniza.`); return; }
+  const nRows = sheet.getLastRow() - cfg.headerRows;
+  if (nRows &lt; 1) { console.log(`"${cfg.tab}" vacía, no se sincroniza.`); return; }
 
   // getDisplayValues: los IDs largos quedan como texto (sin notación científica).
+  const key = cfg.keyColumn || 0;
   const rows = sheet
-    .getRange(CONFIG.headerRows + 1, 1, nRows, CONFIG.columns.length)
+    .getRange(cfg.headerRows + 1, 1, nRows, cfg.columns.length)
     .getDisplayValues()
-    .filter((r) =&gt; r[0].trim() !== '');
-  if (!rows.length) { console.log('Mapa vacío, no se sincroniza.'); return; }
+    .filter((r) =&gt; r[key].trim() !== '');
+  if (!rows.length) { console.log(`"${cfg.tab}" vacía, no se sincroniza.`); return; }
 
   const selects = rows.map((r) =&gt;
-    'SELECT ' + CONFIG.columns.map((c, i) =&gt; `${sqlStr(r[i])} AS ${c}`).join(', ')
+    'SELECT ' + cfg.columns.map((c, i) =&gt; `${sqlStr(r[i])} AS ${c}`).join(', ')
   );
-  const target = `\`${CONFIG.projectId}.${CONFIG.dataset}.${CONFIG.table}\``;
+  const target = `\`${PROJECT_ID}.${DATASET}.${cfg.table}\``;
   bqRun(`CREATE OR REPLACE TABLE ${target} AS\n${selects.join('\nUNION ALL\n')}`);
   console.log(`${rows.length} filas sincronizadas a ${target}.`);
 }
@@ -1136,12 +1155,12 @@ function sqlStr(v) {
 }
 
 function bqRun(sql) {
-  let res = BigQuery.Jobs.query({ query: sql, useLegacySql: false }, CONFIG.projectId);
+  let res = BigQuery.Jobs.query({ query: sql, useLegacySql: false }, PROJECT_ID);
   const jobId = res.jobReference.jobId;
   const location = res.jobReference.location;
   while (!res.jobComplete) {
     Utilities.sleep(1000);
-    res = BigQuery.Jobs.getQueryResults(CONFIG.projectId, jobId, { location });
+    res = BigQuery.Jobs.getQueryResults(PROJECT_ID, jobId, { location });
   }
 }
 </code></pre>
@@ -1406,42 +1425,59 @@ FROM `inmediata-510016.test.tiktok_ad_daily`;
 -- Master a grano fecha × cliente × grupo × platform × campaña × ad.
 -- Alimenta Views 1 / 2 / 3 del dashboard. Google: ad_* = NULL.
 --
--- Join: INNER contra v_client_map. Reglas:
---   1) Cuenta con UN solo cliente en el mapa (ej. Google 884-679-7888 = Nissan)
---      → siempre matchea; el prefijo si existe se ignora.
---   2) Cuenta compartida (más de un cliente para el mismo platform_account_id):
---      a) Si el cliente tiene campaign_name_prefix != '' en el mapa:
---         matchea solo las campañas cuyo nombre arranca con ese prefijo.
---      b) Si el prefijo está vacío → la fila se descarta y 99_control.sql lo flagea.
+-- Cliente de cada fila, en este orden:
+--   1) La campaña está en campaign_map (pestaña "Campaign mapping") → ese cliente.
+--      Sirve para cuentas compartidas (Plaza México: Dimitri / El Flaco / eventos propios;
+--      GS Sports: WTA GDL / LPGA) y para cuentas con eventos mezclados (Meta WTA GDL).
+--   2) Si no está y la cuenta tiene un solo cliente en el mapa → ese cliente.
+--   3) Si no → 'Sin asignar' (visible en el reporte, 99_control.sql la lista).
+--   Las campañas marcadas 'Excluir' no entran. Cuentas fuera del mapa tampoco.
+-- Reemplaza la regla por prefijo de nombre de campaña (2026-10-07): el match es por ID.
 --
--- Cuentas compartidas hoy (según el mapa):
---   google_ads 2162017617 → WTA Merida ("Merida") + WTA Queretaro ("Guadalajara" — Nyuman revisa) + WTA GDL ("")
---   google_ads 1941762954 → Dimitri Vegas ("Dimitri Vegas") + Luis Angel el flaco ("El Flaco")
---   meta        375641674250302 → Dimitri Vegas ("Dimitri Vegas") + Luis Angel el flaco ("El Flaco")
+-- Columnas GA4 (ga4_sessions, …) quedan NULL hasta 20_v_ga4_by_campaign.sql.
 --
--- Columnas GA4 (ga4_sessions, ga4_total_revenue, …) quedan NULL hasta que
--- destraben los property IDs. Están tipadas para que el schema no cambie
--- cuando se agreguen (solo cambia el SELECT, no la forma del master).
---
--- Dependencias: v_paid_ad_daily, v_client_map.
+-- Dependencias: v_paid_ad_daily, v_client_map, campaign_map.
 
 CREATE OR REPLACE VIEW `inmediata-510016.test.master_marketing_daily` AS
 WITH
-  mapping AS (
+  -- Cliente por cuenta: solo sirve si la cuenta tiene UN cliente en el mapa.
+  accounts AS (
     SELECT
       platform,
       platform_account_id,
-      cliente,
-      grupo,
-      campaign_name_prefix,
-      COUNT(*) OVER (PARTITION BY platform, platform_account_id) AS clients_in_account
+      COUNT(DISTINCT cliente) AS clients_in_account,
+      ANY_VALUE(cliente)      AS cliente_unico
     FROM `inmediata-510016.test.v_client_map`
     WHERE platform IN ('meta', 'google_ads', 'tiktok')
+    GROUP BY platform, platform_account_id
+  ),
+  -- Cliente por campaña: pestaña "Campaign mapping" del sheet (lo completa Inmediata).
+  campaigns AS (
+    SELECT TRIM(campaign_id) AS campaign_id, ANY_VALUE(TRIM(cliente)) AS cliente
+    FROM `inmediata-510016.test.campaign_map`
+    WHERE TRIM(IFNULL(campaign_id, '')) != '' AND TRIM(IFNULL(cliente, '')) != ''
+    GROUP BY 1
+  ),
+  grupos AS (
+    SELECT cliente, ANY_VALUE(grupo) AS grupo
+    FROM `inmediata-510016.test.v_client_map`
+    GROUP BY cliente
+  ),
+  assigned AS (
+    SELECT
+      p.*,
+      COALESCE(c.cliente, IF(a.clients_in_account = 1, a.cliente_unico, 'Sin asignar')) AS cliente
+    FROM `inmediata-510016.test.v_paid_ad_daily` p
+    INNER JOIN accounts a
+      ON  p.platform            = a.platform
+      AND p.platform_account_id = a.platform_account_id
+    LEFT JOIN campaigns c
+      ON CAST(p.campaign_id AS STRING) = c.campaign_id
   )
 SELECT
   p.date,
-  m.cliente,
-  m.grupo,
+  p.cliente,
+  g.grupo,
   p.platform,
   p.platform_account_id,
   p.account_name,
@@ -1479,19 +1515,9 @@ SELECT
   CAST(NULL AS FLOAT64) AS ga4_transactions,
   CAST(NULL AS STRING)  AS ga4_source_medium
 
-FROM `inmediata-510016.test.v_paid_ad_daily` p
-INNER JOIN mapping m
-  ON  p.platform            = m.platform
-  AND p.platform_account_id = m.platform_account_id
-WHERE
-  -- cuenta con un solo cliente → siempre matchea
-  m.clients_in_account = 1
-  -- cuenta compartida → solo si la campaña arranca con el prefijo del cliente
-  OR (
-    m.clients_in_account &gt; 1
-    AND m.campaign_name_prefix != ''
-    AND STARTS_WITH(LOWER(p.campaign_name), LOWER(m.campaign_name_prefix))
-  );
+FROM assigned p
+LEFT JOIN grupos g USING (cliente)
+WHERE p.cliente != 'Excluir';
 
 -- Chequeos esperados:
 --   SELECT cliente, SUM(spend) spend_total, SUM(messaging_conversations) msg
@@ -1499,7 +1525,7 @@ WHERE
 --   WHERE date BETWEEN DATE '2026-09-01' AND DATE '2026-09-30'
 --   GROUP BY cliente ORDER BY spend_total DESC;
 --
--- Esperado: 14 clientes aprox (menos los que queden afuera por prefijo faltante).
+-- Esperado: 14 clientes aprox, más 'Sin asignar' si quedan campañas sin mapear (ver 99_control #3).
 -- Nissan con messaging &gt; 0 solo después del resync con messaging en ad_daily.
 </code></pre>
         </div>
@@ -1515,27 +1541,50 @@ WHERE
 -- Master a grano fecha × cliente × campaña × ad_group × keyword × match_type.
 -- Alimenta View 4 del dashboard (Google Keywords).
 --
--- Misma lógica de prefijos que master_marketing_daily para cuentas compartidas.
--- Hoy la única cuenta compartida con keywords es Google 2162017617 (3 WTAs).
+-- Misma asignación de cliente que master_marketing_daily: campaign_map por ID de campaña,
+-- si no, el cliente único de la cuenta, si no 'Sin asignar'. 'Excluir' no entra.
 --
--- Dependencias: google_ads_keyword_daily, v_client_map.
+-- Dependencias: google_ads_keyword_daily, v_client_map, campaign_map.
 
 CREATE OR REPLACE VIEW `inmediata-510016.test.master_google_keywords_daily` AS
 WITH
-  mapping AS (
+  -- Cliente por cuenta: solo sirve si la cuenta tiene UN cliente en el mapa.
+  accounts AS (
     SELECT
+      platform,
       platform_account_id,
-      cliente,
-      grupo,
-      campaign_name_prefix,
-      COUNT(*) OVER (PARTITION BY platform_account_id) AS clients_in_account
+      COUNT(DISTINCT cliente) AS clients_in_account,
+      ANY_VALUE(cliente)      AS cliente_unico
     FROM `inmediata-510016.test.v_client_map`
     WHERE platform = 'google_ads'
+    GROUP BY platform, platform_account_id
+  ),
+  -- Cliente por campaña: pestaña "Campaign mapping" del sheet (lo completa Inmediata).
+  campaigns AS (
+    SELECT TRIM(campaign_id) AS campaign_id, ANY_VALUE(TRIM(cliente)) AS cliente
+    FROM `inmediata-510016.test.campaign_map`
+    WHERE TRIM(IFNULL(campaign_id, '')) != '' AND TRIM(IFNULL(cliente, '')) != ''
+    GROUP BY 1
+  ),
+  grupos AS (
+    SELECT cliente, ANY_VALUE(grupo) AS grupo
+    FROM `inmediata-510016.test.v_client_map`
+    GROUP BY cliente
+  ),
+  assigned AS (
+    SELECT
+      k.*,
+      COALESCE(c.cliente, IF(a.clients_in_account = 1, a.cliente_unico, 'Sin asignar')) AS cliente
+    FROM `inmediata-510016.test.google_ads_keyword_daily` k
+    INNER JOIN accounts a
+      ON k._detrics_account_id = a.platform_account_id
+    LEFT JOIN campaigns c
+      ON CAST(k.campaign_id AS STRING) = c.campaign_id
   )
 SELECT
   k.date,
-  m.cliente,
-  m.grupo,
+  k.cliente,
+  g.grupo,
   'google_ads'                                        AS platform,
   k._detrics_account_id                               AS platform_account_id,
   k.campaign_id,
@@ -1550,16 +1599,9 @@ SELECT
   k.ctr,
   k.average_cpc                                       AS cpc,
   k.conversions
-FROM `inmediata-510016.test.google_ads_keyword_daily` k
-INNER JOIN mapping m
-  ON k._detrics_account_id = m.platform_account_id
-WHERE
-  m.clients_in_account = 1
-  OR (
-    m.clients_in_account &gt; 1
-    AND m.campaign_name_prefix != ''
-    AND STARTS_WITH(LOWER(k.campaign_name), LOWER(m.campaign_name_prefix))
-  );
+FROM assigned k
+LEFT JOIN grupos g USING (cliente)
+WHERE k.cliente != 'Excluir';
 
 -- Chequeos esperados:
 --   SELECT cliente, COUNT(DISTINCT keyword_text) kws, SUM(spend) spend_total
@@ -1628,41 +1670,35 @@ WHERE c.platform IN ('meta', 'google_ads', 'tiktok')
   AND r.platform_account_id IS NULL;
 
 -- ============================================================================
--- 3) Cuentas compartidas con campañas que NO matchean ningún prefijo
---    (filas que caen fuera del master porque el prefijo del cliente no coincide
---     con el campaign_name — típicamente clientes nuevos en la misma cuenta
---     sin prefijo cargado en el mapa)
+-- 3) Campañas 'Sin asignar' en el master
+--    (cuenta compartida o con eventos mezclados y la campaña no está en la
+--     pestaña "Campaign mapping", o está sin cliente). Sumarlas al sheet.
 -- ============================================================================
-WITH shared_accounts AS (
-  SELECT platform, platform_account_id
-  FROM `inmediata-510016.test.v_client_map`
-  GROUP BY platform, platform_account_id
-  HAVING COUNT(*) &gt; 1
-),
-raw_campaigns AS (
-  SELECT 'meta' AS platform, _detrics_account_id AS platform_account_id,
-         campaign_name
-  FROM `inmediata-510016.test.meta_ad_daily`
-  UNION ALL
-  SELECT 'google_ads', _detrics_account_id, campaign_name
-  FROM `inmediata-510016.test.google_ads_campaign_daily`
-  UNION ALL
-  SELECT 'tiktok', _detrics_account_id, campaign_name
-  FROM `inmediata-510016.test.tiktok_ad_daily`
-)
-SELECT DISTINCT
-  rc.platform,
-  rc.platform_account_id,
-  rc.campaign_name,
-  'campaña en cuenta compartida sin prefijo que matchee' AS issue
-FROM raw_campaigns rc
-INNER JOIN shared_accounts sa USING (platform, platform_account_id)
-LEFT JOIN `inmediata-510016.test.v_client_map` c
-  ON  c.platform            = rc.platform
-  AND c.platform_account_id = rc.platform_account_id
-  AND c.campaign_name_prefix != ''
-  AND STARTS_WITH(LOWER(rc.campaign_name), LOWER(c.campaign_name_prefix))
-WHERE c.cliente IS NULL;
+SELECT
+  platform,
+  platform_account_id,
+  account_name,
+  campaign_id,
+  campaign_name,
+  MIN(date)        AS desde,
+  MAX(date)        AS hasta,
+  SUM(impressions) AS impressions,
+  SUM(spend)       AS spend
+FROM `inmediata-510016.test.master_marketing_daily`
+WHERE cliente = 'Sin asignar'
+GROUP BY 1, 2, 3, 4, 5
+ORDER BY spend DESC;
+
+-- ============================================================================
+-- 3b) Filas de campaign_map con un cliente que no existe en el mapa de clientes
+--     (typo o cliente nuevo sin fila en "Mapa de clientes"). 'Excluir' es válido.
+-- ============================================================================
+SELECT cm.campaign_id, cm.campana, cm.cliente
+FROM `inmediata-510016.test.campaign_map` cm
+LEFT JOIN (SELECT DISTINCT cliente FROM `inmediata-510016.test.v_client_map`) c
+  ON TRIM(cm.cliente) = c.cliente
+WHERE TRIM(IFNULL(cm.cliente, '')) NOT IN ('', 'Excluir')
+  AND c.cliente IS NULL;
 
 -- ============================================================================
 -- 4) Health check general del master
@@ -1720,7 +1756,7 @@ ORDER BY spend_total DESC;
           <label class="check"><input type="checkbox" data-k="r2-wta"><span class="box"></span><span class="txt">Cuenta de Meta 366227476108837 (WTA Querétaro) autorizada en Data Sources<small>Paso 2.2</small></span><span class="owner carat">Inmediata</span></label>
           <label class="check"><input type="checkbox" data-k="r2-ga4"><span class="box"></span><span class="txt">Propiedades de GA4 confirmadas: Sitio Angelópolis, antea.mx y PlaSa (491476089, dentro de la cuenta 357062931). Ya sincronizando 24 meses<small>Paso 6</small></span><span class="owner both">Inmediata y Detrics</span></label>
           <label class="check"><input type="checkbox" data-k="r2-ig"><span class="box"></span><span class="txt">Instagram de Ser Madre autorizado en Data Sources<small>Paso 2.2</small></span><span class="owner carat">Inmediata</span></label>
-          <label class="check"><input type="checkbox" data-k="r2-prefix"><span class="box"></span><span class="txt">Prefijos de campaña de WTA Querétaro y WTA GDL corregidos en la columna O del mapa<small>Paso 3</small></span><span class="owner carat">Inmediata</span></label>
+          <label class="check"><input type="checkbox" data-k="r2-prefix"><span class="box"></span><span class="txt">Columna <strong>Cliente</strong> completa en la pestaña Campaign mapping: 54 campañas de Plaza México, Guadalajara Open y GS Sports<small>Paso 7.1</small></span><span class="owner carat">Inmediata</span></label>
           <div class="check-group">Definimos juntos</div>
           <label class="check"><input type="checkbox" data-k="r2-ga4scope"><span class="box"></span><span class="txt">GA4: qué evento es conversión para cada cliente, si el utm_campaign coincide con el nombre de la campaña y si usan el autoetiquetado de Google Ads<small>Pasos 6 y 7</small></span><span class="owner both">Inmediata y Detrics</span></label>
           <label class="check"><input type="checkbox" data-k="r2-nissan"><span class="box"></span><span class="txt">KPI de la vista de leads de Nissan, además del costo por conversación de WhatsApp<small>Paso 8</small></span><span class="owner both">Inmediata y Detrics</span></label>
