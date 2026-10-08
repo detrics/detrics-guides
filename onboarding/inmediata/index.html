@@ -1435,8 +1435,9 @@ FROM `inmediata-510016.test.tiktok_ad_daily`;
 -- Reemplaza la regla por prefijo de nombre de campaña (2026-10-07): el match es por ID.
 --
 -- Columnas en español con espacios y tildes (nombres flexibles de BigQuery): Looker las muestra tal cual.
+-- Nombres flexibles: sin paréntesis, barras ni puntos (BigQuery no los acepta).
 -- Semana = lunes de cada semana (lunes a domingo); Mes = día 1 del mes.
--- Columnas GA4 (Sesiones (GA4), …) quedan NULL hasta 20_v_ga4_by_campaign.sql.
+-- Columnas GA4 (Sesiones GA4, …) quedan NULL hasta 20_v_ga4_by_campaign.sql.
 --
 -- Dependencias: v_paid_ad_daily, v_client_map, campaign_map.
 
@@ -1516,11 +1517,11 @@ SELECT
   p.video_views_p100                     AS `Reproducciones completas`,
 
   -- GA4 (completar en 20_v_ga4_by_campaign.sql cuando destraben IDs)
-  CAST(NULL AS FLOAT64)                  AS `Sesiones (GA4)`,
-  CAST(NULL AS FLOAT64)                  AS `Sesiones con interacción (GA4)`,
-  CAST(NULL AS FLOAT64)                  AS `Ingresos (GA4)`,
-  CAST(NULL AS FLOAT64)                  AS `Transacciones (GA4)`,
-  CAST(NULL AS STRING)                   AS `Fuente / medio (GA4)`
+  CAST(NULL AS FLOAT64)                  AS `Sesiones GA4`,
+  CAST(NULL AS FLOAT64)                  AS `Sesiones con interacción GA4`,
+  CAST(NULL AS FLOAT64)                  AS `Ingresos GA4`,
+  CAST(NULL AS FLOAT64)                  AS `Transacciones GA4`,
+  CAST(NULL AS STRING)                   AS `Fuente y medio GA4`
 
 FROM assigned p
 LEFT JOIN grupos g USING (cliente)

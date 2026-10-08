@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-IB6mVCoazdgnXONBaTLTJ0gk+oojinI7Hmq4/pQ0l4M='; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://storage.googleapis.com; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-0hbU7odeSDbUveG+cwrupLoKCmxTMWvpqc6g2/XaS1M='; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://storage.googleapis.com; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="robots" content="noindex, nofollow">
 <title>Onboarding VMP: dashboard llave en mano en BigQuery</title>
@@ -600,6 +600,40 @@
     .step, .mile, .session, .gantt-wrap, .contact { break-inside: avoid; }
     .copy-btn { display: none; }
   }
+  .todo-call { margin-top: 20px; }
+  .todo-call h5 { font-size: 15px; font-weight: 700; color: var(--ink); margin-bottom: 8px; }
+  .sql-block {
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    margin-top: 14px;
+    overflow: hidden;
+  }
+  .sql-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--gray-200);
+    background: var(--surface);
+  }
+  .sql-title { flex: 1; }
+  .sql-title strong { display: block; font-size: 14px; color: var(--ink); margin-bottom: 2px; }
+  .sql-title span { font-size: 13px; color: var(--gray-600); line-height: 1.5; }
+  .sql-head .copy-btn { align-self: center; }
+  .sql-block pre {
+    margin: 0;
+    padding: 14px 16px;
+    overflow-x: auto;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    line-height: 1.55;
+    color: var(--ink);
+    background: var(--gray-50);
+    max-height: 320px;
+    overflow-y: auto;
+  }
+  .sql-block pre code { font-family: inherit; background: none; border: 0; padding: 0; color: inherit; font-size: inherit; }
 </style>
 </head>
 <body>
@@ -625,7 +659,6 @@
         <img src="https://storage.googleapis.com/detrics-static/public/img/tiktok-logo.png" alt="TikTok Ads">
         <img src="https://storage.googleapis.com/detrics-static/public/img/pinterest-logo.png" alt="Pinterest Ads">
         <img src="https://storage.googleapis.com/detrics-static/public/img/tienda-nube-logo.png" alt="Tiendanube">
-        <img src="https://storage.googleapis.com/detrics-static/public/img/mercado-libre-logo.png" alt="Mercado Ads y Mercado Libre Orgánico">
       </div>
       <span class="dests">
         <span class="arrow" aria-hidden="true">&rarr;</span>
@@ -796,7 +829,127 @@
         </div>
         <p style="margin-top:12px;">En cada celda va el <strong>nombre o el ID de la cuenta publicitaria</strong> (o cuentas, si son varias) de esa marca en esa fuente. Facebook e Instagram siguen la misma lógica que Meta Ads: si comparten cuentas, se anotan una vez. Si una fuente no aplica para una marca, se deja vacía.</p>
         <div class="tip blue"><span class="tip-icon">&#9432;</span><span>Si una cuenta publicitaria se comparte entre dos marcas, escribilas separadas por coma en la misma celda y avisanos en el kickoff. En la consolidación separamos los datos por campaña.</span></div>
-        <div class="tip amber"><span class="tip-icon">&#9888;</span><span>Meta Ads y Mercado Libre son las que hoy tienen más cuentas fuera del BigQuery, así que conviene revisarlas primero.</span></div>
+        <div class="tip amber"><span class="tip-icon">&#9888;</span><span>Meta Ads es la fuente que hoy tiene más cuentas fuera del BigQuery, así que conviene revisarla primero.</span></div>
+        <ol class="substeps" style="margin-top:20px;">
+          <li data-n="2.1">
+            <strong>Álvaro instala el Apps Script del mapa de marcas</strong>
+            El script copia la pestaña <strong>Mapa de marcas</strong> a la tabla <code>mapa_marcas</code> del BigQuery de VMP todos los días a las 3 AM, antes de las transferencias. Queda a nombre de Álvaro y corre con su cuenta, así sigue funcionando cuando Detrics ya no tenga acceso al proyecto.
+            <ol>
+              <li>Abrir el sheet <a href="https://docs.google.com/spreadsheets/d/1NOwp_at_0R6gGIGI-fZ2xMxFH4WJpzWpTKkCFux-zpI/edit" target="_blank" rel="noopener">Mapa de marcas</a> con la cuenta de Álvaro, con acceso al proyecto <code>analytics-beauty-web</code>.</li>
+              <li>Ir a <strong>Extensiones › Apps Script</strong>. El editor se abre en una pestaña nueva. Borrar el código de ejemplo (<code>function myFunction</code>).</li>
+              <li>Copiar el script con el botón de abajo, pegarlo en el editor y guardar con <strong>Ctrl + S</strong>.</li>
+              <li>En la barra izquierda, clic en <strong>Servicios (+)</strong>, elegir <strong>BigQuery API</strong> y clic en <strong>Agregar</strong>.</li>
+              <li>En el selector de función de arriba, elegir <code>syncClientMapToBigQuery</code> y clic en <strong>Ejecutar</strong>. Google pide autorización: elegir la cuenta de Álvaro, <strong>Configuración avanzada › Ir a (nombre del proyecto)</strong> y <strong>Permitir</strong>.</li>
+              <li>Abajo, en el <strong>Registro de ejecución</strong>, aparece una línea con la cantidad de filas sincronizadas a <code>mapa_marcas</code>. La tabla ya está en BigQuery.</li>
+              <li>Elegir <code>installDailyTrigger</code> y clic en <strong>Ejecutar</strong>. En <strong>Activadores</strong> (el ícono de reloj de la barra izquierda) aparece <code>syncClientMapToBigQuery</code>, diario, de 3 a 4 AM.</li>
+              <li>Volver al sheet y recargarlo. Aparece el menú <strong>Detrics › Sincronizar mapa ahora</strong>, para ver un cambio del mapa en el dashboard sin esperar a la corrida del día siguiente.</li>
+            </ol>
+            <div class="tip amber"><span class="tip-icon">&#9888;</span><span>El script lee las columnas por posición, de la A a la N. Para sumar un dato nuevo, agréguenlo a la derecha, y no cambien el nombre de la pestaña.</span></div>
+            <div class="sql-block">
+              <div class="sql-head">
+                <div class="sql-title">
+                  <strong>Apps Script · Mapa de marcas a BigQuery</strong>
+                  <span>Se pega en <strong>Extensiones › Apps Script</strong> del sheet. Escribe la tabla <code>mapa_marcas</code> en el dataset <code>detrics_raw</code>.</span>
+                </div>
+                <button class="copy-btn" type="button" data-copy-target="gs-mapa">Copiar script</button>
+              </div>
+              <pre id="gs-mapa"><code>/**
+ * Sincroniza la pestaña "Mapa de marcas" a la tabla nativa `detrics_raw.mapa_marcas`.
+ *
+ * Vive dentro del sheet del mapa (Extensiones › Apps Script). Mismo patrón que la
+ * guía de alarmas (guides.detrics.io/alarms, syncClientMapToBigQuery): cada corrida
+ * hace CREATE OR REPLACE TABLE con las filas del sheet. v_mapa_cuentas y v_mapa_prefijos
+ * (masters/00_funciones_y_mapa.sql) leen esta tabla.
+ *
+ * Setup (una vez):
+ *   1. Pegar este archivo en Extensiones › Apps Script del sheet.
+ *   2. Servicios (+) › BigQuery API.
+ *   3. Correr syncClientMapToBigQuery una vez (autoriza y crea la tabla).
+ *   4. Correr installDailyTrigger una vez (corrida diaria a las 3 AM, antes de los transfers de Detrics).
+ *
+ * Quien instala necesita poder escribir en el dataset (BigQuery Data Editor) y crear jobs
+ * en el proyecto (BigQuery Job User o BigQuery User). El trigger corre con su cuenta.
+ * Para aplicar un cambio del sheet al momento: menú Detrics › Sincronizar mapa ahora.
+ */
+
+const CONFIG = {
+  projectId: 'analytics-beauty-web',
+  dataset: 'detrics_raw',
+  table: 'mapa_marcas',
+  tab: 'Mapa de marcas',
+  headerRows: 2, // fila 1 = encabezados, fila 2 = descripciones
+  columns: [
+    'marca',
+    'meta_ads',
+    'google_ads',
+    'tiktok_ads',
+    'pinterest_ads',
+    'ga4',
+    'tiendanube',
+    'mercado_libre',
+    'facebook_insights',
+    'instagram_insights',
+    'search_console',
+    'merchant_center',
+    'prefijo_campanas',
+    'notas',
+  ],
+};
+
+function onOpen() {
+  SpreadsheetApp.getUi()
+    .createMenu('Detrics')
+    .addItem('Sincronizar mapa ahora', 'syncClientMapToBigQuery')
+    .addToUi();
+}
+
+function syncClientMapToBigQuery() {
+  const sheet = SpreadsheetApp.getActive().getSheetByName(CONFIG.tab);
+  const nRows = sheet.getLastRow() - CONFIG.headerRows;
+  if (nRows &lt; 1) { console.log('Mapa vacío, no se sincroniza.'); return; }
+
+  // getDisplayValues: los IDs largos quedan como texto (sin notación científica).
+  const rows = sheet
+    .getRange(CONFIG.headerRows + 1, 1, nRows, CONFIG.columns.length)
+    .getDisplayValues()
+    .filter((r) =&gt; r[0].trim() !== '');
+  if (!rows.length) { console.log('Mapa vacío, no se sincroniza.'); return; }
+
+  const selects = rows.map((r) =&gt;
+    'SELECT ' + CONFIG.columns.map((c, i) =&gt; `${sqlStr(r[i])} AS ${c}`).join(', ')
+  );
+  const target = `\`${CONFIG.projectId}.${CONFIG.dataset}.${CONFIG.table}\``;
+  bqRun(`CREATE OR REPLACE TABLE ${target} AS\n${selects.join('\nUNION ALL\n')}`);
+  console.log(`${rows.length} filas sincronizadas a ${target}.`);
+}
+
+function installDailyTrigger() {
+  ScriptApp.getProjectTriggers()
+    .filter((t) =&gt; t.getHandlerFunction() === 'syncClientMapToBigQuery')
+    .forEach((t) =&gt; ScriptApp.deleteTrigger(t));
+  ScriptApp.newTrigger('syncClientMapToBigQuery').timeBased().everyDays(1).atHour(3).create();
+}
+
+// Celda vacía → NULL tipado como STRING, así una columna toda vacía no queda INT64.
+function sqlStr(v) {
+  const s = String(v).trim();
+  if (s === '') return 'CAST(NULL AS STRING)';
+  return "'" + s.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n') + "'";
+}
+
+function bqRun(sql) {
+  let res = BigQuery.Jobs.query({ query: sql, useLegacySql: false }, CONFIG.projectId);
+  const jobId = res.jobReference.jobId;
+  const location = res.jobReference.location;
+  while (!res.jobComplete) {
+    Utilities.sleep(1000);
+    res = BigQuery.Jobs.getQueryResults(CONFIG.projectId, jobId, { location });
+  }
+}
+</code></pre>
+            </div>
+          </li>
+        </ol>
       </div>
     </div>
 
@@ -869,6 +1022,32 @@
       </div>
     </div>
 
+    <div class="step">
+      <div class="step-body">
+        <div class="todo-call" style="margin-top:0">
+          <h5>Pendientes de la reunión 2 · jueves 8/10</h5>
+          <div class="checklist todo">
+          <div class="check-group">Álvaro</div>
+          <label class="check"><input type="checkbox" data-k="r2-script"><span class="box"></span><span class="txt">Apps Script del mapa de marcas instalado con su cuenta<small>Paso 2.1</small></span><span class="owner carat">VMP</span></label>
+          <label class="check"><input type="checkbox" data-k="r2-map"><span class="box"></span><span class="txt">Mapa de marcas completo, con los prefijos de las campañas multimarca<small>Paso 2</small></span><span class="owner carat">VMP</span></label>
+          <label class="check"><input type="checkbox" data-k="r2-looker"><span class="box"></span><span class="txt">Informe de Looker Studio en blanco compartido como Editor con los tres correos de Detrics<small>Paso 3.4</small></span><span class="owner carat">VMP</span></label>
+          <label class="check"><input type="checkbox" data-k="r2-utm"><span class="box"></span><span class="txt">Qué pone hoy la agencia en utm_content y utm_term de cada anuncio. Define cuánto podemos cruzar la venta a nivel creatividad en Meta y TikTok</span><span class="owner carat">VMP</span></label>
+          <label class="check"><input type="checkbox" data-k="r2-naming"><span class="box"></span><span class="txt">Reenviar el formato nuevo de nombres de campaña que le pasó a la agencia</span><span class="owner carat">VMP</span></label>
+          <label class="check"><input type="checkbox" data-k="r2-stores"><span class="box"></span><span class="txt">Tienda de Mayoristas conectada en Detrics, y confirmar si ACF tiene tienda propia</span><span class="owner carat">VMP</span></label>
+          <div class="check-group">Definimos juntos</div>
+          <label class="check"><input type="checkbox" data-k="r2-products"><span class="box"></span><span class="txt">A qué marca van las campañas por producto: GHS - Search - Acido Azelaico, Campaña Rulos y Search Genérica Capilar<small>Paso 2</small></span><span class="owner both">VMP y Detrics</span></label>
+          <label class="check"><input type="checkbox" data-k="r2-gads"><span class="box"></span><span class="txt">Las 7 campañas de Google que no están en la cuenta 2092904876: 326 órdenes de septiembre, la mayor (22538711981) con 231 órdenes en /productos/vitamina-c. ¿Pausadas, borradas o de otra cuenta?</span><span class="owner both">VMP y Detrics</span></label>
+          <label class="check"><input type="checkbox" data-k="r2-old"><span class="box"></span><span class="txt">Cuentas que quedan afuera: las tres VMP 2023 de solo lectura, ACF Profesional, ACF Europa y la segunda cuenta de TikTok (7613425728436158465). Confirmar que no tienen inversión actual</span><span class="owner both">VMP y Detrics</span></label>
+          <label class="check"><input type="checkbox" data-k="r2-pinterest"><span class="box"></span><span class="txt">Moneda de la cuenta de Pinterest: el campo dice dólares y los montos parecen pesos</span><span class="owner both">VMP y Detrics</span></label>
+          <div class="check-group">Detrics</div>
+          <label class="check"><input type="checkbox" data-k="r2-images"><span class="box"></span><span class="txt">Imágenes de los anuncios de Meta y TikTok guardadas en el BigQuery de VMP, con la recarga histórica terminada<small>Paso 4</small></span><span class="owner detrics">Detrics</span></label>
+          <label class="check"><input type="checkbox" data-k="r2-tn"><span class="box"></span><span class="txt">Contarle a Álvaro que la diferencia de órdenes de Tiendanube quedó resuelta<small>Paso 4</small></span><span class="owner detrics">Detrics</span></label>
+          <label class="check"><input type="checkbox" data-k="r2-design"><span class="box"></span><span class="txt">Mostrar el diseño del dashboard: Resumen, Campañas, Anuncios, Ventas, Social y Otras fuentes<small>Paso 5</small></span><span class="owner detrics">Detrics</span></label>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- STEPS 4-5 -->
     <div class="phase-head"><h3>Semanas 1 y 2</h3><span class="owner detrics">Equipo de Detrics</span></div>
     <div class="step">
@@ -880,7 +1059,7 @@
         <ul class="plain">
           <li>Unimos las 12 fuentes en tablas con las mismas métricas por plataforma, adentro del BigQuery de VMP.</li>
           <li>Cruzamos con el mapa de marcas: cada cuenta publicitaria queda asignada a ACF, NIC o Beauty Web.</li>
-          <li>Sumamos las cuentas de Meta Ads de ACF y NIC y las de Mercado Libre, que hoy quedaban afuera del BigQuery original.</li>
+          <li>Sumamos las cuentas de Meta Ads de ACF y NIC, que hoy quedaban afuera del BigQuery original.</li>
           <li>Validamos los números contra los reportes que Álvaro consulta hoy.</li>
         </ul>
         <p>Cierra con la <strong>reunión 2</strong>: revisamos las tablas consolidadas con Álvaro y confirmamos el mapa de marcas.</p>
@@ -943,6 +1122,7 @@
       <label class="check"><input type="checkbox" data-k="map"><span class="box"></span><span class="txt">Mapa de marcas de ACF, NIC y Beauty Web completado y compartido con support@detrics.io<small>Paso 2</small></span><span class="owner carat">VMP</span></label>
       <label class="check"><input type="checkbox" data-k="workspace"><span class="box"></span><span class="txt">support@detrics.io invitado al workspace de VMP en Detrics<small>Paso 3.2</small></span><span class="owner carat">VMP</span></label>
       <label class="check"><input type="checkbox" data-k="iam"><span class="box"></span><span class="txt">Roles MCP Tool User, BigQuery Job User y BigQuery Data Editor para support@, tomas@ e ignacio.goyanes@detrics.io<small>Paso 3.3</small></span><span class="owner carat">VMP</span></label>
+      <label class="check"><input type="checkbox" data-k="mapsync"><span class="box"></span><span class="txt">Apps Script del mapa de marcas instalado: sincroniza el mapa a BigQuery todos los días<small>Paso 2.1</small></span><span class="owner carat">VMP</span></label>
       <label class="check"><input type="checkbox" data-k="looker"><span class="box"></span><span class="txt">Informe de Looker Studio en blanco creado y compartido como Editor con support@, tomas@ e ignacio.goyanes@detrics.io<small>Paso 3.4</small></span><span class="owner carat">VMP</span></label>
       <div class="check-group">Semanas 1 y 2 · Detrics</div>
       <label class="check"><input type="checkbox" data-k="tables"><span class="box"></span><span class="txt">Tablas consolidadas por marca armadas y validadas en la reunión 2<small>Paso 4</small></span><span class="owner both">VMP y Detrics</span></label>
@@ -986,10 +1166,15 @@
 </footer>
 
 <script>
-  // copy buttons
+  // copy buttons: either data-copy="literal" or data-copy-target="elementId"
   document.querySelectorAll('.copy-btn').forEach(function (btn) {
     btn.addEventListener('click', function () {
       var text = btn.getAttribute('data-copy');
+      if (!text) {
+        var tid = btn.getAttribute('data-copy-target');
+        if (tid) { var el = document.getElementById(tid); if (el) text = el.innerText; }
+      }
+      if (!text) return;
       var done = function () {
         var orig = btn.textContent;
         btn.textContent = 'Copiado';
@@ -1005,13 +1190,14 @@
     var state = {};
     try { state = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { state = {}; }
     var boxes = document.querySelectorAll('#list input');
+    var all = document.querySelectorAll('#list input, .todo input');
     document.getElementById('total').textContent = boxes.length;
     function count() {
       var n = 0;
       boxes.forEach(function (b) { if (b.checked) n++; });
       document.getElementById('done').textContent = n;
     }
-    boxes.forEach(function (b) {
+    all.forEach(function (b) {
       b.checked = !!state[b.dataset.k];
       b.addEventListener('change', function () {
         state[b.dataset.k] = b.checked;
