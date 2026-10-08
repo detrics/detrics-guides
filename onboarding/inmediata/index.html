@@ -1482,7 +1482,7 @@ SELECT
   DATE_TRUNC(p.date, WEEK(MONDAY))       AS Semana,
   DATE_TRUNC(p.date, MONTH)              AS Mes,
   p.cliente                              AS Cliente,
-  g.grupo                                AS `Grupo empresarial`,
+  g.grupo                                AS Grupo_empresarial,
   CASE p.platform
     WHEN 'meta' THEN 'Meta'
     WHEN 'google_ads' THEN 'Google Ads'
@@ -1490,45 +1490,45 @@ SELECT
     ELSE p.platform
   END                                    AS Plataforma,
   p.account_name                         AS Cuenta,
-  p.platform_account_id                  AS `ID de cuenta`,
+  p.platform_account_id                  AS ID_de_cuenta,
   p.currency                             AS Moneda,
-  p.campaign_name                        AS `Campaña`,
-  p.campaign_id                          AS `ID de campaña`,
-  p.adset_name                           AS `Conjunto de anuncios`,
-  p.adset_id                             AS `ID de conjunto`,
+  p.campaign_name                        AS Campana,
+  p.campaign_id                          AS ID_de_campana,
+  p.adset_name                           AS Conjunto_de_anuncios,
+  p.adset_id                             AS ID_de_conjunto,
   p.ad_name                              AS Anuncio,
-  p.ad_id                                AS `ID de anuncio`,
+  p.ad_id                                AS ID_de_anuncio,
   p.ad_image_url                         AS Creativo,
-  p.ad_video_url                         AS `Video del creativo`,
-  p.ad_preview_link                      AS `Vista previa`,
+  p.ad_video_url                         AS Video_del_creativo,
+  p.ad_preview_link                      AS Vista_previa,
   p.ad_creative_type                     AS Formato,
-  p.ad_destination_url                   AS `URL de destino`,
-  p.ad_copy                              AS `Texto del anuncio`,
+  p.ad_destination_url                   AS URL_de_destino,
+  p.ad_copy                              AS Texto_del_anuncio,
 
   -- Solo métricas sumables. CTR, CPC, CPM, ROAS y costos por resultado se calculan en Looker.
-  p.spend                                AS `Inversión`,
+  p.spend                                AS Inversion,
   p.impressions                          AS Impresiones,
   p.clicks                               AS Clics,
   p.purchases                            AS Compras,
-  p.purchase_value                       AS `Valor de compras`,
-  p.messaging_conversations              AS `Conversaciones iniciadas`,
+  p.purchase_value                       AS Valor_de_compras,
+  p.messaging_conversations              AS Conversaciones_iniciadas,
   p.conversions                          AS Conversiones,
-  p.conversions_value                    AS `Valor de conversiones`,
-  p.video_views_p100                     AS `Reproducciones completas`,
+  p.conversions_value                    AS Valor_de_conversiones,
+  p.video_views_p100                     AS Reproducciones_completas,
 
   -- GA4 (completar en 20_v_ga4_by_campaign.sql cuando destraben IDs)
-  CAST(NULL AS FLOAT64)                  AS `Sesiones GA4`,
-  CAST(NULL AS FLOAT64)                  AS `Sesiones con interacción GA4`,
-  CAST(NULL AS FLOAT64)                  AS `Ingresos GA4`,
-  CAST(NULL AS FLOAT64)                  AS `Transacciones GA4`,
-  CAST(NULL AS STRING)                   AS `Fuente y medio GA4`
+  CAST(NULL AS FLOAT64)                  AS Sesiones_GA4,
+  CAST(NULL AS FLOAT64)                  AS Sesiones_con_interaccion_GA4,
+  CAST(NULL AS FLOAT64)                  AS Ingresos_GA4,
+  CAST(NULL AS FLOAT64)                  AS Transacciones_GA4,
+  CAST(NULL AS STRING)                   AS Fuente_y_medio_GA4
 
 FROM assigned p
 LEFT JOIN grupos g USING (cliente)
 WHERE p.cliente != 'Excluir';
 
 -- Chequeos esperados:
---   SELECT Cliente, SUM(`Inversión`) inversion, SUM(`Conversaciones iniciadas`) conversaciones
+--   SELECT Cliente, SUM(Inversion) inversion, SUM(Conversaciones_iniciadas) conversaciones
 --   FROM master_marketing_daily
 --   WHERE Fecha BETWEEN DATE '2026-09-01' AND DATE '2026-09-30'
 --   GROUP BY Cliente ORDER BY inversion DESC;
@@ -1596,14 +1596,14 @@ SELECT
   DATE_TRUNC(k.date, WEEK(MONDAY))       AS Semana,
   DATE_TRUNC(k.date, MONTH)              AS Mes,
   k.cliente                              AS Cliente,
-  g.grupo                                AS `Grupo empresarial`,
+  g.grupo                                AS Grupo_empresarial,
   'Google Ads'                           AS Plataforma,
-  k._detrics_account_id                  AS `ID de cuenta`,
-  k.campaign_name                        AS `Campaña`,
-  k.campaign_id                          AS `ID de campaña`,
-  k.ad_group_name                        AS `Grupo de anuncios`,
-  k.ad_group_id                          AS `ID de grupo de anuncios`,
-  k.keyword_text                         AS `Palabra clave`,
+  k._detrics_account_id                  AS ID_de_cuenta,
+  k.campaign_name                        AS Campana,
+  k.campaign_id                          AS ID_de_campana,
+  k.ad_group_name                        AS Grupo_de_anuncios,
+  k.ad_group_id                          AS ID_de_grupo_de_anuncios,
+  k.keyword_text                         AS Palabra_clave,
   CASE UPPER(k.keyword_match_type)
     WHEN 'EXACT'  THEN 'Exacta'
     WHEN 'PHRASE' THEN 'Frase'
@@ -1612,7 +1612,7 @@ SELECT
   END                                    AS Concordancia,
 
   -- Solo métricas sumables. CTR, CPC y costo por conversión se calculan en Looker.
-  k.cost_micros                          AS `Inversión`,
+  k.cost_micros                          AS Inversion,
   k.impressions                          AS Impresiones,
   k.clicks                               AS Clics,
   k.conversions                          AS Conversiones
@@ -1621,7 +1621,7 @@ LEFT JOIN grupos g USING (cliente)
 WHERE k.cliente != 'Excluir';
 
 -- Chequeos esperados:
---   SELECT Cliente, COUNT(DISTINCT `Palabra clave`) kws, SUM(`Inversión`) inversion
+--   SELECT Cliente, COUNT(DISTINCT Palabra_clave) kws, SUM(Inversion) inversion
 --   FROM master_google_keywords_daily
 --   WHERE Fecha BETWEEN DATE '2026-09-01' AND DATE '2026-09-30'
 --   GROUP BY Cliente ORDER BY inversion DESC;
@@ -1693,14 +1693,14 @@ WHERE c.platform IN ('meta', 'google_ads', 'tiktok')
 -- ============================================================================
 SELECT
   Plataforma,
-  `ID de cuenta`,
+  ID_de_cuenta,
   Cuenta,
-  `ID de campaña`,
-  `Campaña`,
+  ID_de_campana,
+  Campana,
   MIN(Fecha)        AS desde,
   MAX(Fecha)        AS hasta,
   SUM(Impresiones)  AS impresiones,
-  SUM(`Inversión`) AS inversion
+  SUM(Inversion) AS inversion
 FROM `inmediata-510016.test.master_marketing_daily`
 WHERE Cliente = 'Sin asignar'
 GROUP BY 1, 2, 3, 4, 5
@@ -1723,16 +1723,16 @@ WHERE TRIM(IFNULL(cm.cliente, '')) NOT IN ('', 'Excluir')
 SELECT
   Plataforma,
   COUNT(DISTINCT Cliente)                                    AS clientes,
-  COUNT(DISTINCT `ID de cuenta`)                            AS cuentas,
-  COUNT(DISTINCT `ID de campaña`)                           AS campanas,
+  COUNT(DISTINCT ID_de_cuenta)                            AS cuentas,
+  COUNT(DISTINCT ID_de_campana)                           AS campanas,
   COUNT(*)                                                   AS filas,
   MIN(Fecha)                                                 AS desde,
   MAX(Fecha)                                                 AS hasta,
-  SUM(`Inversión`)                                          AS inversion_total,
+  SUM(Inversion)                                          AS inversion_total,
   SUM(Impresiones)                                           AS impresiones_total,
   SUM(Clics)                                                 AS clics_total,
   SUM(COALESCE(Compras, Conversiones))                       AS resultados_total,
-  SUM(`Conversaciones iniciadas`)                           AS conversaciones_total
+  SUM(Conversaciones_iniciadas)                           AS conversaciones_total
 FROM `inmediata-510016.test.master_marketing_daily`
 GROUP BY Plataforma
 ORDER BY inversion_total DESC;
@@ -1742,9 +1742,9 @@ ORDER BY inversion_total DESC;
 -- ============================================================================
 SELECT
   Cliente,
-  COUNT(DISTINCT `Palabra clave`) AS keywords_unicas,
+  COUNT(DISTINCT Palabra_clave) AS keywords_unicas,
   COUNT(DISTINCT Concordancia)    AS concordancias,
-  SUM(`Inversión`)               AS inversion_total,
+  SUM(Inversion)               AS inversion_total,
   SUM(Clics)                      AS clics_total,
   SUM(Conversiones)               AS conversiones_total
 FROM `inmediata-510016.test.master_google_keywords_daily`
