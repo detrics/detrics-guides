@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-0hbU7odeSDbUveG+cwrupLoKCmxTMWvpqc6g2/XaS1M='; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://storage.googleapis.com; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-gRMcPvqVU6Cy2z7IyOFu1xYowS8Qq+Ze14Sih9+vk0A='; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://storage.googleapis.com; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="robots" content="noindex, nofollow">
 <title>Onboarding VMP: dashboard llave en mano en BigQuery</title>
@@ -1028,7 +1028,7 @@ function bqRun(sql) {
           <h5>Pendientes de la reunión 2 · jueves 8/10</h5>
           <div class="checklist todo">
           <div class="check-group">Álvaro</div>
-          <label class="check"><input type="checkbox" data-k="r2-script"><span class="box"></span><span class="txt">Apps Script del mapa de marcas instalado con su cuenta<small>Paso 2.1</small></span><span class="owner carat">VMP</span></label>
+          <label class="check"><input type="checkbox" data-k="r2-script" data-done checked><span class="box"></span><span class="txt">Apps Script del mapa de marcas instalado con su cuenta<small>Paso 2.1</small></span><span class="owner carat">VMP</span></label>
           <label class="check"><input type="checkbox" data-k="r2-map"><span class="box"></span><span class="txt">Mapa de marcas completo, con los prefijos de las campañas multimarca<small>Paso 2</small></span><span class="owner carat">VMP</span></label>
           <label class="check"><input type="checkbox" data-k="r2-looker"><span class="box"></span><span class="txt">Informe de Looker Studio en blanco compartido como Editor con los tres correos de Detrics<small>Paso 3.4</small></span><span class="owner carat">VMP</span></label>
           <label class="check"><input type="checkbox" data-k="r2-utm"><span class="box"></span><span class="txt">Qué pone hoy la agencia en utm_content y utm_term de cada anuncio. Define cuánto podemos cruzar la venta a nivel creatividad en Meta y TikTok</span><span class="owner carat">VMP</span></label>
@@ -1040,7 +1040,7 @@ function bqRun(sql) {
           <label class="check"><input type="checkbox" data-k="r2-utm-nomatch"><span class="box"></span><span class="txt">Links de anuncios con un utm_campaign que no coincide con ninguna campaña: 1.503 órdenes de septiembre, ARS 121 M, casi todas de Meta con el nombre viejo de una campaña renombrada. Completar la campaña real de cada una en la pestaña <a href="https://docs.google.com/spreadsheets/d/1NOwp_at_0R6gGIGI-fZ2xMxFH4WJpzWpTKkCFux-zpI/edit#gid=143912495" target="_blank" rel="noopener">UTM sin coincidencia</a>. La solución de fondo es que la agencia use {{campaign.name}} en utm_campaign</span><span class="owner both">VMP y Detrics</span></label>
           <label class="check"><input type="checkbox" data-k="r2-validate"><span class="box"></span><span class="txt">Validar los números de septiembre en el Looker de prueba contra lo que Álvaro ve hoy: inversión, impresiones y clics por plataforma, y órdenes y facturación de Tiendanube por estado de la orden y del pago</span><span class="owner both">VMP y Detrics</span></label>
           <div class="check-group">Detrics</div>
-          <label class="check"><input type="checkbox" data-k="r2-images"><span class="box"></span><span class="txt">Imágenes de los anuncios de Meta y TikTok guardadas en el BigQuery de VMP, con la recarga histórica terminada<small>Paso 4</small></span><span class="owner detrics">Detrics</span></label>
+          <label class="check"><input type="checkbox" data-k="r2-images" data-done checked><span class="box"></span><span class="txt">Imágenes de los anuncios de Meta y TikTok guardadas en el BigQuery de VMP, con la recarga histórica terminada<small>Paso 4</small></span><span class="owner detrics">Detrics</span></label>
           <label class="check"><input type="checkbox" data-k="r2-design"><span class="box"></span><span class="txt">Mostrar el diseño del dashboard: Resumen, Campañas, Anuncios, Ventas, Social y Otras fuentes<small>Paso 5</small></span><span class="owner detrics">Detrics</span></label>
           </div>
         </div>
@@ -1198,7 +1198,7 @@ function bqRun(sql) {
       document.getElementById('done').textContent = n;
     }
     all.forEach(function (b) {
-      b.checked = !!state[b.dataset.k];
+      b.checked = b.hasAttribute('data-done') || !!state[b.dataset.k];
       b.addEventListener('change', function () {
         state[b.dataset.k] = b.checked;
         try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
