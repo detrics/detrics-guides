@@ -1036,7 +1036,36 @@
               <li>Abrir el sheet <a href="https://docs.google.com/spreadsheets/d/1tvtqVpj30VRhtQXCvYEKzVgI2znOpWyM9gR9LcNBku8/edit" target="_blank" rel="noopener">Mapa de clientes</a> con la cuenta de Jonathan, la dueña del proyecto <code>inmediata-510016</code>.</li>
               <li>Ir a <strong>Extensiones › Apps Script</strong>. El editor se abre en una pestaña nueva. Borrar el código de ejemplo (<code>function myFunction</code>).</li>
               <li>Copiar el script con el botón de abajo, pegarlo en el editor y guardar con <strong>Ctrl + S</strong>.</li>
-              <li>En la barra izquierda, clic en <strong>Servicios (+)</strong>, elegir <strong>BigQuery API</strong> y clic en <strong>Agregar</strong>.</li>
+              <li>En la barra izquierda, clic en <strong>Servicios (+)</strong>, elegir <strong>BigQuery API</strong> y clic en <strong>Agregar</strong>. Si BigQuery API no aparece en la lista o <strong>Agregar</strong> da error, sumarlo desde el archivo de configuración del proyecto:
+                <ol>
+                  <li>En la barra izquierda, clic en <strong>Configuración del proyecto</strong> (el ícono de engranaje) y tildar <strong>Mostrar el archivo de manifiesto "appsscript.json" en el editor</strong>.</li>
+                  <li>Volver a <strong>Editor</strong> (el ícono <code>&lt;&gt;</code>). En la lista de archivos aparece <code>appsscript.json</code>: abrirlo, borrar todo su contenido, pegar el bloque de abajo con el botón <strong>Copiar JSON</strong> y guardar con <strong>Ctrl + S</strong>.</li>
+                  <li>En <strong>Servicios</strong>, a la izquierda, aparece <strong>BigQuery</strong>. Seguir con el paso siguiente.</li>
+                </ol>
+                <div class="sql-block">
+                  <div class="sql-head">
+                    <div class="sql-title">
+                      <strong>appsscript.json · BigQuery API activada</strong>
+                      <span>Reemplaza todo el contenido de <code>appsscript.json</code>. Solo hace falta si <strong>Servicios (+)</strong> no funcionó.</span>
+                    </div>
+                    <button class="copy-btn" type="button" data-copy-target="json-manifest">Copiar JSON</button>
+                  </div>
+                  <pre id="json-manifest"><code>{
+  "timeZone": "America/Mexico_City",
+  "dependencies": {
+    "enabledAdvancedServices": [
+      {
+        "userSymbol": "BigQuery",
+        "serviceId": "bigquery",
+        "version": "v2"
+      }
+    ]
+  },
+  "exceptionLogging": "STACKDRIVER",
+  "runtimeVersion": "V8"
+}</code></pre>
+                </div>
+              </li>
               <li>En el selector de función de arriba, elegir <code>syncClientMapToBigQuery</code> y clic en <strong>Ejecutar</strong>. Google pide autorización: elegir la cuenta de Jonathan, <strong>Configuración avanzada › Ir a (nombre del proyecto)</strong> y <strong>Permitir</strong>.</li>
               <li>Abajo, en el <strong>Registro de ejecución</strong>, aparecen dos líneas: <code>14 filas sincronizadas a client_map</code> y una con las campañas de <code>campaign_map</code>. Las dos tablas ya están en BigQuery.</li>
               <li>Elegir <code>installDailyTrigger</code> y clic en <strong>Ejecutar</strong>. En <strong>Activadores</strong> (el ícono de reloj de la barra izquierda) aparece <code>syncClientMapToBigQuery</code>, diario, de 3 a 4 AM.</li>
