@@ -679,7 +679,7 @@
 </div>
 
 
-<new_string><!-- ============ ROADMAP ============ -->
+<!-- ============ ROADMAP ============ -->
 <section class="section" id="roadmap">
   <div class="wide">
     <h2 class="section-title">Roadmap</h2>
@@ -833,7 +833,7 @@
         <ol class="substeps" style="margin-top:20px;">
           <li data-n="2.1">
             <strong>Álvaro instala el Apps Script del mapa de marcas</strong>
-            El script copia la pestaña <strong>Mapa de marcas</strong> a la tabla <code>mapa_marcas</code> del BigQuery de VMP todos los días a las 3 AM, antes de las transferencias. Queda a nombre de Álvaro y corre con su cuenta, así sigue funcionando cuando Detrics ya no tenga acceso al proyecto.
+            El script copia a BigQuery, todos los días a las 3 AM, la pestaña <strong>Mapa de marcas</strong> y las tres pestañas de trabajo del paso 2.3. Después agrega a esas pestañas las campañas y los UTMs nuevos que falta decidir. Queda a nombre de Álvaro y corre con su cuenta, así sigue funcionando cuando Detrics ya no tenga acceso al proyecto.
             <ol>
               <li>Abrir el sheet <a href="https://docs.google.com/spreadsheets/d/1NOwp_at_0R6gGIGI-fZ2xMxFH4WJpzWpTKkCFux-zpI/edit" target="_blank" rel="noopener">Mapa de marcas</a> con la cuenta de Álvaro, con acceso al proyecto <code>analytics-beauty-web</code>.</li>
               <li>Ir a <strong>Extensiones › Apps Script</strong>. El editor se abre en una pestaña nueva. Borrar el código de ejemplo (<code>function myFunction</code>).</li>
@@ -844,57 +844,73 @@
               <li>Elegir <code>installDailyTrigger</code> y clic en <strong>Ejecutar</strong>. En <strong>Activadores</strong> (el ícono de reloj de la barra izquierda) aparece <code>syncClientMapToBigQuery</code>, diario, de 3 a 4 AM.</li>
               <li>Volver al sheet y recargarlo. Aparece el menú <strong>Detrics › Sincronizar mapa ahora</strong>, para ver un cambio del mapa en el dashboard sin esperar a la corrida del día siguiente.</li>
             </ol>
-            <div class="tip amber"><span class="tip-icon">&#9888;</span><span>El script lee las columnas por posición, de la A a la N. Para sumar un dato nuevo, agréguenlo a la derecha, y no cambien el nombre de la pestaña.</span></div>
+            <div class="tip amber"><span class="tip-icon">&#9888;</span><span>El script lee las columnas por posición. Para sumar un dato nuevo, agréguenlo a la derecha, y no cambien el nombre de ninguna pestaña.</span></div>
             <div class="sql-block">
               <div class="sql-head">
                 <div class="sql-title">
                   <strong>Apps Script · Mapa de marcas a BigQuery</strong>
-                  <span>Se pega en <strong>Extensiones › Apps Script</strong> del sheet. Escribe la tabla <code>mapa_marcas</code> en el dataset <code>detrics_raw</code>.</span>
+                  <span>Se pega en <strong>Extensiones › Apps Script</strong> del sheet. Escribe las tablas <code>mapa_marcas</code>, <code>mapa_campanas</code>, <code>mapa_utms</code> y <code>mapa_gad</code> en el dataset <code>detrics_raw</code>. Versión del 15 de octubre.</span>
                 </div>
                 <button class="copy-btn" type="button" data-copy-target="gs-mapa">Copiar script</button>
               </div>
               <pre id="gs-mapa"><code>/**
- * Sincroniza la pestaña "Mapa de marcas" a la tabla nativa `detrics_raw.mapa_marcas`.
+ * Sincroniza el sheet del mapa de VMP a BigQuery y agrega a las pestañas lo nuevo que falta decidir.
  *
- * Vive dentro del sheet del mapa (Extensiones › Apps Script). Mismo patrón que la
- * guía de alarmas (guides.detrics.io/alarms, syncClientMapToBigQuery): cada corrida
- * hace CREATE OR REPLACE TABLE con las filas del sheet. v_mapa_cuentas y v_mapa_prefijos
- * (masters/00_funciones_y_mapa.sql) leen esta tabla.
+ *   "Mapa de marcas"                   → detrics_raw.mapa_marcas   (cuentas y prefijos de cada marca)
+ *   "Campañas"                         → detrics_raw.mapa_campanas (ID de campaña → marca; gana sobre el prefijo)
+ *   "UTM sin coincidencia"             → detrics_raw.mapa_utms     (utm_campaign → campaña real, PML o nada)
+ *   "Campañas con venta y no en GADS"  → detrics_raw.mapa_gad      (gad_campaignid fuera de la cuenta → PML o nada)
+ *
+ * Después de sincronizar, busca en BigQuery lo que apareció en los últimos 30 días y todavía no está
+ * en ninguna fila, y lo agrega al final de su pestaña, resaltado y con la columna de decisión vacía:
+ *   - Campañas con inversión que quedaron en Multimarca (el nombre no dice la marca) → "Campañas", columna Marca.
+ *   - utm_campaign con al menos 2 órdenes pagas que no cruzan ninguna campaña → "UTM sin coincidencia",
+ *     columna "Campaña real": el nombre de la campaña con su ID entre paréntesis, solo el ID, o PML.
+ *   - gad_campaignid de Google que no está en la cuenta conectada → "Campañas con venta y no en GADS",
+ *     columna "Nombre de la campaña": PML si es de esa agencia.
+ * Lo que se completa se aplica en la corrida de las 08:00 del día siguiente, con toda su historia.
+ *
+ * Vive dentro del sheet del mapa (Extensiones › Apps Script). Cada corrida hace CREATE OR REPLACE TABLE
+ * con las filas de cada pestaña. Las vistas de masters/00_funciones_y_mapa.sql leen estas tablas.
  *
  * Setup (una vez):
- *   1. Pegar este archivo en Extensiones › Apps Script del sheet.
- *   2. Servicios (+) › BigQuery API.
- *   3. Correr syncClientMapToBigQuery una vez (autoriza y crea la tabla).
- *   4. Correr installDailyTrigger una vez (corrida diaria a las 3 AM, antes de los transfers de Detrics).
+ *   1. Pegar este archivo en Extensiones › Apps Script del sheet (reemplaza el anterior).
+ *   2. Servicios (+) › BigQuery API (ya está si el script anterior corría).
+ *   3. Correr syncClientMapToBigQuery una vez (autoriza y crea las tablas nuevas).
+ *   4. El activador diario de las 3 AM sigue igual. Si no existe, correr installDailyTrigger una vez.
  *
- * Quien instala necesita poder escribir en el dataset (BigQuery Data Editor) y crear jobs
- * en el proyecto (BigQuery Job User o BigQuery User). El trigger corre con su cuenta.
+ * Quien instala necesita poder escribir en el dataset (BigQuery Data Editor) y crear jobs en el
+ * proyecto (BigQuery Job User o BigQuery User). El activador corre con su cuenta.
  * Para aplicar un cambio del sheet al momento: menú Detrics › Sincronizar mapa ahora.
  */
 
-const CONFIG = {
-  projectId: 'analytics-beauty-web',
-  dataset: 'detrics_raw',
-  table: 'mapa_marcas',
-  tab: 'Mapa de marcas',
-  headerRows: 2, // fila 1 = encabezados, fila 2 = descripciones
-  columns: [
-    'marca',
-    'meta_ads',
-    'google_ads',
-    'tiktok_ads',
-    'pinterest_ads',
-    'ga4',
-    'tiendanube',
-    'mercado_libre',
-    'facebook_insights',
-    'instagram_insights',
-    'search_console',
-    'merchant_center',
-    'prefijo_campanas',
-    'notas',
-  ],
-};
+const PROJECT_ID = 'analytics-beauty-web';
+const DATASET = 'detrics_raw';
+const TZ = 'America/Argentina/Buenos_Aires';
+const NEW_ROW_COLOR = '#fff2cc'; // amarillo claro: falta decidir
+const DIAS = 30; // ventana para buscar lo nuevo
+
+const TABLES = [
+  {
+    table: 'mapa_marcas', tab: 'Mapa de marcas', headerRows: 2, key: 0,
+    columns: ['marca', 'meta_ads', 'google_ads', 'tiktok_ads', 'pinterest_ads', 'ga4', 'tiendanube', 'mercado_libre',
+      'facebook_insights', 'instagram_insights', 'search_console', 'merchant_center', 'prefijo_campanas', 'notas'],
+  },
+  {
+    table: 'mapa_campanas', tab: 'Campañas', headerRows: 1, key: 1,
+    columns: ['plataforma', 'campaign_id', 'campana', 'cuenta', 'inversion', 'marca', 'detectada', 'comentarios'],
+  },
+  {
+    table: 'mapa_utms', tab: 'UTM sin coincidencia', headerRows: 1, key: 1,
+    columns: ['tipo', 'utm_campaign', 'ordenes_pagas', 'venta', 'utm_source', 'ejemplo_utm_content', 'campana_sugerida',
+      'campana_real', 'comentarios', 'detectada'],
+  },
+  {
+    table: 'mapa_gad', tab: 'Campañas con venta y no en GADS', headerRows: 1, key: 0, keyPattern: /^\d+$/,
+    columns: ['gad_campaignid', 'ordenes', 'ordenes_pagas', 'facturacion', 'pagina_principal', 'otras_paginas', 'cuenta',
+      'nombre', 'comentarios', 'detectada'],
+  },
+];
 
 function onOpen() {
   SpreadsheetApp.getUi()
@@ -903,24 +919,118 @@ function onOpen() {
     .addToUi();
 }
 
+// Lo que corre el activador diario y el menú. Mantiene el nombre del script anterior para que el
+// activador ya instalado siga funcionando.
 function syncClientMapToBigQuery() {
-  const sheet = SpreadsheetApp.getActive().getSheetByName(CONFIG.tab);
-  const nRows = sheet.getLastRow() - CONFIG.headerRows;
-  if (nRows &lt; 1) { console.log('Mapa vacío, no se sincroniza.'); return; }
+  TABLES.forEach(syncTable);
+  appendNewCampaigns();
+  appendNewUtms();
+  appendNewGad();
+}
 
+function syncTable(cfg) {
+  const sheet = SpreadsheetApp.getActive().getSheetByName(cfg.tab);
+  if (!sheet) { console.log(`Falta la pestaña "${cfg.tab}", no se sincroniza.`); return; }
+  const nRows = sheet.getLastRow() - cfg.headerRows;
+  if (nRows &lt; 1) { console.log(`"${cfg.tab}": sin filas.`); return; }
   // getDisplayValues: los IDs largos quedan como texto (sin notación científica).
   const rows = sheet
-    .getRange(CONFIG.headerRows + 1, 1, nRows, CONFIG.columns.length)
+    .getRange(cfg.headerRows + 1, 1, nRows, cfg.columns.length)
     .getDisplayValues()
-    .filter((r) =&gt; r[0].trim() !== '');
-  if (!rows.length) { console.log('Mapa vacío, no se sincroniza.'); return; }
-
+    .filter((r) =&gt; {
+      const k = r[cfg.key].trim();
+      return k !== '' &amp;&amp; (!cfg.keyPattern || cfg.keyPattern.test(k));
+    });
+  if (!rows.length) { console.log(`"${cfg.tab}": sin filas.`); return; }
   const selects = rows.map((r) =&gt;
-    'SELECT ' + CONFIG.columns.map((c, i) =&gt; `${sqlStr(r[i])} AS ${c}`).join(', ')
+    'SELECT ' + cfg.columns.map((c, i) =&gt; `${sqlStr(r[i])} AS ${c}`).join(', ')
   );
-  const target = `\`${CONFIG.projectId}.${CONFIG.dataset}.${CONFIG.table}\``;
-  bqRun(`CREATE OR REPLACE TABLE ${target} AS\n${selects.join('\nUNION ALL\n')}`);
-  console.log(`${rows.length} filas sincronizadas a ${target}.`);
+  bqRun(`CREATE OR REPLACE TABLE ${tbl(cfg.table)} AS\n${selects.join('\nUNION ALL\n')}`);
+  console.log(`"${cfg.tab}": ${rows.length} filas → ${cfg.table}.`);
+}
+
+// Campañas con inversión en los últimos 30 días que quedaron Multimarca y no están en "Campañas".
+function appendNewCampaigns() {
+  const rows = bqRun(`
+    SELECT \`${PROJECT_ID}.${DATASET}.plataforma_nombre\`(plataforma), campaign_id,
+           ARRAY_AGG(campaign_name ORDER BY fecha DESC LIMIT 1)[OFFSET(0)], account_id,
+           CAST(ROUND(SUM(spend)) AS STRING)
+    FROM ${tbl('v_paid_campaign_daily')}
+    WHERE marca = 'Multimarca' AND fecha &gt;= DATE_SUB(CURRENT_DATE('${TZ}'), INTERVAL ${DIAS} DAY)
+    GROUP BY plataforma, campaign_id, account_id
+    HAVING SUM(spend) &gt; 0
+    ORDER BY SUM(spend) DESC`);
+  appendRows('Campañas', 2, rows.map((r) =&gt; ({
+    key: r[1],
+    values: [r[0], r[1], r[2], r[3], Number(r[4]), '', today(), 'Nueva: falta la marca.'],
+  })), { textColumns: [2, 4] });
+}
+
+// utm_campaign con órdenes pagas en los últimos 30 días que no cruzan ninguna campaña.
+function appendNewUtms() {
+  const rows = bqRun(`
+    SELECT utm_campaign, COUNT(*), CAST(ROUND(SUM(order_total)) AS STRING),
+           STRING_AGG(DISTINCT IFNULL(utm_source, '(vacío)'), ', '),
+           ANY_VALUE(utm_content),
+           STRING_AGG(DISTINCT IF(metodo_atribucion = 'plataforma_por_fuente', plataforma_inferida, NULL), ', ')
+    FROM ${tbl('orders_attributed')}
+    WHERE es_venta AND utm_campaign IS NOT NULL
+      AND metodo_atribucion IN ('utm_campaign_sin_match', 'plataforma_por_fuente')
+      AND fecha &gt;= DATE_SUB(CURRENT_DATE('${TZ}'), INTERVAL ${DIAS} DAY)
+    GROUP BY utm_campaign
+    HAVING COUNT(*) &gt;= 2
+    ORDER BY SUM(order_total) DESC`);
+  appendRows('UTM sin coincidencia', 2, rows.map((r) =&gt; ({
+    key: r[0].trim().toLowerCase(),
+    values: [r[5] ? `Anuncio pago (${r[5]})` : 'Sin clasificar', r[0], Number(r[1]), Number(r[2]), r[3], r[4] || '',
+      '', '', `Nueva: últimos ${DIAS} días.`, today()],
+  })), { afterLastKeyRow: true });
+}
+
+// gad_campaignid de Google con órdenes en los últimos 30 días que no está en la cuenta conectada.
+function appendNewGad() {
+  const rows = bqRun(`
+    SELECT o.gad_campaignid, COUNT(*), COUNTIF(a.es_venta),
+           CAST(ROUND(SUM(IF(a.es_venta, a.order_total, 0))) AS STRING)
+    FROM ${tbl('orders_attributed')} a
+    JOIN ${tbl('v_orders')} o USING (order_id)
+    WHERE a.metodo_atribucion = 'google_campaign_fuera_de_cuenta'
+      AND a.fecha &gt;= DATE_SUB(CURRENT_DATE('${TZ}'), INTERVAL ${DIAS} DAY)
+    GROUP BY 1
+    ORDER BY 4 DESC`);
+  appendRows('Campañas con venta y no en GADS', 1, rows.map((r) =&gt; ({
+    key: r[0],
+    values: [r[0], Number(r[1]), Number(r[2]), Number(r[3]), '', '', '', '', `Nueva: últimos ${DIAS} días.`, today()],
+  })), { afterLastKeyRow: true, keyPattern: /^\d+$/, textColumns: [1] });
+}
+
+// Agrega las filas cuya clave no está en la pestaña. keyCol es 1-based.
+// afterLastKeyRow: inserta debajo de la última fila con clave (antes de los totales y las notas).
+function appendRows(tabName, keyCol, items, opts) {
+  opts = opts || {};
+  const sheet = SpreadsheetApp.getActive().getSheetByName(tabName);
+  if (!sheet) { console.log(`Falta la pestaña "${tabName}".`); return; }
+  const last = sheet.getLastRow();
+  const keys = last &gt; 1 ? sheet.getRange(2, keyCol, last - 1, 1).getDisplayValues().map((r) =&gt; r[0].trim()) : [];
+  const known = new Set(keys.map((k) =&gt; k.toLowerCase()));
+  const fresh = items.filter((it) =&gt; it.key &amp;&amp; !known.has(String(it.key).toLowerCase()));
+  if (!fresh.length) { console.log(`"${tabName}": nada nuevo.`); return; }
+
+  let start;
+  if (opts.afterLastKeyRow) {
+    let lastKeyRow = 1;
+    keys.forEach((k, i) =&gt; { if (k &amp;&amp; (!opts.keyPattern || opts.keyPattern.test(k))) lastKeyRow = i + 2; });
+    sheet.insertRowsAfter(lastKeyRow, fresh.length);
+    start = lastKeyRow + 1;
+  } else {
+    start = last + 1;
+  }
+  const width = fresh[0].values.length;
+  (opts.textColumns || []).forEach((c) =&gt; sheet.getRange(start, c, fresh.length, 1).setNumberFormat('@'));
+  sheet.getRange(start, 1, fresh.length, width)
+    .setValues(fresh.map((it) =&gt; it.values))
+    .setBackground(NEW_ROW_COLOR);
+  console.log(`"${tabName}": ${fresh.length} filas nuevas.`);
 }
 
 function installDailyTrigger() {
@@ -930,6 +1040,14 @@ function installDailyTrigger() {
   ScriptApp.newTrigger('syncClientMapToBigQuery').timeBased().everyDays(1).atHour(3).create();
 }
 
+function tbl(name) {
+  return `\`${PROJECT_ID}.${DATASET}.${name}\``;
+}
+
+function today() {
+  return Utilities.formatDate(new Date(), TZ, 'yyyy-MM-dd');
+}
+
 // Celda vacía → NULL tipado como STRING, así una columna toda vacía no queda INT64.
 function sqlStr(v) {
   const s = String(v).trim();
@@ -937,17 +1055,49 @@ function sqlStr(v) {
   return "'" + s.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n') + "'";
 }
 
+// Corre una query y devuelve sus filas como arrays de texto (vacío si no devuelve filas).
 function bqRun(sql) {
-  let res = BigQuery.Jobs.query({ query: sql, useLegacySql: false }, CONFIG.projectId);
+  let res = BigQuery.Jobs.query({ query: sql, useLegacySql: false }, PROJECT_ID);
   const jobId = res.jobReference.jobId;
   const location = res.jobReference.location;
   while (!res.jobComplete) {
     Utilities.sleep(1000);
-    res = BigQuery.Jobs.getQueryResults(CONFIG.projectId, jobId, { location });
+    res = BigQuery.Jobs.getQueryResults(PROJECT_ID, jobId, { location });
   }
+  const out = [];
+  let page = res;
+  while (true) {
+    (page.rows || []).forEach((row) =&gt; out.push(row.f.map((c) =&gt; (c.v === null ? '' : String(c.v)))));
+    if (!page.pageToken) break;
+    page = BigQuery.Jobs.getQueryResults(PROJECT_ID, jobId, { location, pageToken: page.pageToken });
+  }
+  return out;
 }
 </code></pre>
             </div>
+          </li>
+          <li data-n="2.2">
+            <strong>Álvaro pega la versión nueva del script (reunión 4, jueves 22/10)</strong>
+            La versión del 15 de octubre suma las tres pestañas de trabajo y agrega sola lo nuevo que falta decidir. Se pega una vez, en el mismo editor. El activador de las 3 AM no se toca.
+            <ol>
+              <li>Abrir el sheet <a href="https://docs.google.com/spreadsheets/d/1NOwp_at_0R6gGIGI-fZ2xMxFH4WJpzWpTKkCFux-zpI/edit" target="_blank" rel="noopener">Mapa de marcas</a> con la cuenta de Álvaro e ir a <strong>Extensiones › Apps Script</strong>.</li>
+              <li>Seleccionar todo el código (<strong>Ctrl + A</strong>) y borrarlo.</li>
+              <li>Copiar el script con el botón del paso 2.1, pegarlo y guardar con <strong>Ctrl + S</strong>.</li>
+              <li>Elegir <code>syncClientMapToBigQuery</code> y clic en <strong>Ejecutar</strong>. Si Google vuelve a pedir autorización, aceptar como en el paso 2.1.</li>
+              <li>En el <strong>Registro de ejecución</strong> aparece una línea por pestaña con su cantidad de filas, y las filas nuevas que agregó, si hubo.</li>
+            </ol>
+            <div class="tip blue"><span class="tip-icon">&#9432;</span><span>El activador ya instalado sigue andando con la versión nueva. No hace falta correr <code>installDailyTrigger</code> otra vez.</span></div>
+          </li>
+          <li data-n="2.3">
+            <strong>Las pestañas de trabajo: cómo se completan</strong>
+            Cada pestaña tiene una columna de decisión. Lo que falta decidir aparece resaltado en amarillo.
+            <ul class="plain">
+              <li><strong>Campañas:</strong> campañas con inversión cuyo nombre no dice la marca. Se completa la columna <strong>Marca</strong> con la lista desplegable, y gana sobre el prefijo del nombre. Por ejemplo, GHS - PMAX va a ACF.</li>
+              <li><strong>UTM sin coincidencia:</strong> valores de utm_campaign con ventas que no coinciden con ninguna campaña. En <strong>Campaña real</strong> va el nombre con el ID entre paréntesis, por ejemplo BW_REMARKETING (120238678221170477), o solo el ID. Si el anuncio es de PML, va PML. Si es email, influencer u orgánico, va No aplica.</li>
+              <li><strong>Campañas con venta y no en GADS:</strong> campañas de Google que traen ventas y no están en la cuenta conectada. En <strong>Nombre de la campaña</strong> va PML si es de esa agencia.</li>
+            </ul>
+            <p style="margin-top:12px;">Todos los días a las 3 AM el script agrega al final de cada pestaña lo nuevo de los últimos 30 días que todavía no figura. Lo que completen se ve en el dashboard después de la corrida de las 08:00, con toda la historia de esa campaña o ese UTM.</p>
+            <div class="tip green"><span class="tip-icon">&#10003;</span><span>Con el estándar de UTMs del 15/10 (ID de campaña y de anuncio en Meta), las órdenes nuevas cruzan solas y estas pestañas casi no crecen. Lo que más va a aparecer son links manuales y campañas nuevas sin la marca en el nombre.</span></div>
           </li>
         </ol>
       </div>
@@ -1029,20 +1179,41 @@ function bqRun(sql) {
           <div class="checklist todo">
           <div class="check-group">Álvaro</div>
           <label class="check"><input type="checkbox" data-k="r2-script" data-done checked><span class="box"></span><span class="txt">Apps Script del mapa de marcas instalado con su cuenta<small>Paso 2.1</small></span><span class="owner carat">VMP</span></label>
-          <label class="check"><input type="checkbox" data-k="r2-map"><span class="box"></span><span class="txt">Mapa de marcas: con la marca al principio del nombre de cada campaña no hace falta cargar prefijos. Queda confirmar las notas del mapa (ACF Profesional, ACF Europa, De la Patagonia)<small>Paso 2</small></span><span class="owner carat">VMP</span></label>
+          <label class="check"><input type="checkbox" data-k="r2-map" data-done checked><span class="box"></span><span class="txt">Mapa de marcas: con la marca al principio del nombre de cada campaña no hace falta cargar prefijos. Queda confirmar las notas del mapa (ACF Profesional, ACF Europa, De la Patagonia)<small>Paso 2</small></span><span class="owner carat">VMP</span></label>
           <label class="check"><input type="checkbox" data-k="r2-looker" data-done checked><span class="box"></span><span class="txt">Informe de Looker Studio en blanco compartido como Editor con los tres correos de Detrics<small>Paso 3.4</small></span><span class="owner carat">VMP</span></label>
-          <label class="check"><input type="checkbox" data-k="r2-utm"><span class="box"></span><span class="txt">Álvaro se reúne el viernes 9/10 con la agencia de PPC para definir la nomenclatura de campañas y los UTMs con el ID de campaña. Cuando estén aplicados, a mitad de la semana del 12/10, nos pasa los UTMs finales</span><span class="owner carat">VMP</span></label>
-          <label class="check"><input type="checkbox" data-k="r2-naming"><span class="box"></span><span class="txt">Nombres de campaña con la marca al principio, como parte del estándar nuevo. Álvaro nos reenvía el formato cuando la agencia lo aplique</span><span class="owner carat">VMP</span></label>
+          <label class="check"><input type="checkbox" data-k="r2-utm" data-done checked><span class="box"></span><span class="txt">Álvaro se reúne el viernes 9/10 con la agencia de PPC para definir la nomenclatura de campañas y los UTMs con el ID de campaña. Cuando estén aplicados, a mitad de la semana del 12/10, nos pasa los UTMs finales</span><span class="owner carat">VMP</span></label>
+          <label class="check"><input type="checkbox" data-k="r2-naming" data-done checked><span class="box"></span><span class="txt">Nombres de campaña con la marca al principio, como parte del estándar nuevo. Álvaro nos reenvía el formato cuando la agencia lo aplique</span><span class="owner carat">VMP</span></label>
           <label class="check"><input type="checkbox" data-k="r2-stores" data-done checked><span class="box"></span><span class="txt">Tienda de Mayoristas: queda fuera del alcance de este dashboard</span><span class="owner carat">VMP</span></label>
           <div class="check-group">Definimos juntos</div>
-          <label class="check"><input type="checkbox" data-k="r2-products"><span class="box"></span><span class="txt">Después de la reunión del 9/10 con la agencia: A qué marca van las 5 campañas con inversión en septiembre cuyo nombre no dice la marca (GHS - PMAX, Acido Azelaico, Genérica Capilar, y dos de Rulos en TikTok). Completar la columna "Marca" en la pestaña <a href="https://docs.google.com/spreadsheets/d/1NOwp_at_0R6gGIGI-fZ2xMxFH4WJpzWpTKkCFux-zpI/edit#gid=1973749218" target="_blank" rel="noopener">Campañas genericas</a><small>Paso 2</small></span><span class="owner both">VMP y Detrics</span></label>
-          <label class="check"><input type="checkbox" data-k="r2-gads"><span class="box"></span><span class="txt">Después de la reunión del 9/10 con la agencia: Las 7 campañas de Google que traen ventas y no están en la cuenta conectada (2092904876): 338 órdenes de septiembre, ARS 25,9 M pagados; la mayor (22538711981) manda 203 órdenes a /productos/vitamina-c. Completar en qué cuenta está cada una y su nombre en la pestaña <a href="https://docs.google.com/spreadsheets/d/1NOwp_at_0R6gGIGI-fZ2xMxFH4WJpzWpTKkCFux-zpI/edit#gid=179296817" target="_blank" rel="noopener">Campañas con venta y no en GADS</a></span><span class="owner both">VMP y Detrics</span></label>
-          <label class="check"><input type="checkbox" data-k="r2-utm-nomatch"><span class="box"></span><span class="txt">Después de la reunión del 9/10 con la agencia: Links de anuncios con un utm_campaign que no coincide con ninguna campaña: 1.503 órdenes de septiembre, ARS 121 M, casi todas de Meta con el nombre viejo de una campaña renombrada. Completar la campaña real de cada una en la pestaña <a href="https://docs.google.com/spreadsheets/d/1NOwp_at_0R6gGIGI-fZ2xMxFH4WJpzWpTKkCFux-zpI/edit#gid=143912495" target="_blank" rel="noopener">UTM sin coincidencia</a>. La solución de fondo es que la agencia use {{campaign.name}} en utm_campaign</span><span class="owner both">VMP y Detrics</span></label>
+          <label class="check"><input type="checkbox" data-k="r2-products" data-done checked><span class="box"></span><span class="txt">Después de la reunión del 9/10 con la agencia: A qué marca van las 5 campañas con inversión en septiembre cuyo nombre no dice la marca (GHS - PMAX, Acido Azelaico, Genérica Capilar, y dos de Rulos en TikTok). Completar la columna "Marca" en la pestaña <a href="https://docs.google.com/spreadsheets/d/1NOwp_at_0R6gGIGI-fZ2xMxFH4WJpzWpTKkCFux-zpI/edit#gid=1973749218" target="_blank" rel="noopener">Campañas genericas</a><small>Paso 2</small></span><span class="owner both">VMP y Detrics</span></label>
+          <label class="check"><input type="checkbox" data-k="r2-gads" data-done checked><span class="box"></span><span class="txt">Después de la reunión del 9/10 con la agencia: Las 7 campañas de Google que traen ventas y no están en la cuenta conectada (2092904876): 338 órdenes de septiembre, ARS 25,9 M pagados; la mayor (22538711981) manda 203 órdenes a /productos/vitamina-c. Completar en qué cuenta está cada una y su nombre en la pestaña <a href="https://docs.google.com/spreadsheets/d/1NOwp_at_0R6gGIGI-fZ2xMxFH4WJpzWpTKkCFux-zpI/edit#gid=179296817" target="_blank" rel="noopener">Campañas con venta y no en GADS</a></span><span class="owner both">VMP y Detrics</span></label>
+          <label class="check"><input type="checkbox" data-k="r2-utm-nomatch" data-done checked><span class="box"></span><span class="txt">Después de la reunión del 9/10 con la agencia: Links de anuncios con un utm_campaign que no coincide con ninguna campaña: 1.503 órdenes de septiembre, ARS 121 M, casi todas de Meta con el nombre viejo de una campaña renombrada. Completar la campaña real de cada una en la pestaña <a href="https://docs.google.com/spreadsheets/d/1NOwp_at_0R6gGIGI-fZ2xMxFH4WJpzWpTKkCFux-zpI/edit#gid=143912495" target="_blank" rel="noopener">UTM sin coincidencia</a>. La solución de fondo es que la agencia use {{campaign.name}} en utm_campaign</span><span class="owner both">VMP y Detrics</span></label>
           <label class="check"><input type="checkbox" data-k="r2-validate" data-done checked><span class="box"></span><span class="txt">Validar los números de septiembre en el Looker de prueba contra lo que Álvaro ve hoy: inversión, impresiones y clics por plataforma, y órdenes y facturación de Tiendanube por estado de la orden y del pago</span><span class="owner both">VMP y Detrics</span></label>
           <div class="check-group">Detrics</div>
           <label class="check"><input type="checkbox" data-k="r2-images" data-done checked><span class="box"></span><span class="txt">Imágenes de los anuncios de Meta y TikTok guardadas en el BigQuery de VMP, con la recarga histórica terminada<small>Paso 4</small></span><span class="owner detrics">Detrics</span></label>
           <label class="check"><input type="checkbox" data-k="r2-design" data-done checked><span class="box"></span><span class="txt">Mostrar el diseño del dashboard: Resumen, Campañas, Anuncios, Ventas, Social y Otras fuentes<small>Paso 5</small></span><span class="owner detrics">Detrics</span></label>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-body">
+        <div class="todo-call" style="margin-top:0">
+          <h5>Pendientes de la reunión 4 · jueves 22/10</h5>
+          <div class="checklist todo">
+          <div class="check-group">Álvaro</div>
+          <label class="check"><input type="checkbox" data-k="r4-script"><span class="box"></span><span class="txt">Pegar la versión nueva del Apps Script en el sheet del mapa<small>Paso 2.2</small></span><span class="owner carat">VMP</span></label>
+          <label class="check"><input type="checkbox" data-k="r4-campanas"><span class="box"></span><span class="txt">Marca de las 2 campañas que quedan en la pestaña <a href="https://docs.google.com/spreadsheets/d/1NOwp_at_0R6gGIGI-fZ2xMxFH4WJpzWpTKkCFux-zpI/edit" target="_blank" rel="noopener">Campañas</a>: Sales20260710142909 (TikTok, ARS 134 mil desde julio) y GHS - PMAX #2 (Google)<small>Paso 2.3</small></span><span class="owner carat">VMP</span></label>
+          <label class="check"><input type="checkbox" data-k="r4-tiktok"><span class="box"></span><span class="txt">Avisar cuando la agencia aplique en TikTok la plantilla con IDs, con la fecha de corte</span><span class="owner carat">VMP</span></label>
+          <div class="check-group">Definimos juntos</div>
+          <label class="check"><input type="checkbox" data-k="r4-owner"><span class="box"></span><span class="txt">Quién revisa las filas nuevas de las pestañas de trabajo y cada cuánto<small>Paso 2.3</small></span><span class="owner both">VMP y Detrics</span></label>
+          <label class="check"><input type="checkbox" data-k="r4-review"><span class="box"></span><span class="txt">Recorrer las 6 páginas del dashboard en borrador y anotar los ajustes para la entrega<small>Paso 5</small></span><span class="owner both">VMP y Detrics</span></label>
+          <div class="check-group">Detrics</div>
+          <label class="check"><input type="checkbox" data-k="r4-meta-id"><span class="box"></span><span class="txt">Confirmar que las órdenes de Meta desde el 15/10 cruzan por ID de campaña y de anuncio</span><span class="owner detrics">Detrics</span></label>
+          <label class="check"><input type="checkbox" data-k="r4-looker"><span class="box"></span><span class="txt">Looker con las 6 páginas en borrador: Resumen, Campañas, Anuncios, Ventas, Social y Otras fuentes<small>Paso 5</small></span><span class="owner detrics">Detrics</span></label>
+          </div>
+          <p style="margin-top:12px;">Entrega del dashboard: jueves 29/10.</p>
         </div>
       </div>
     </div>
