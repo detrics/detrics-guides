@@ -661,6 +661,12 @@
     max-height: 320px;
     overflow-y: auto;
   }
+  .sql-view summary { cursor: pointer; list-style: none; }
+  .sql-view summary::-webkit-details-marker { display: none; }
+  .sql-view summary .sql-title strong::before { content: "\25B8\00a0\00a0"; color: var(--blue); }
+  .sql-view[open] summary .sql-title strong::before { content: "\25BE\00a0\00a0"; }
+  .sql-view:not([open]) summary { border-bottom: 0; }
+  .sql-view-actions { display: flex; justify-content: flex-end; padding: 10px 14px 0; background: var(--gray-50); }
   .sql-block pre code { font-family: inherit; background: none; border: 0; padding: 0; color: inherit; font-size: inherit; }
 </style>
 </head>
@@ -1312,7 +1318,7 @@ function bqRun(sql) {
     <!-- STEP 7 SQL ADDENDUM: manual run fallback -->
     <div class="sql-addendum">
       <div class="sql-intro">
-        <p>Las 5 vistas las crea Detrics desde su MCP con el rol de <strong>BigQuery Data Editor</strong> del paso 1.3. Si prefieren revisar el SQL antes y correrlo desde la cuenta de Jonathan, abajo están los 5 archivos listos para copiar y pegar en la consola de BigQuery. Antes, el paso 7.1 tiene que estar hecho.</p>
+        <p>Las vistas las crea Detrics desde su MCP con el rol de <strong>BigQuery Data Editor</strong> del paso 1.3. Si prefieren revisar el SQL o volver a crearlas desde la cuenta de Jonathan, abajo están todos los archivos, en su versión actual (16/10), listos para copiar y pegar en la consola de BigQuery. Antes, el paso 7.1 tiene que estar hecho.</p>
       </div>
 
       <details class="sql-manual">
@@ -1322,7 +1328,7 @@ function bqRun(sql) {
           <li>En el panel izquierdo, bajo <code>inmediata-510016</code>, abrir el dataset <code>test</code>.</li>
           <li>Arriba a la derecha, clic en <strong>+ Redactar nueva consulta</strong> (Compose new query).</li>
           <li>Copiar el SQL del archivo <strong>05</strong> con el botón de la derecha, pegarlo en el editor, clic en <strong>Ejecutar</strong> (Run). Esperar el mensaje de éxito.</li>
-          <li>Repetir con <strong>10</strong>, <strong>30</strong> y <strong>40</strong> en ese orden. Cada uno depende del anterior.</li>
+          <li>Repetir con <strong>10</strong>, <strong>30</strong> y <strong>40</strong> en ese orden: cada uno depende del anterior. Después, los de <strong>32</strong> a <strong>56</strong>, en cualquier orden: cada uno se abre con un clic en su título.</li>
           <li>El <strong>99</strong> son queries de chequeo. Correrlo al final para validar que no haya cuentas huérfanas o campañas sin cliente.</li>
         </ol>
 
@@ -1406,27 +1412,30 @@ FROM cleaned WHERE tiktok_organic IS NOT NULL;
           <div class="sql-head">
             <div class="sql-title">
               <strong>10 · UNION canónica de las 3 raw</strong>
-              <span>Crea <code>v_paid_ad_daily</code> uniendo Meta <code>meta_ad_daily</code> + Google <code>google_ads_campaign_daily</code> + TikTok <code>tiktok_ad_daily</code> en un solo esquema. Google va a grano campaña con las columnas de creativo en NULL.</span>
+              <span>Crea <code>v_paid_ad_daily</code> uniendo Meta <code>meta_ad_daily</code> + Google <code>google_ads_ad_group_daily</code> + TikTok <code>tiktok_ad_daily</code> en un solo esquema. Meta y TikTok van a grano anuncio; Google a grano grupo de anuncios, con el tipo de campaña y las columnas de creativo en NULL. Compras y leads de Google salen de sus acciones de conversión. Versión del 16/10.</span>
             </div>
             <button class="copy-btn" type="button" data-copy-target="sql-10">Copiar SQL</button>
           </div>
           <pre id="sql-10"><code>-- 10_v_paid_ad_daily.sql
 -- UNION canónica de las 3 raw tables de ads a grano ad. Google va a grano
--- campaña con ad_* en NULL (sus Search Ads no tienen creativo comparable).
+-- grupo de anuncios con ad_* en NULL (sus Search Ads no tienen creativo comparable).
 --
--- Grano: fecha × platform × account × campaña × ad (Google: ad_* = NULL)
+-- Grano: fecha × platform × account × campaña × conjunto/grupo × ad (Google: ad_* = NULL)
 --
 -- Nombres canónicos (todas las columnas del output):
 --   date, platform, platform_account_id, account_name, currency,
 --   campaign_id, campaign_name,
---   adset_id, adset_name,                            -- NULL en Google
+--   campaign_type,                                   -- Google solo: tipo de campaña (SEARCH, DISPLAY, VIDEO, PERFORMANCE_MAX, DEMAND_GEN)
+--   adset_id, adset_name,                            -- Google: grupo de anuncios
 --   ad_id, ad_name,                                  -- NULL en Google
 --   ad_image_url, ad_video_url, ad_preview_link,
 --   ad_creative_type, ad_destination_url, ad_copy,   -- NULL en Google
 --   spend, impressions, clicks, ctr, cpc, cpm,
---   purchases, purchase_value,                       -- Meta tiene; TikTok 0; Google NULL
+--   purchases, purchase_value,                       -- Meta píxel; Google acciones PURCHASE; TikTok 0
 --   messaging_conversations, cost_per_messaging,     -- Meta solo (Nissan WhatsApp)
 --   conversions, conversions_value,                  -- Google solo
+--   leads,                                           -- Meta conversaciones; Google acciones de lead + Compra_Luis_El_Flaco; TikTok NULL (sus leads son clics)
+--   profile_visits_ads,                              -- Meta solo: results de conjuntos que optimizan por visitas al perfil
 --   video_views_p100                                 -- TikTok solo
 --
 -- Notas:
@@ -1435,7 +1444,8 @@ FROM cleaned WHERE tiktok_organic IS NOT NULL;
 --   - meta_ad_daily tiene messaging a partir del resync del 2026-10-02.
 --     Antes de que termine ese resync, messaging solo tiene datos del día actual.
 --
--- Dependencias: meta_ad_daily, google_ads_campaign_daily, tiktok_ad_daily.
+-- Dependencias: meta_ad_daily, meta_ad_results_daily, google_ads_ad_group_daily,
+--               google_ads_ad_group_conversions_daily, google_ads_campaign_daily, tiktok_ad_daily.
 
 CREATE OR REPLACE VIEW `inmediata-510016.test.v_paid_ad_daily` AS
 
@@ -1448,6 +1458,7 @@ SELECT
   account_currency                                        AS currency,
   campaign_id,
   campaign_name,
+  CAST(NULL AS STRING)                                    AS campaign_type,
   adset_id,
   adset_name,
   ad_id,
@@ -1470,22 +1481,44 @@ SELECT
   cost_per_messaging_conversation_started                 AS cost_per_messaging,
   CAST(NULL AS FLOAT64)                                   AS conversions,
   CAST(NULL AS FLOAT64)                                   AS conversions_value,
-  CAST(NULL AS INT64)                                     AS video_views_p100
+  CAST(NULL AS INT64)                                     AS video_views_p100,
+  post_reaction                                           AS reactions,
+  comment                                                 AS comments,
+  post                                                    AS shares,
+  onsite_conversion_post_save                             AS saves,
+  video_thruplay_watched_actions                          AS thruplays,
+  inline_link_clicks                                      AS link_clicks,
+  landing_page_view                                       AS landing_page_views,
+  -- Lead en Meta = conversación de WhatsApp iniciada (campañas OUTCOME_LEADS de Nissan).
+  onsite_conversion_messaging_conversation_started_7d     AS leads,
+  -- Visitas al perfil generadas por anuncios: Meta no tiene métrica propia. Es el results de los
+  -- conjuntos con objetivo de visitas al perfil (meta_ad_results_daily); en el resto queda NULL.
+  pv.profile_visits                                       AS profile_visits_ads
 FROM `inmediata-510016.test.meta_ad_daily`
+LEFT JOIN (
+  SELECT date AS pv_date, CAST(ad_id AS STRING) AS pv_ad_id, SUM(results) AS profile_visits
+  FROM `inmediata-510016.test.meta_ad_results_daily`
+  WHERE adset_optimization_goal IN ('PROFILE_VISIT', 'VISIT_INSTAGRAM_PROFILE')
+  GROUP BY 1, 2
+) pv
+  ON pv.pv_date = date AND pv.pv_ad_id = CAST(ad_id AS STRING)
 
 UNION ALL
 
--- ====== GOOGLE (campaign grain, ad_* NULL) =================================
+-- ====== GOOGLE (ad group grain, ad_* NULL) =================================
+-- Grupo de anuncios en adset_*: suma lo mismo que la campaña en todos los tipos (Search, Display,
+-- YouTube, Performance Max, Demand Gen). En Performance Max el grupo es el grupo de recursos.
 SELECT
-  date                                                    AS date,
+  g.date                                                  AS date,
   'google_ads'                                            AS platform,
-  _detrics_account_id                                     AS platform_account_id,
-  customer_descriptive_name                               AS account_name,
-  customer_currency_code                                  AS currency,
-  campaign_id,
-  campaign_name,
-  CAST(NULL AS STRING)                                    AS adset_id,
-  CAST(NULL AS STRING)                                    AS adset_name,
+  g._detrics_account_id                                   AS platform_account_id,
+  acc.account_name,
+  acc.currency,
+  g.campaign_id,
+  g.campaign_name,
+  ch.channel_type                                         AS campaign_type,
+  g.ad_group_id                                           AS adset_id,
+  g.ad_group_name                                         AS adset_name,
   CAST(NULL AS STRING)                                    AS ad_id,
   CAST(NULL AS STRING)                                    AS ad_name,
   CAST(NULL AS STRING)                                    AS ad_image_url,
@@ -1494,20 +1527,62 @@ SELECT
   CAST(NULL AS STRING)                                    AS ad_creative_type,
   CAST(NULL AS STRING)                                    AS ad_destination_url,
   CAST(NULL AS STRING)                                    AS ad_copy,
-  cost_micros                                             AS spend,
-  impressions,
-  clicks,
-  ctr,
-  average_cpc                                             AS cpc,
-  SAFE_DIVIDE(cost_micros * 1000, NULLIF(impressions, 0)) AS cpm,
-  CAST(NULL AS INT64)                                     AS purchases,
-  CAST(NULL AS FLOAT64)                                   AS purchase_value,
+  g.cost_micros                                           AS spend,
+  g.impressions,
+  g.clicks,
+  SAFE_DIVIDE(g.clicks, NULLIF(g.impressions, 0))         AS ctr,
+  SAFE_DIVIDE(g.cost_micros, NULLIF(g.clicks, 0))         AS cpc,
+  SAFE_DIVIDE(g.cost_micros * 1000, NULLIF(g.impressions, 0)) AS cpm,
+  -- Compras = solo las acciones de categoría PURCHASE; Leads = las de categoría de lead
+  -- (google_ads_ad_group_conversions_daily). Conversiones sigue siendo el total de todas las acciones.
+  IFNULL(cv.purchases, 0)                                 AS purchases,
+  IFNULL(cv.purchase_value, 0)                            AS purchase_value,
   CAST(NULL AS INT64)                                     AS messaging_conversations,
   CAST(NULL AS FLOAT64)                                   AS cost_per_messaging,
-  conversions,
-  conversions_value,
-  CAST(NULL AS INT64)                                     AS video_views_p100
-FROM `inmediata-510016.test.google_ads_campaign_daily`
+  g.conversions,
+  g.conversions_value,
+  CAST(NULL AS INT64)                                     AS video_views_p100,
+  CAST(NULL AS INT64)                                     AS reactions,
+  CAST(NULL AS INT64)                                     AS comments,
+  CAST(NULL AS INT64)                                     AS shares,
+  CAST(NULL AS INT64)                                     AS saves,
+  CAST(NULL AS INT64)                                     AS thruplays,
+  -- Google no separa clics en el enlace: sus clics ya son clics al anuncio que llevan al sitio.
+  g.clicks                                                AS link_clicks,
+  CAST(NULL AS INT64)                                     AS landing_page_views,
+  IFNULL(cv.leads, 0)                                     AS leads,
+  CAST(NULL AS INT64)                                     AS profile_visits_ads
+FROM `inmediata-510016.test.google_ads_ad_group_daily` g
+-- Nombre y moneda de la cuenta y tipo de campaña: solo están en la tabla de campañas.
+LEFT JOIN (
+  SELECT _detrics_account_id, ANY_VALUE(customer_descriptive_name) AS account_name,
+         ANY_VALUE(customer_currency_code) AS currency
+  FROM `inmediata-510016.test.google_ads_campaign_daily`
+  GROUP BY 1
+) acc
+  ON acc._detrics_account_id = g._detrics_account_id
+LEFT JOIN (
+  SELECT campaign_id, ANY_VALUE(campaign_advertising_channel_type) AS channel_type
+  FROM `inmediata-510016.test.google_ads_campaign_daily`
+  GROUP BY 1
+) ch
+  ON ch.campaign_id = g.campaign_id
+LEFT JOIN (
+  SELECT date, _detrics_account_id, ad_group_id,
+         -- Compra_Luis_El_Flaco está como PURCHASE en Google Ads pero es un lead, con valor 1 por default
+         -- (Jonathan, mail del 13-oct): se cuenta como lead y no como compra.
+         SUM(IF(segments_conversion_action_category = 'PURCHASE' AND segments_conversion_action_name != 'Compra_Luis_El_Flaco', conversions, 0))       AS purchases,
+         SUM(IF(segments_conversion_action_category = 'PURCHASE' AND segments_conversion_action_name != 'Compra_Luis_El_Flaco', conversions_value, 0)) AS purchase_value,
+         -- Lead en Google = acciones de categoría de lead (hoy solo SIGNUP: los formularios de Nissan).
+         SUM(IF(segments_conversion_action_category IN ('SIGNUP', 'SUBMIT_LEAD_FORM', 'BOOK_APPOINTMENT',
+                'REQUEST_QUOTE', 'CONTACT', 'PHONE_CALL_LEAD', 'IMPORTED_LEAD', 'QUALIFIED_LEAD',
+                'CONVERTED_LEAD') OR segments_conversion_action_name = 'Compra_Luis_El_Flaco', conversions, 0)) AS leads
+  FROM `inmediata-510016.test.google_ads_ad_group_conversions_daily`
+  GROUP BY 1, 2, 3
+) cv
+  ON  cv.date = g.date
+  AND cv._detrics_account_id = g._detrics_account_id
+  AND cv.ad_group_id = g.ad_group_id
 
 UNION ALL
 
@@ -1520,6 +1595,7 @@ SELECT
   currency,
   campaign_id,
   campaign_name,
+  CAST(NULL AS STRING)                                    AS campaign_type,
   adgroup_id                                              AS adset_id,
   adgroup_name                                            AS adset_name,
   ad_id,
@@ -1542,7 +1618,20 @@ SELECT
   CAST(NULL AS FLOAT64)                                   AS cost_per_messaging,
   CAST(NULL AS FLOAT64)                                   AS conversions,
   CAST(NULL AS FLOAT64)                                   AS conversions_value,
-  video_views_p100
+  video_views_p100,
+  CAST(NULL AS INT64)                                     AS reactions,
+  CAST(NULL AS INT64)                                     AS comments,
+  CAST(NULL AS INT64)                                     AS shares,
+  CAST(NULL AS INT64)                                     AS saves,
+  CAST(NULL AS INT64)                                     AS thruplays,
+  -- TikTok: clicks ya es "Clicks (Destination)", el clic que lleva al destino.
+  clicks                                                  AS link_clicks,
+  -- TikTok: vista de la página de destino medida por el píxel de TikTok (equivale al landing_page_view de Meta).
+  total_landing_page_view                                 AS landing_page_views,
+  -- Las campañas "Leads" de TikTok optimizan por clic a WhatsApp: cuentan como clics, no como leads
+  -- (Jonathan, mail del 13-oct).
+  CAST(NULL AS FLOAT64)                                   AS leads,
+  CAST(NULL AS INT64)                                     AS profile_visits_ads
 FROM `inmediata-510016.test.tiktok_ad_daily`;
 
 -- Chequeos esperados:
@@ -1560,7 +1649,8 @@ FROM `inmediata-510016.test.tiktok_ad_daily`;
           </div>
           <pre id="sql-30"><code>-- 30_master_marketing_daily.sql
 -- Master a grano fecha × cliente × grupo × platform × campaña × ad.
--- Alimenta Views 1 / 2 / 3 del dashboard. Google: ad_* = NULL.
+-- Alimenta Views 1 / 2 / 3 del dashboard. Google: el grupo de anuncios va en Conjunto_de_anuncios
+-- y ad_* = NULL.
 --
 -- Cliente de cada fila, en este orden:
 --   1) La campaña está en campaign_map (pestaña "Campaign mapping") → ese cliente.
@@ -1631,6 +1721,15 @@ SELECT
   p.currency                             AS Moneda,
   p.campaign_name                        AS Campana,
   p.campaign_id                          AS ID_de_campana,
+  -- Solo Google Ads. Vacío en Meta y TikTok.
+  CASE p.campaign_type
+    WHEN 'SEARCH'          THEN 'Search'
+    WHEN 'DISPLAY'         THEN 'Display'
+    WHEN 'VIDEO'           THEN 'YouTube'
+    WHEN 'PERFORMANCE_MAX' THEN 'Performance Max'
+    WHEN 'DEMAND_GEN'      THEN 'Demand Gen'
+    ELSE p.campaign_type
+  END                                    AS Tipo_de_campana,
   p.adset_name                           AS Conjunto_de_anuncios,
   p.adset_id                             AS ID_de_conjunto,
   p.ad_name                              AS Anuncio,
@@ -1649,9 +1748,25 @@ SELECT
   p.purchases                            AS Compras,
   p.purchase_value                       AS Valor_de_compras,
   p.messaging_conversations              AS Conversaciones_iniciadas,
+  -- Leads de todas las plataformas: Meta = conversaciones de WhatsApp; Google = acciones de
+  -- conversión de categoría de lead (formularios); TikTok = pendiente (ver Diccionario).
+  p.leads                                AS Leads,
   p.conversions                          AS Conversiones,
   p.conversions_value                    AS Valor_de_conversiones,
   p.video_views_p100                     AS Reproducciones_completas,
+  p.reactions                            AS Reacciones,
+  p.comments                             AS Comentarios,
+  p.shares                               AS Compartidos,
+  p.saves                                AS Guardados,
+  p.thruplays                            AS ThruPlays,
+  -- Interacciones según Inmediata (checkpoint 2026-10-09): reacciones + comentarios +
+  -- compartidos + guardados + ThruPlays. No es post_engagement de Meta (suma reproducciones de 3 s).
+  IF(p.platform = 'meta', IFNULL(p.reactions, 0) + IFNULL(p.comments, 0) + IFNULL(p.shares, 0)
+     + IFNULL(p.saves, 0) + IFNULL(p.thruplays, 0), NULL) AS Interacciones,
+  p.link_clicks                          AS Clics_en_el_enlace,
+  p.landing_page_views                   AS Vistas_de_pagina_de_destino,
+  -- Solo Meta, solo conjuntos que optimizan por visitas al perfil (en el resto, NULL).
+  p.profile_visits_ads                   AS Visitas_al_perfil_anuncios,
 
   -- GA4 (completar en 20_v_ga4_by_campaign.sql cuando destraben IDs)
   CAST(NULL AS FLOAT64)                  AS Sesiones_GA4,
@@ -1691,7 +1806,10 @@ WHERE p.cliente != 'Excluir';
 --
 -- Columnas en español, mismos nombres que master_marketing_daily. Semana = lunes; Mes = día 1.
 --
--- Dependencias: google_ads_keyword_daily, v_client_map, campaign_map.
+-- Totales completos: suma lo mismo que Google Ads y que master_marketing_daily. Para ver qué
+-- buscó la gente, master_google_search_terms_daily (ahí Google oculta los términos de poco volumen).
+--
+-- Dependencias: google_ads_keyword_daily, google_ads_keyword_conversions_daily, v_client_map, campaign_map.
 
 CREATE OR REPLACE VIEW `inmediata-510016.test.master_google_keywords_daily` AS
 WITH
@@ -1752,9 +1870,29 @@ SELECT
   k.cost_micros                          AS Inversion,
   k.impressions                          AS Impresiones,
   k.clicks                               AS Clics,
+  -- Compras y leads con la misma regla que master_marketing_daily (10_v_paid_ad_daily.sql).
+  IFNULL(cv.purchases, 0)                AS Compras,
+  IFNULL(cv.purchase_value, 0)           AS Valor_de_compras,
+  IFNULL(cv.leads, 0)                    AS Leads,
   k.conversions                          AS Conversiones
 FROM assigned k
 LEFT JOIN grupos g USING (cliente)
+LEFT JOIN (
+  SELECT date AS cv_date, _detrics_account_id AS cv_account, ad_group_id AS cv_ad_group,
+         keyword_text AS cv_keyword, keyword_match_type AS cv_match,
+         SUM(IF(segments_conversion_action_category = 'PURCHASE' AND segments_conversion_action_name != 'Compra_Luis_El_Flaco', conversions, 0))       AS purchases,
+         SUM(IF(segments_conversion_action_category = 'PURCHASE' AND segments_conversion_action_name != 'Compra_Luis_El_Flaco', conversions_value, 0)) AS purchase_value,
+         SUM(IF(segments_conversion_action_category IN ('SIGNUP', 'SUBMIT_LEAD_FORM', 'BOOK_APPOINTMENT',
+                'REQUEST_QUOTE', 'CONTACT', 'PHONE_CALL_LEAD', 'IMPORTED_LEAD', 'QUALIFIED_LEAD',
+                'CONVERTED_LEAD') OR segments_conversion_action_name = 'Compra_Luis_El_Flaco', conversions, 0)) AS leads
+  FROM `inmediata-510016.test.google_ads_keyword_conversions_daily`
+  GROUP BY 1, 2, 3, 4, 5
+) cv
+  ON  cv.cv_date     = k.date
+  AND cv.cv_account  = k._detrics_account_id
+  AND cv.cv_ad_group = k.ad_group_id
+  AND cv.cv_keyword  = k.keyword_text
+  AND cv.cv_match    = k.keyword_match_type
 WHERE k.cliente != 'Excluir';
 
 -- Chequeos esperados:
@@ -1767,6 +1905,1055 @@ WHERE k.cliente != 'Excluir';
 --   WTA GDL — gdl open BROAD, guadalajara open boletos BROAD, wta BROAD
 </code></pre>
         </div>
+        <details class="sql-block sql-view">
+          <summary class="sql-head">
+            <div class="sql-title">
+              <strong>32 · Meta por campaña</strong>
+              <span>Crea <code>master_meta_campaign_daily</code>: métricas de Meta que solo existen a nivel campaña (alcance, resultados, vistas de página de destino, carrito y pago iniciado). Clic para ver el SQL.</span>
+            </div>
+          </summary>
+          <div class="sql-view-actions"><button class="copy-btn" type="button" data-copy-target="sql-32">Copiar SQL</button></div>
+          <pre id="sql-32"><code>-- 32_master_meta_campaign_daily.sql
+-- Meta a grano fecha × cliente × campaña, con las métricas que solo existen a nivel campaña:
+-- alcance, resultados, vistas de la página de destino, carrito y pago iniciado.
+-- Alimenta la página de Meta del Looker junto con master_marketing_daily (creativos).
+--
+-- Cliente: misma regla que 30_master_marketing_daily (campaign_map → cliente único de la cuenta
+-- → 'Sin asignar'; 'Excluir' no entra).
+-- Alcance_diario NO se suma entre días: sumado por mes cuenta dos veces a quien vio anuncios
+-- en más de un día. Usarlo solo a grano día o como promedio diario.
+--
+-- Dependencias: meta_campaign_daily, v_client_map, campaign_map.
+
+CREATE OR REPLACE VIEW `inmediata-510016.test.master_meta_campaign_daily` AS
+WITH
+  accounts AS (
+    SELECT platform_account_id, COUNT(DISTINCT cliente) AS clients_in_account, ANY_VALUE(cliente) AS cliente_unico
+    FROM `inmediata-510016.test.v_client_map`
+    WHERE platform = 'meta'
+    GROUP BY platform_account_id
+  ),
+  campaigns AS (
+    SELECT TRIM(campaign_id) AS campaign_id, ANY_VALUE(TRIM(cliente)) AS cliente
+    FROM `inmediata-510016.test.campaign_map`
+    WHERE TRIM(IFNULL(campaign_id, '')) != '' AND TRIM(IFNULL(cliente, '')) != ''
+    GROUP BY 1
+  ),
+  grupos AS (
+    SELECT cliente, ANY_VALUE(grupo) AS grupo FROM `inmediata-510016.test.v_client_map` GROUP BY cliente
+  ),
+  assigned AS (
+    SELECT m.*, COALESCE(c.cliente, IF(a.clients_in_account = 1, a.cliente_unico, 'Sin asignar')) AS cliente
+    FROM `inmediata-510016.test.meta_campaign_daily` m
+    INNER JOIN accounts a ON m._detrics_account_id = a.platform_account_id
+    LEFT JOIN campaigns c ON CAST(m.campaign_id AS STRING) = c.campaign_id
+  )
+SELECT
+  m.date AS Fecha,
+  DATE_TRUNC(m.date, WEEK(MONDAY)) AS Semana,
+  DATE_TRUNC(m.date, MONTH) AS Mes,
+  m.cliente AS Cliente,
+  g.grupo AS Grupo_empresarial,
+  m.account_name AS Cuenta,
+  m._detrics_account_id AS ID_de_cuenta,
+  m.account_currency AS Moneda,
+  m.campaign_name AS Campana,
+  m.campaign_id AS ID_de_campana,
+  m.spend AS Inversion,
+  m.impressions AS Impresiones,
+  m.clicks AS Clics,
+  m.reach AS Alcance_diario,
+  m.results AS Resultados,
+  m.landing_page_view AS Vistas_de_pagina_de_destino,
+  m.offsite_conversion_fb_pixel_add_to_cart AS Agregados_al_carrito,
+  m.offsite_conversion_fb_pixel_initiate_checkout AS Pagos_iniciados,
+  m.offsite_conversion_fb_pixel_purchase AS Compras,
+  m.offsite_conversion_fb_pixel_purchase_value AS Valor_de_compras,
+  m.onsite_conversion_messaging_conversation_started_7d AS Conversaciones_iniciadas
+FROM assigned m
+LEFT JOIN grupos g USING (cliente)
+WHERE m.cliente != 'Excluir';
+
+-- Chequeo (2026-10-13): inversión de septiembre por cliente igual a master_marketing_daily
+-- (Plataforma = 'Meta') y a master_meta_demographics_daily, diferencias de redondeo.
+</code></pre>
+        </details>
+        <details class="sql-block sql-view">
+          <summary class="sql-head">
+            <div class="sql-title">
+              <strong>34 · Meta por edad y género</strong>
+              <span>Crea <code>master_meta_demographics_daily</code>: panel de edad y género de la página de Meta. Clic para ver el SQL.</span>
+            </div>
+          </summary>
+          <div class="sql-view-actions"><button class="copy-btn" type="button" data-copy-target="sql-34">Copiar SQL</button></div>
+          <pre id="sql-34"><code>-- 34_master_meta_demographics_daily.sql
+-- Meta a grano fecha × cliente × campaña × edad × género, para el panel demográfico
+-- de la página de Meta del Looker.
+--
+-- Cliente: misma regla que 30_master_marketing_daily (campaign_map → cliente único de la cuenta
+-- → 'Sin asignar'; 'Excluir' no entra).
+--
+-- Dependencias: meta_demographics_daily, v_client_map, campaign_map.
+
+CREATE OR REPLACE VIEW `inmediata-510016.test.master_meta_demographics_daily` AS
+WITH
+  accounts AS (
+    SELECT platform_account_id, COUNT(DISTINCT cliente) AS clients_in_account, ANY_VALUE(cliente) AS cliente_unico
+    FROM `inmediata-510016.test.v_client_map`
+    WHERE platform = 'meta'
+    GROUP BY platform_account_id
+  ),
+  campaigns AS (
+    SELECT TRIM(campaign_id) AS campaign_id, ANY_VALUE(TRIM(cliente)) AS cliente
+    FROM `inmediata-510016.test.campaign_map`
+    WHERE TRIM(IFNULL(campaign_id, '')) != '' AND TRIM(IFNULL(cliente, '')) != ''
+    GROUP BY 1
+  ),
+  grupos AS (
+    SELECT cliente, ANY_VALUE(grupo) AS grupo FROM `inmediata-510016.test.v_client_map` GROUP BY cliente
+  ),
+  assigned AS (
+    SELECT d.*, COALESCE(c.cliente, IF(a.clients_in_account = 1, a.cliente_unico, 'Sin asignar')) AS cliente
+    FROM `inmediata-510016.test.meta_demographics_daily` d
+    INNER JOIN accounts a ON d._detrics_account_id = a.platform_account_id
+    LEFT JOIN campaigns c ON CAST(d.campaign_id AS STRING) = c.campaign_id
+  )
+SELECT
+  d.date AS Fecha,
+  DATE_TRUNC(d.date, WEEK(MONDAY)) AS Semana,
+  DATE_TRUNC(d.date, MONTH) AS Mes,
+  d.cliente AS Cliente,
+  g.grupo AS Grupo_empresarial,
+  d.account_name AS Cuenta,
+  d._detrics_account_id AS ID_de_cuenta,
+  d.campaign_name AS Campana,
+  d.campaign_id AS ID_de_campana,
+  d.age AS Edad,
+  CASE LOWER(d.gender) WHEN 'female' THEN 'Mujer' WHEN 'male' THEN 'Hombre' ELSE 'Sin dato' END AS Genero,
+  d.spend AS Inversion,
+  d.impressions AS Impresiones,
+  d.clicks AS Clics,
+  d.results AS Resultados
+FROM assigned d
+LEFT JOIN grupos g USING (cliente)
+WHERE d.cliente != 'Excluir';
+</code></pre>
+        </details>
+        <details class="sql-block sql-view">
+          <summary class="sql-head">
+            <div class="sql-title">
+              <strong>42 · Términos de búsqueda de Google</strong>
+              <span>Crea <code>master_google_search_terms_daily</code>: qué buscó la gente en Search y Performance Max, con compras y leads por término. Clic para ver el SQL.</span>
+            </div>
+          </summary>
+          <div class="sql-view-actions"><button class="copy-btn" type="button" data-copy-target="sql-42">Copiar SQL</button></div>
+          <pre id="sql-42"><code>-- 42_master_google_search_terms_daily.sql
+-- Master a grano fecha × cliente × campaña × grupo de anuncios × keyword × término de búsqueda.
+-- Alimenta la tabla de términos de búsqueda del dashboard (qué buscó la gente y qué vendió).
+--
+-- Dos orígenes:
+--   Search          → search_term_view: trae grupo de anuncios, keyword y concordancia.
+--   Performance Max → campaign_search_term_view: solo campaña y término (PMax no tiene keywords).
+--                     Ese reporte trae también las campañas de Search: acá se queda solo con las
+--                     campañas PERFORMANCE_MAX, para no contar Search dos veces.
+--
+-- Google oculta los términos de poco volumen: estos totales quedan por debajo de los de la campaña
+-- (Nissan sep-26: 72 % de la inversión). Para totales, master_google_keywords_daily o master_marketing_daily.
+--
+-- Gasto y conversiones vienen de tablas separadas (Google solo permite el desglose por acción de
+-- conversión con métricas de conversión). Se unen con UNION ALL + GROUP BY y no con JOIN: así una
+-- conversión sin fila de gasto ese día no se pierde.
+--
+-- Compras y leads: misma regla que master_marketing_daily (10_v_paid_ad_daily.sql).
+-- Mismo cliente que master_marketing_daily: campaign_map por ID, si no, el cliente único de la cuenta.
+--
+-- Dependencias: google_ads_search_terms_daily, google_ads_search_terms_conversions_daily,
+--               google_ads_pmax_search_terms_daily, google_ads_pmax_search_terms_conversions_daily,
+--               google_ads_campaign_daily, v_client_map, campaign_map.
+
+CREATE OR REPLACE VIEW `inmediata-510016.test.master_google_search_terms_daily` AS
+WITH
+  pmax_campaigns AS (
+    SELECT DISTINCT campaign_id
+    FROM `inmediata-510016.test.google_ads_campaign_daily`
+    WHERE campaign_advertising_channel_type = 'PERFORMANCE_MAX'
+  ),
+  rows_union AS (
+    -- Search: gasto
+    SELECT date, _detrics_account_id, campaign_id, campaign_name, ad_group_id, ad_group_name,
+           keyword_text, keyword_match_type, search_term_view_search_term AS search_term,
+           segments_search_term_match_type AS search_term_match_type, 'Search' AS origen,
+           cost_micros AS spend, impressions, clicks,
+           0.0 AS purchases, 0.0 AS purchase_value, 0.0 AS leads
+    FROM `inmediata-510016.test.google_ads_search_terms_daily`
+    UNION ALL
+    -- Search: conversiones por acción
+    SELECT date, _detrics_account_id, campaign_id, campaign_name, ad_group_id, ad_group_name,
+           keyword_text, keyword_match_type, search_term_view_search_term,
+           segments_search_term_match_type, 'Search',
+           0.0, 0, 0,
+           IF(segments_conversion_action_category = 'PURCHASE' AND segments_conversion_action_name != 'Compra_Luis_El_Flaco', conversions, 0),
+           IF(segments_conversion_action_category = 'PURCHASE' AND segments_conversion_action_name != 'Compra_Luis_El_Flaco', conversions_value, 0),
+           IF(segments_conversion_action_category IN ('SIGNUP', 'SUBMIT_LEAD_FORM', 'BOOK_APPOINTMENT',
+              'REQUEST_QUOTE', 'CONTACT', 'PHONE_CALL_LEAD', 'IMPORTED_LEAD', 'QUALIFIED_LEAD',
+              'CONVERTED_LEAD') OR segments_conversion_action_name = 'Compra_Luis_El_Flaco', conversions, 0)
+    FROM `inmediata-510016.test.google_ads_search_terms_conversions_daily`
+    UNION ALL
+    -- Performance Max: gasto
+    SELECT date, _detrics_account_id, campaign_id, campaign_name, CAST(NULL AS STRING), CAST(NULL AS STRING),
+           CAST(NULL AS STRING), CAST(NULL AS STRING), campaign_search_term_view_search_term,
+           CAST(NULL AS STRING), 'Performance Max',
+           cost_micros, impressions, clicks, 0.0, 0.0, 0.0
+    FROM `inmediata-510016.test.google_ads_pmax_search_terms_daily`
+    WHERE campaign_id IN (SELECT campaign_id FROM pmax_campaigns)
+    UNION ALL
+    -- Performance Max: conversiones por acción
+    SELECT date, _detrics_account_id, campaign_id, campaign_name, CAST(NULL AS STRING), CAST(NULL AS STRING),
+           CAST(NULL AS STRING), CAST(NULL AS STRING), campaign_search_term_view_search_term,
+           CAST(NULL AS STRING), 'Performance Max',
+           0.0, 0, 0,
+           IF(segments_conversion_action_category = 'PURCHASE' AND segments_conversion_action_name != 'Compra_Luis_El_Flaco', conversions, 0),
+           IF(segments_conversion_action_category = 'PURCHASE' AND segments_conversion_action_name != 'Compra_Luis_El_Flaco', conversions_value, 0),
+           IF(segments_conversion_action_category IN ('SIGNUP', 'SUBMIT_LEAD_FORM', 'BOOK_APPOINTMENT',
+              'REQUEST_QUOTE', 'CONTACT', 'PHONE_CALL_LEAD', 'IMPORTED_LEAD', 'QUALIFIED_LEAD',
+              'CONVERTED_LEAD') OR segments_conversion_action_name = 'Compra_Luis_El_Flaco', conversions, 0)
+    FROM `inmediata-510016.test.google_ads_pmax_search_terms_conversions_daily`
+    WHERE campaign_id IN (SELECT campaign_id FROM pmax_campaigns)
+  ),
+  terms AS (
+    SELECT date, _detrics_account_id, campaign_id, campaign_name, ad_group_id, ad_group_name,
+           keyword_text, keyword_match_type, search_term, search_term_match_type, origen,
+           SUM(spend) AS spend, SUM(impressions) AS impressions, SUM(clicks) AS clicks,
+           SUM(purchases) AS purchases, SUM(purchase_value) AS purchase_value, SUM(leads) AS leads
+    FROM rows_union
+    GROUP BY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
+  ),
+  -- Cliente por cuenta: solo sirve si la cuenta tiene UN cliente en el mapa.
+  accounts AS (
+    SELECT
+      platform_account_id,
+      COUNT(DISTINCT cliente) AS clients_in_account,
+      ANY_VALUE(cliente)      AS cliente_unico
+    FROM `inmediata-510016.test.v_client_map`
+    WHERE platform = 'google_ads'
+    GROUP BY platform_account_id
+  ),
+  -- Cliente por campaña: pestaña "Campaign mapping" del sheet (lo completa Inmediata).
+  campaigns AS (
+    SELECT TRIM(campaign_id) AS campaign_id, ANY_VALUE(TRIM(cliente)) AS cliente
+    FROM `inmediata-510016.test.campaign_map`
+    WHERE TRIM(IFNULL(campaign_id, '')) != '' AND TRIM(IFNULL(cliente, '')) != ''
+    GROUP BY 1
+  ),
+  grupos AS (
+    SELECT cliente, ANY_VALUE(grupo) AS grupo
+    FROM `inmediata-510016.test.v_client_map`
+    GROUP BY cliente
+  ),
+  assigned AS (
+    SELECT
+      t.*,
+      COALESCE(c.cliente, IF(a.clients_in_account = 1, a.cliente_unico, 'Sin asignar')) AS cliente
+    FROM terms t
+    INNER JOIN accounts a
+      ON t._detrics_account_id = a.platform_account_id
+    LEFT JOIN campaigns c
+      ON CAST(t.campaign_id AS STRING) = c.campaign_id
+  )
+SELECT
+  t.date                                 AS Fecha,
+  DATE_TRUNC(t.date, WEEK(MONDAY))       AS Semana,
+  DATE_TRUNC(t.date, MONTH)              AS Mes,
+  t.cliente                              AS Cliente,
+  g.grupo                                AS Grupo_empresarial,
+  'Google Ads'                           AS Plataforma,
+  t._detrics_account_id                  AS ID_de_cuenta,
+  t.origen                               AS Origen,
+  t.campaign_name                        AS Campana,
+  t.campaign_id                          AS ID_de_campana,
+  t.ad_group_name                        AS Grupo_de_anuncios,
+  t.ad_group_id                          AS ID_de_grupo_de_anuncios,
+  t.keyword_text                         AS Palabra_clave,
+  CASE UPPER(t.keyword_match_type)
+    WHEN 'EXACT'  THEN 'Exacta'
+    WHEN 'PHRASE' THEN 'Frase'
+    WHEN 'BROAD'  THEN 'Amplia'
+    ELSE t.keyword_match_type
+  END                                    AS Concordancia,
+  t.search_term                          AS Termino_de_busqueda,
+  -- Cómo coincidió la búsqueda con la keyword (variantes cercanas incluidas). Vacío en PMax.
+  CASE UPPER(t.search_term_match_type)
+    WHEN 'EXACT'       THEN 'Exacta'
+    WHEN 'NEAR_EXACT'  THEN 'Exacta (variante cercana)'
+    WHEN 'PHRASE'      THEN 'Frase'
+    WHEN 'NEAR_PHRASE' THEN 'Frase (variante cercana)'
+    WHEN 'BROAD'       THEN 'Amplia'
+    ELSE t.search_term_match_type
+  END                                    AS Concordancia_del_termino,
+
+  -- Solo métricas sumables. CTR, CPC, costo por compra y por lead se calculan en Looker.
+  t.spend                                AS Inversion,
+  t.impressions                          AS Impresiones,
+  t.clicks                               AS Clics,
+  t.purchases                            AS Compras,
+  t.purchase_value                       AS Valor_de_compras,
+  t.leads                                AS Leads
+FROM assigned t
+LEFT JOIN grupos g USING (cliente)
+WHERE t.cliente != 'Excluir';
+
+-- Chequeos esperados:
+--   SELECT Origen, Cliente, SUM(Inversion), SUM(Compras), SUM(Valor_de_compras), SUM(Leads)
+--   FROM master_google_search_terms_daily
+--   WHERE Fecha BETWEEN DATE '2026-09-01' AND DATE '2026-09-30'
+--   GROUP BY 1, 2 ORDER BY 3 DESC;
+--
+-- Esperado (pull de prueba 2026-10-13): Nissan sep-26 ≈ 20.5K MXN de inversión (vs 28.5K de la
+-- campaña); PMax WTA GDL 13-ago a 12-oct ≈ 11.6K MXN, "boletomovil" ≈ 172 compras / 540K MXN.
+</code></pre>
+        </details>
+        <details class="sql-block sql-view">
+          <summary class="sql-head">
+            <div class="sql-title">
+              <strong>44 · Grupos de anuncios de Google</strong>
+              <span>Crea <code>master_google_ad_group_daily</code>: Google por grupo de anuncios en todos los tipos de campaña. Hoy también está en master_marketing_daily. Clic para ver el SQL.</span>
+            </div>
+          </summary>
+          <div class="sql-view-actions"><button class="copy-btn" type="button" data-copy-target="sql-44">Copiar SQL</button></div>
+          <pre id="sql-44"><code>-- 44_master_google_ad_group_daily.sql
+-- Master a grano fecha × cliente × campaña × grupo de anuncios de Google Ads.
+-- Alimenta el panel de grupos de anuncios de la página de Google del Looker.
+--
+-- Totales completos: suma lo mismo que Google Ads y que master_marketing_daily, en todos los tipos
+-- de campaña (Search, Display, YouTube, Performance Max, Demand Gen). En Performance Max el "grupo"
+-- es el grupo de recursos.
+--
+-- Compras y leads: misma regla que master_marketing_daily (10_v_paid_ad_daily.sql).
+-- Cliente: misma regla que 30_master_marketing_daily (campaign_map → cliente único de la cuenta
+-- → 'Sin asignar'; 'Excluir' no entra).
+--
+-- Dependencias: google_ads_ad_group_daily, google_ads_ad_group_conversions_daily,
+--               google_ads_campaign_daily, v_client_map, campaign_map.
+
+CREATE OR REPLACE VIEW `inmediata-510016.test.master_google_ad_group_daily` AS
+WITH
+  accounts AS (
+    SELECT platform_account_id, COUNT(DISTINCT cliente) AS clients_in_account, ANY_VALUE(cliente) AS cliente_unico
+    FROM `inmediata-510016.test.v_client_map`
+    WHERE platform = 'google_ads'
+    GROUP BY platform_account_id
+  ),
+  campaigns AS (
+    SELECT TRIM(campaign_id) AS campaign_id, ANY_VALUE(TRIM(cliente)) AS cliente
+    FROM `inmediata-510016.test.campaign_map`
+    WHERE TRIM(IFNULL(campaign_id, '')) != '' AND TRIM(IFNULL(cliente, '')) != ''
+    GROUP BY 1
+  ),
+  grupos AS (
+    SELECT cliente, ANY_VALUE(grupo) AS grupo FROM `inmediata-510016.test.v_client_map` GROUP BY cliente
+  ),
+  channel AS (
+    SELECT campaign_id, ANY_VALUE(campaign_advertising_channel_type) AS channel_type
+    FROM `inmediata-510016.test.google_ads_campaign_daily`
+    GROUP BY 1
+  ),
+  assigned AS (
+    SELECT a.*, COALESCE(c.cliente, IF(acc.clients_in_account = 1, acc.cliente_unico, 'Sin asignar')) AS cliente
+    FROM `inmediata-510016.test.google_ads_ad_group_daily` a
+    INNER JOIN accounts acc ON a._detrics_account_id = acc.platform_account_id
+    LEFT JOIN campaigns c ON CAST(a.campaign_id AS STRING) = c.campaign_id
+  )
+SELECT
+  a.date                                 AS Fecha,
+  DATE_TRUNC(a.date, WEEK(MONDAY))       AS Semana,
+  DATE_TRUNC(a.date, MONTH)              AS Mes,
+  a.cliente                              AS Cliente,
+  g.grupo                                AS Grupo_empresarial,
+  'Google Ads'                           AS Plataforma,
+  a._detrics_account_id                  AS ID_de_cuenta,
+  a.campaign_name                        AS Campana,
+  a.campaign_id                          AS ID_de_campana,
+  CASE ch.channel_type
+    WHEN 'SEARCH'          THEN 'Search'
+    WHEN 'DISPLAY'         THEN 'Display'
+    WHEN 'VIDEO'           THEN 'YouTube'
+    WHEN 'PERFORMANCE_MAX' THEN 'Performance Max'
+    WHEN 'DEMAND_GEN'      THEN 'Demand Gen'
+    ELSE ch.channel_type
+  END                                    AS Tipo_de_campana,
+  a.ad_group_name                        AS Grupo_de_anuncios,
+  a.ad_group_id                          AS ID_de_grupo_de_anuncios,
+
+  -- Solo métricas sumables. CTR, CPC, costo por compra y por lead se calculan en Looker.
+  a.cost_micros                          AS Inversion,
+  a.impressions                          AS Impresiones,
+  a.clicks                               AS Clics,
+  IFNULL(cv.purchases, 0)                AS Compras,
+  IFNULL(cv.purchase_value, 0)           AS Valor_de_compras,
+  IFNULL(cv.leads, 0)                    AS Leads,
+  a.conversions                          AS Conversiones,
+  a.conversions_value                    AS Valor_de_conversiones
+FROM assigned a
+LEFT JOIN grupos g USING (cliente)
+LEFT JOIN channel ch ON ch.campaign_id = a.campaign_id
+LEFT JOIN (
+  SELECT date AS cv_date, _detrics_account_id AS cv_account, ad_group_id AS cv_ad_group,
+         SUM(IF(segments_conversion_action_category = 'PURCHASE' AND segments_conversion_action_name != 'Compra_Luis_El_Flaco', conversions, 0))       AS purchases,
+         SUM(IF(segments_conversion_action_category = 'PURCHASE' AND segments_conversion_action_name != 'Compra_Luis_El_Flaco', conversions_value, 0)) AS purchase_value,
+         SUM(IF(segments_conversion_action_category IN ('SIGNUP', 'SUBMIT_LEAD_FORM', 'BOOK_APPOINTMENT',
+                'REQUEST_QUOTE', 'CONTACT', 'PHONE_CALL_LEAD', 'IMPORTED_LEAD', 'QUALIFIED_LEAD',
+                'CONVERTED_LEAD') OR segments_conversion_action_name = 'Compra_Luis_El_Flaco', conversions, 0)) AS leads
+  FROM `inmediata-510016.test.google_ads_ad_group_conversions_daily`
+  GROUP BY 1, 2, 3
+) cv
+  ON  cv.cv_date     = a.date
+  AND cv.cv_account  = a._detrics_account_id
+  AND cv.cv_ad_group = a.ad_group_id
+WHERE a.cliente != 'Excluir';
+
+-- Chequeos esperados:
+--   Inversión y Conversiones por Tipo_de_campana = google_ads_campaign_daily (2026: Search 269.6K,
+--   Display 88.7K, YouTube 58.8K, PMax 16.6K, Demand Gen 1.8K; conversiones 983 Search + 339.6 PMax).
+--   Compras y Leads por cliente = master_marketing_daily (Plataforma = 'Google Ads').
+</code></pre>
+        </details>
+        <details class="sql-block sql-view">
+          <summary class="sql-head">
+            <div class="sql-title">
+              <strong>46 · Google por edad</strong>
+              <span>Crea <code>master_google_age_daily</code>: panel de edad de Google (sin Performance Max). No se suma con el de género. Clic para ver el SQL.</span>
+            </div>
+          </summary>
+          <div class="sql-view-actions"><button class="copy-btn" type="button" data-copy-target="sql-46">Copiar SQL</button></div>
+          <pre id="sql-46"><code>-- 46_master_google_age_daily.sql
+-- Google Ads a grano fecha × cliente × campaña × edad, para el panel demográfico de la página de
+-- Google del Looker.
+--
+-- Google no deja cruzar edad con género en el mismo reporte: el género está en master_google_gender_daily.
+-- Cada vista reparte el total de la campaña por su lado; no se suman entre sí.
+-- Performance Max no informa datos demográficos: su inversión no aparece acá.
+--
+-- Cliente: misma regla que 30_master_marketing_daily (campaign_map → cliente único de la cuenta
+-- → 'Sin asignar'; 'Excluir' no entra).
+--
+-- Dependencias: google_ads_demographics_daily (solo trae edad), v_client_map, campaign_map.
+
+CREATE OR REPLACE VIEW `inmediata-510016.test.master_google_age_daily` AS
+WITH
+  accounts AS (
+    SELECT platform_account_id, COUNT(DISTINCT cliente) AS clients_in_account, ANY_VALUE(cliente) AS cliente_unico
+    FROM `inmediata-510016.test.v_client_map`
+    WHERE platform = 'google_ads'
+    GROUP BY platform_account_id
+  ),
+  campaigns AS (
+    SELECT TRIM(campaign_id) AS campaign_id, ANY_VALUE(TRIM(cliente)) AS cliente
+    FROM `inmediata-510016.test.campaign_map`
+    WHERE TRIM(IFNULL(campaign_id, '')) != '' AND TRIM(IFNULL(cliente, '')) != ''
+    GROUP BY 1
+  ),
+  grupos AS (
+    SELECT cliente, ANY_VALUE(grupo) AS grupo FROM `inmediata-510016.test.v_client_map` GROUP BY cliente
+  ),
+  assigned AS (
+    SELECT d.*, COALESCE(c.cliente, IF(a.clients_in_account = 1, a.cliente_unico, 'Sin asignar')) AS cliente
+    FROM `inmediata-510016.test.google_ads_demographics_daily` d
+    INNER JOIN accounts a ON d._detrics_account_id = a.platform_account_id
+    LEFT JOIN campaigns c ON CAST(d.campaign_id AS STRING) = c.campaign_id
+  )
+SELECT
+  d.date                                 AS Fecha,
+  DATE_TRUNC(d.date, WEEK(MONDAY))       AS Semana,
+  DATE_TRUNC(d.date, MONTH)              AS Mes,
+  d.cliente                              AS Cliente,
+  g.grupo                                AS Grupo_empresarial,
+  'Google Ads'                           AS Plataforma,
+  d._detrics_account_id                  AS ID_de_cuenta,
+  d.campaign_name                        AS Campana,
+  d.campaign_id                          AS ID_de_campana,
+  CASE d.age_range_type
+    WHEN '65-UP'        THEN '65+'
+    WHEN 'UNDETERMINED' THEN 'Sin dato'
+    ELSE d.age_range_type
+  END                                    AS Edad,
+  d.cost_micros                          AS Inversion,
+  d.impressions                          AS Impresiones,
+  d.clicks                               AS Clics
+FROM assigned d
+LEFT JOIN grupos g USING (cliente)
+WHERE d.cliente != 'Excluir';
+</code></pre>
+        </details>
+        <details class="sql-block sql-view">
+          <summary class="sql-head">
+            <div class="sql-title">
+              <strong>47 · Google por género</strong>
+              <span>Crea <code>master_google_gender_daily</code>: panel de género de Google (sin Performance Max). No se suma con el de edad. Clic para ver el SQL.</span>
+            </div>
+          </summary>
+          <div class="sql-view-actions"><button class="copy-btn" type="button" data-copy-target="sql-47">Copiar SQL</button></div>
+          <pre id="sql-47"><code>-- 47_master_google_gender_daily.sql
+-- Google Ads a grano fecha × cliente × campaña × género, para el panel demográfico de la página de
+-- Google del Looker.
+--
+-- Google no deja cruzar género con edad en el mismo reporte: la edad está en master_google_age_daily.
+-- Cada vista reparte el total de la campaña por su lado; no se suman entre sí.
+-- Performance Max no informa datos demográficos: su inversión no aparece acá.
+--
+-- Cliente: misma regla que 30_master_marketing_daily (campaign_map → cliente único de la cuenta
+-- → 'Sin asignar'; 'Excluir' no entra).
+--
+-- Dependencias: google_ads_gender_daily, v_client_map, campaign_map.
+
+CREATE OR REPLACE VIEW `inmediata-510016.test.master_google_gender_daily` AS
+WITH
+  accounts AS (
+    SELECT platform_account_id, COUNT(DISTINCT cliente) AS clients_in_account, ANY_VALUE(cliente) AS cliente_unico
+    FROM `inmediata-510016.test.v_client_map`
+    WHERE platform = 'google_ads'
+    GROUP BY platform_account_id
+  ),
+  campaigns AS (
+    SELECT TRIM(campaign_id) AS campaign_id, ANY_VALUE(TRIM(cliente)) AS cliente
+    FROM `inmediata-510016.test.campaign_map`
+    WHERE TRIM(IFNULL(campaign_id, '')) != '' AND TRIM(IFNULL(cliente, '')) != ''
+    GROUP BY 1
+  ),
+  grupos AS (
+    SELECT cliente, ANY_VALUE(grupo) AS grupo FROM `inmediata-510016.test.v_client_map` GROUP BY cliente
+  ),
+  assigned AS (
+    SELECT d.*, COALESCE(c.cliente, IF(a.clients_in_account = 1, a.cliente_unico, 'Sin asignar')) AS cliente
+    FROM `inmediata-510016.test.google_ads_gender_daily` d
+    INNER JOIN accounts a ON d._detrics_account_id = a.platform_account_id
+    LEFT JOIN campaigns c ON CAST(d.campaign_id AS STRING) = c.campaign_id
+  )
+SELECT
+  d.date                                 AS Fecha,
+  DATE_TRUNC(d.date, WEEK(MONDAY))       AS Semana,
+  DATE_TRUNC(d.date, MONTH)              AS Mes,
+  d.cliente                              AS Cliente,
+  g.grupo                                AS Grupo_empresarial,
+  'Google Ads'                           AS Plataforma,
+  d._detrics_account_id                  AS ID_de_cuenta,
+  d.campaign_name                        AS Campana,
+  d.campaign_id                          AS ID_de_campana,
+  CASE d.gender_type
+    WHEN 'FEMALE' THEN 'Mujer'
+    WHEN 'MALE'   THEN 'Hombre'
+    ELSE 'Sin dato'
+  END                                    AS Genero,
+  d.cost_micros                          AS Inversion,
+  d.impressions                          AS Impresiones,
+  d.clicks                               AS Clics
+FROM assigned d
+LEFT JOIN grupos g USING (cliente)
+WHERE d.cliente != 'Excluir';
+</code></pre>
+        </details>
+        <details class="sql-block sql-view">
+          <summary class="sql-head">
+            <div class="sql-title">
+              <strong>48 · Dispositivos de Meta, Google y TikTok</strong>
+              <span>Crea <code>master_device_daily</code>: inversión, tráfico, compras y leads por dispositivo, con el mismo vocabulario en las tres plataformas. Clic para ver el SQL.</span>
+            </div>
+          </summary>
+          <div class="sql-view-actions"><button class="copy-btn" type="button" data-copy-target="sql-48">Copiar SQL</button></div>
+          <pre id="sql-48"><code>-- 48_master_device_daily.sql
+-- Master a grano fecha × cliente × plataforma × campaña × conjunto/grupo × dispositivo.
+-- Alimenta el panel de dispositivos del Looker (Meta, Google Ads y TikTok juntos).
+--
+-- Vocabulario común entre plataformas:
+--   Dispositivo        Celular · Computadora · Tablet · TV · Sin dato
+--   Sistema_operativo  iOS · Android (Meta y TikTok; Google no lo informa en este reporte)
+--   Dispositivo_detalle lo que informa cada plataforma (iPhone, Android celular, iPad, …)
+--
+-- Métricas con la misma regla que master_marketing_daily (10_v_paid_ad_daily.sql):
+--   Compras / Leads de Google por acción de conversión; Leads de Meta = conversaciones iniciadas;
+--   TikTok sin leads (sus clics a WhatsApp cuentan como clics).
+-- Cliente: misma regla que 30_master_marketing_daily (campaign_map → cliente único de la cuenta
+-- → 'Sin asignar'; 'Excluir' no entra).
+--
+-- Dependencias: google_ads_device_daily, google_ads_device_conversions_daily, google_ads_campaign_daily,
+--               meta_device_daily, tiktok_device_daily, tiktok_ad_daily, v_client_map, campaign_map.
+
+CREATE OR REPLACE VIEW `inmediata-510016.test.master_device_daily` AS
+WITH
+  google_cv AS (
+    SELECT date, _detrics_account_id, ad_group_id, segments_device,
+           SUM(IF(segments_conversion_action_category = 'PURCHASE' AND segments_conversion_action_name != 'Compra_Luis_El_Flaco', conversions, 0))       AS purchases,
+           SUM(IF(segments_conversion_action_category = 'PURCHASE' AND segments_conversion_action_name != 'Compra_Luis_El_Flaco', conversions_value, 0)) AS purchase_value,
+           SUM(IF(segments_conversion_action_category IN ('SIGNUP', 'SUBMIT_LEAD_FORM', 'BOOK_APPOINTMENT',
+                  'REQUEST_QUOTE', 'CONTACT', 'PHONE_CALL_LEAD', 'IMPORTED_LEAD', 'QUALIFIED_LEAD',
+                  'CONVERTED_LEAD') OR segments_conversion_action_name = 'Compra_Luis_El_Flaco', conversions, 0)) AS leads
+    FROM `inmediata-510016.test.google_ads_device_conversions_daily`
+    GROUP BY 1, 2, 3, 4
+  ),
+  google_acc AS (
+    SELECT _detrics_account_id, ANY_VALUE(customer_descriptive_name) AS account_name
+    FROM `inmediata-510016.test.google_ads_campaign_daily`
+    GROUP BY 1
+  ),
+  google_ch AS (
+    SELECT campaign_id, ANY_VALUE(campaign_advertising_channel_type) AS channel_type
+    FROM `inmediata-510016.test.google_ads_campaign_daily`
+    GROUP BY 1
+  ),
+  tiktok_acc AS (
+    SELECT _detrics_account_id, ANY_VALUE(advertiser_name) AS account_name
+    FROM `inmediata-510016.test.tiktok_ad_daily`
+    GROUP BY 1
+  ),
+  rows_union AS (
+    -- Google Ads
+    SELECT
+      d.date, 'google_ads' AS platform, d._detrics_account_id AS platform_account_id, acc.account_name,
+      d.campaign_id, d.campaign_name, ch.channel_type AS campaign_type, d.ad_group_id AS adset_id, d.ad_group_name AS adset_name,
+      CASE d.segments_device
+        WHEN 'MOBILE'       THEN 'Celular'
+        WHEN 'DESKTOP'      THEN 'Computadora'
+        WHEN 'TABLET'       THEN 'Tablet'
+        WHEN 'CONNECTED_TV' THEN 'TV'
+        ELSE 'Sin dato'
+      END AS device,
+      CAST(NULL AS STRING) AS os,
+      CASE d.segments_device
+        WHEN 'MOBILE'       THEN 'Celular'
+        WHEN 'DESKTOP'      THEN 'Computadora'
+        WHEN 'TABLET'       THEN 'Tablet'
+        WHEN 'CONNECTED_TV' THEN 'TV'
+        ELSE 'Otro'
+      END AS device_detail,
+      d.cost_micros AS spend, d.impressions, d.clicks,
+      d.clicks AS link_clicks, CAST(NULL AS INT64) AS landing_page_views,
+      IFNULL(cv.purchases, 0) AS purchases, IFNULL(cv.purchase_value, 0) AS purchase_value, IFNULL(cv.leads, 0) AS leads,
+      d.conversions, d.conversions_value
+    FROM `inmediata-510016.test.google_ads_device_daily` d
+    LEFT JOIN google_acc acc ON acc._detrics_account_id = d._detrics_account_id
+    LEFT JOIN google_ch ch ON ch.campaign_id = d.campaign_id
+    LEFT JOIN google_cv cv
+      ON  cv.date = d.date AND cv._detrics_account_id = d._detrics_account_id
+      AND cv.ad_group_id = d.ad_group_id AND cv.segments_device = d.segments_device
+
+    UNION ALL
+
+    -- Meta
+    SELECT
+      date, 'meta', _detrics_account_id, account_name,
+      campaign_id, campaign_name, CAST(NULL AS STRING), adset_id, adset_name,
+      CASE
+        WHEN impression_device IN ('iphone', 'android_smartphone', 'ipod') THEN 'Celular'
+        WHEN impression_device IN ('ipad', 'android_tablet')               THEN 'Tablet'
+        WHEN impression_device = 'desktop'                                 THEN 'Computadora'
+        ELSE 'Sin dato'
+      END,
+      CASE
+        WHEN impression_device IN ('iphone', 'ipad', 'ipod')                THEN 'iOS'
+        WHEN impression_device IN ('android_smartphone', 'android_tablet') THEN 'Android'
+      END,
+      CASE impression_device
+        WHEN 'iphone'             THEN 'iPhone'
+        WHEN 'android_smartphone' THEN 'Android celular'
+        WHEN 'ipad'               THEN 'iPad'
+        WHEN 'android_tablet'     THEN 'Android tablet'
+        WHEN 'ipod'               THEN 'iPod'
+        WHEN 'desktop'            THEN 'Computadora'
+        ELSE 'Otro'
+      END,
+      spend, impressions, clicks,
+      inline_link_clicks, landing_page_view,
+      offsite_conversion_fb_pixel_purchase, offsite_conversion_fb_pixel_purchase_value,
+      onsite_conversion_messaging_conversation_started_7d,
+      CAST(NULL AS FLOAT64), CAST(NULL AS FLOAT64)
+    FROM `inmediata-510016.test.meta_device_daily`
+
+    UNION ALL
+
+    -- TikTok
+    SELECT
+      t.stat_time_day, 'tiktok', t._detrics_account_id, acc.account_name,
+      t.campaign_id, t.campaign_name, CAST(NULL AS STRING), t.adgroup_id, t.adgroup_name,
+      -- En BigQuery llega como iOS (= iPhone), iPad, Android, Unknown; la API también usa IPHONE / IPAD / ANDROID.
+      CASE UPPER(t.platform) WHEN 'IOS' THEN 'Celular' WHEN 'IPHONE' THEN 'Celular' WHEN 'ANDROID' THEN 'Celular' WHEN 'IPAD' THEN 'Tablet' ELSE 'Sin dato' END,
+      CASE UPPER(t.platform) WHEN 'IOS' THEN 'iOS' WHEN 'IPHONE' THEN 'iOS' WHEN 'IPAD' THEN 'iOS' WHEN 'ANDROID' THEN 'Android' END,
+      CASE UPPER(t.platform) WHEN 'IOS' THEN 'iPhone' WHEN 'IPHONE' THEN 'iPhone' WHEN 'ANDROID' THEN 'Android' WHEN 'IPAD' THEN 'iPad' ELSE 'Otro' END,
+      t.spend, t.impressions, t.clicks,
+      t.clicks, t.total_landing_page_view,
+      t.conversion, CAST(NULL AS FLOAT64), CAST(NULL AS FLOAT64),
+      CAST(NULL AS FLOAT64), CAST(NULL AS FLOAT64)
+    FROM `inmediata-510016.test.tiktok_device_daily` t
+    LEFT JOIN tiktok_acc acc ON acc._detrics_account_id = t._detrics_account_id
+  ),
+  accounts AS (
+    SELECT platform, platform_account_id, COUNT(DISTINCT cliente) AS clients_in_account, ANY_VALUE(cliente) AS cliente_unico
+    FROM `inmediata-510016.test.v_client_map`
+    WHERE platform IN ('meta', 'google_ads', 'tiktok')
+    GROUP BY platform, platform_account_id
+  ),
+  campaigns AS (
+    SELECT TRIM(campaign_id) AS campaign_id, ANY_VALUE(TRIM(cliente)) AS cliente
+    FROM `inmediata-510016.test.campaign_map`
+    WHERE TRIM(IFNULL(campaign_id, '')) != '' AND TRIM(IFNULL(cliente, '')) != ''
+    GROUP BY 1
+  ),
+  grupos AS (
+    SELECT cliente, ANY_VALUE(grupo) AS grupo FROM `inmediata-510016.test.v_client_map` GROUP BY cliente
+  ),
+  assigned AS (
+    SELECT r.*, COALESCE(c.cliente, IF(a.clients_in_account = 1, a.cliente_unico, 'Sin asignar')) AS cliente
+    FROM rows_union r
+    INNER JOIN accounts a ON r.platform = a.platform AND r.platform_account_id = a.platform_account_id
+    LEFT JOIN campaigns c ON CAST(r.campaign_id AS STRING) = c.campaign_id
+  )
+SELECT
+  r.date                                 AS Fecha,
+  DATE_TRUNC(r.date, WEEK(MONDAY))       AS Semana,
+  DATE_TRUNC(r.date, MONTH)              AS Mes,
+  r.cliente                              AS Cliente,
+  g.grupo                                AS Grupo_empresarial,
+  CASE r.platform WHEN 'meta' THEN 'Meta' WHEN 'google_ads' THEN 'Google Ads' WHEN 'tiktok' THEN 'TikTok' END AS Plataforma,
+  r.account_name                         AS Cuenta,
+  r.platform_account_id                  AS ID_de_cuenta,
+  r.campaign_name                        AS Campana,
+  CAST(r.campaign_id AS STRING)          AS ID_de_campana,
+  -- Solo Google Ads. Vacío en Meta y TikTok.
+  CASE r.campaign_type
+    WHEN 'SEARCH'          THEN 'Search'
+    WHEN 'DISPLAY'         THEN 'Display'
+    WHEN 'VIDEO'           THEN 'YouTube'
+    WHEN 'PERFORMANCE_MAX' THEN 'Performance Max'
+    WHEN 'DEMAND_GEN'      THEN 'Demand Gen'
+    ELSE r.campaign_type
+  END                                    AS Tipo_de_campana,
+  r.adset_name                           AS Conjunto_de_anuncios,
+  CAST(r.adset_id AS STRING)             AS ID_de_conjunto,
+  r.device                               AS Dispositivo,
+  r.os                                   AS Sistema_operativo,
+  r.device_detail                        AS Dispositivo_detalle,
+
+  -- Solo métricas sumables. CTR, CPC, CPL, CPA y ROAS se calculan en Looker.
+  r.spend                                AS Inversion,
+  r.impressions                          AS Impresiones,
+  r.clicks                               AS Clics,
+  r.link_clicks                          AS Clics_en_el_enlace,
+  r.landing_page_views                   AS Vistas_de_pagina_de_destino,
+  r.purchases                            AS Compras,
+  r.purchase_value                       AS Valor_de_compras,
+  r.leads                                AS Leads,
+  r.conversions                          AS Conversiones,
+  r.conversions_value                    AS Valor_de_conversiones
+FROM assigned r
+LEFT JOIN grupos g USING (cliente)
+WHERE r.cliente != 'Excluir';
+
+-- Chequeos esperados (por cliente y plataforma, sumando todos los dispositivos):
+--   Inversion, Compras y Leads = master_marketing_daily.
+--   Meta y TikTok: Clics_en_el_enlace y Vistas_de_pagina_de_destino también.
+</code></pre>
+        </details>
+        <details class="sql-block sql-view">
+          <summary class="sql-head">
+            <div class="sql-title">
+              <strong>50 · Instagram por día</strong>
+              <span>Crea <code>master_social_daily</code>: alcance diario, totales de 30 días de la cuenta, seguidores y seguidores nuevos. Clic para ver el SQL.</span>
+            </div>
+          </summary>
+          <div class="sql-view-actions"><button class="copy-btn" type="button" data-copy-target="sql-50">Copiar SQL</button></div>
+          <pre id="sql-50"><code>-- 50_master_social_daily.sql
+-- Instagram orgánico a grano fecha × cuenta, con cliente. Alimenta la página de Instagram del Looker.
+--
+-- Solo entran las cuentas de Instagram del Mapa de clientes (INNER JOIN con v_client_map).
+-- La primera carga del transfer trajo también 4 centros comerciales (después se sacaron del
+-- transfer): sus filas quedan en las tablas crudas y este join las deja afuera.
+--
+-- Fuentes:
+--   ig_account_reach_daily  alcance por día (historia de 3 meses, incremental)
+--   ig_account_snapshot     foto diaria (full_append) con el total de los 30 días anteriores: visitas
+--                           al perfil, clics al sitio, visualizaciones, me gusta, comentarios,
+--                           compartidos, guardados. Instagram no los devuelve por día.
+--   ig_followers_snapshot   seguidores al momento de cada corrida (full_append); de acá sale
+--                           Seguidores_nuevos (diferencia contra el día anterior)
+--
+-- Total móvil de 30 días (verificado 2026-10-13): la tabla tiene timeframe "yesterday" pero el transfer
+-- lo ignora y pide los últimos 30 días. Ser Madre 12-oct: 4.281 visitas = 13-sep a 12-oct en la API
+-- (el día solo, 37). VMP tiene el mismo comportamiento. Por eso las columnas van con sufijo _30_dias
+-- y no se suman entre fechas.
+--
+-- Dependencias: ig_account_reach_daily, ig_account_snapshot, ig_followers_snapshot, v_client_map.
+
+CREATE OR REPLACE VIEW `inmediata-510016.test.master_social_daily` AS
+WITH
+  cuentas AS (
+    SELECT platform_account_id, ANY_VALUE(cliente) AS cliente, ANY_VALUE(grupo) AS grupo
+    FROM `inmediata-510016.test.v_client_map`
+    WHERE platform = 'instagram'
+    GROUP BY 1
+  ),
+  alcance AS (
+    SELECT _detrics_account_id AS id, date AS fecha, ANY_VALUE(username) AS username, MAX(account_reach) AS alcance
+    FROM `inmediata-510016.test.ig_account_reach_daily`
+    GROUP BY 1, 2
+  ),
+  -- Foto diaria de los últimos 30 días: cada corrida guarda el total de los 30 días anteriores
+  -- (el transfer ignora el timeframe "yesterday" de la tabla). Fecha = último día cubierto.
+  kpis AS (
+    SELECT * EXCEPT (rn) FROM (
+      SELECT _detrics_account_id AS id,
+             DATE_SUB(DATE(_detrics_synced_at, 'America/Mexico_City'), INTERVAL 1 DAY) AS fecha,
+             profile_views, website_clicks, account_views, account_likes, account_comments, account_shares, account_saves,
+             ROW_NUMBER() OVER (PARTITION BY _detrics_account_id, DATE(_detrics_synced_at, 'America/Mexico_City') ORDER BY _detrics_synced_at DESC) AS rn
+      FROM `inmediata-510016.test.ig_account_snapshot`
+    ) WHERE rn = 1
+  ),
+  -- Seguidores al cierre de cada día: la corrida programada es a las 4 a. m. de México, así que la foto
+  -- del día D es el cierre de D-1 (misma fecha que kpis). Se toma la primera corrida del día, la más
+  -- cercana a medianoche. Seguidores_nuevos = cierre del día menos cierre de la fecha anterior con dato;
+  -- sumado en un período da el cambio neto del período. Serie desde el 13-oct-2026 (primera foto).
+  seguidores AS (
+    SELECT id, fecha, followers_count,
+           followers_count - LAG(followers_count) OVER (PARTITION BY id ORDER BY fecha) AS seguidores_nuevos
+    FROM (
+      SELECT _detrics_account_id AS id,
+             DATE_SUB(DATE(_detrics_synced_at, 'America/Mexico_City'), INTERVAL 1 DAY) AS fecha,
+             followers_count,
+             ROW_NUMBER() OVER (PARTITION BY _detrics_account_id, DATE(_detrics_synced_at, 'America/Mexico_City') ORDER BY _detrics_synced_at ASC) AS rn
+      FROM `inmediata-510016.test.ig_followers_snapshot`
+    ) WHERE rn = 1
+  )
+SELECT
+  a.fecha AS Fecha,
+  DATE_TRUNC(a.fecha, WEEK(MONDAY)) AS Semana,
+  DATE_TRUNC(a.fecha, MONTH) AS Mes,
+  c.cliente AS Cliente,
+  c.grupo AS Grupo_empresarial,
+  'Instagram' AS Plataforma,
+  a.username AS Cuenta,
+  a.id AS ID_de_cuenta,
+  a.alcance AS Alcance_diario,
+  k.profile_views AS Visitas_al_perfil_30_dias,
+  k.website_clicks AS Clics_al_sitio_30_dias,
+  k.account_views AS Visualizaciones_30_dias,
+  k.account_likes AS Me_gusta_30_dias,
+  k.account_comments AS Comentarios_30_dias,
+  k.account_shares AS Compartidos_30_dias,
+  k.account_saves AS Guardados_30_dias,
+  IF(k.id IS NULL, NULL, IFNULL(k.account_likes, 0) + IFNULL(k.account_comments, 0) + IFNULL(k.account_shares, 0) + IFNULL(k.account_saves, 0)) AS Interacciones_30_dias,
+  s.followers_count AS Seguidores,
+  s.seguidores_nuevos AS Seguidores_nuevos
+FROM alcance a
+INNER JOIN cuentas c ON c.platform_account_id = a.id
+LEFT JOIN kpis k ON k.id = a.id AND k.fecha = a.fecha
+LEFT JOIN seguidores s ON s.id = a.id AND s.fecha = a.fecha;
+</code></pre>
+        </details>
+        <details class="sql-block sql-view">
+          <summary class="sql-head">
+            <div class="sql-title">
+              <strong>52 · Publicaciones de Instagram</strong>
+              <span>Crea <code>master_social_posts</code>: grilla de publicaciones de los últimos 6 meses, por fecha de publicación. Clic para ver el SQL.</span>
+            </div>
+          </summary>
+          <div class="sql-view-actions"><button class="copy-btn" type="button" data-copy-target="sql-52">Copiar SQL</button></div>
+          <pre id="sql-52"><code>-- 52_master_social_posts.sql
+-- Una fila por publicación de Instagram (últimos 6 meses), con cliente. Grilla de publicaciones del Looker.
+-- Las métricas son acumuladas desde que se publicó: no se suman por día.
+--
+-- Solo entran las cuentas de Instagram del Mapa de clientes (INNER JOIN con v_client_map).
+-- Imagen: media_url, que Detrics guarda en su almacenamiento (el link no vence). La tabla pide solo
+-- media_url, como VMP: con media_url y thumbnail_url juntos Detrics no re-alojaba ninguna imagen
+-- (0 de 64; con solo media_url, 61 de 64 — los 3 restantes son videos sin imagen). 2026-10-13.
+--
+-- Dependencias: ig_media_performance, v_client_map.
+
+CREATE OR REPLACE VIEW `inmediata-510016.test.master_social_posts` AS
+WITH cuentas AS (
+  SELECT platform_account_id, ANY_VALUE(cliente) AS cliente, ANY_VALUE(grupo) AS grupo
+  FROM `inmediata-510016.test.v_client_map`
+  WHERE platform = 'instagram'
+  GROUP BY 1
+)
+SELECT
+  DATE(m.timestamp) AS Fecha_de_publicacion,
+  DATE_TRUNC(DATE(m.timestamp), WEEK(MONDAY)) AS Semana,
+  DATE_TRUNC(DATE(m.timestamp), MONTH) AS Mes,
+  c.cliente AS Cliente,
+  c.grupo AS Grupo_empresarial,
+  m.username AS Cuenta,
+  m._detrics_account_id AS ID_de_cuenta,
+  m.media_id AS ID_de_publicacion,
+  CASE m.media_product_type WHEN 'REELS' THEN 'Reel' WHEN 'FEED' THEN 'Feed' WHEN 'STORY' THEN 'Historia' ELSE m.media_product_type END AS Tipo,
+  CASE m.media_type WHEN 'IMAGE' THEN 'Imagen' WHEN 'VIDEO' THEN 'Video' WHEN 'CAROUSEL_ALBUM' THEN 'Carrusel' ELSE m.media_type END AS Formato,
+  m.permalink AS Link,
+  m.caption AS Texto,
+  m.media_url AS Imagen,
+  m.views AS Visualizaciones,
+  m.reach AS Alcance,
+  m.likes AS Me_gusta,
+  m.comments AS Comentarios,
+  m.shares AS Compartidos,
+  m.saved AS Guardados,
+  IFNULL(m.likes, 0) + IFNULL(m.comments, 0) + IFNULL(m.shares, 0) + IFNULL(m.saved, 0) AS Interacciones
+FROM `inmediata-510016.test.ig_media_performance` m
+INNER JOIN cuentas c ON c.platform_account_id = m._detrics_account_id;
+</code></pre>
+        </details>
+        <details class="sql-block sql-view">
+          <summary class="sql-head">
+            <div class="sql-title">
+              <strong>54 · Seguidores actuales de Instagram</strong>
+              <span>Crea <code>master_social_followers_latest</code>: una fila por cuenta con los seguidores de hoy, para el scorecard (no la filtra el selector de fechas). Clic para ver el SQL.</span>
+            </div>
+          </summary>
+          <div class="sql-view-actions"><button class="copy-btn" type="button" data-copy-target="sql-54">Copiar SQL</button></div>
+          <pre id="sql-54"><code>-- 54_master_social_followers_latest.sql
+-- Una fila por cuenta de Instagram con los seguidores actuales (la última foto de ig_followers_snapshot).
+-- Alimenta el scorecard de seguidores del Looker: muestra siempre lo que la cuenta tiene hoy.
+--
+-- Sin columna de tipo fecha a propósito: así el selector de fechas del reporte no la filtra.
+-- Actualizado_al es texto con la hora de la foto, para mostrarla debajo del número si hace falta.
+-- La evolución diaria está en master_social_daily (Seguidores y Seguidores_nuevos).
+--
+-- Solo entran las cuentas de Instagram del Mapa de clientes (INNER JOIN con v_client_map).
+--
+-- Dependencias: ig_followers_snapshot, v_client_map.
+
+CREATE OR REPLACE VIEW `inmediata-510016.test.master_social_followers_latest` AS
+WITH
+  cuentas AS (
+    SELECT platform_account_id, ANY_VALUE(cliente) AS cliente, ANY_VALUE(grupo) AS grupo
+    FROM `inmediata-510016.test.v_client_map`
+    WHERE platform = 'instagram'
+    GROUP BY 1
+  ),
+  ultima AS (
+    SELECT * EXCEPT (rn) FROM (
+      SELECT _detrics_account_id AS id, username, followers_count, _detrics_synced_at,
+             ROW_NUMBER() OVER (PARTITION BY _detrics_account_id ORDER BY _detrics_synced_at DESC) AS rn
+      FROM `inmediata-510016.test.ig_followers_snapshot`
+    ) WHERE rn = 1
+  )
+SELECT
+  c.cliente                              AS Cliente,
+  c.grupo                                AS Grupo_empresarial,
+  'Instagram'                            AS Plataforma,
+  u.username                             AS Cuenta,
+  u.id                                   AS ID_de_cuenta,
+  u.followers_count                      AS Seguidores_actuales,
+  FORMAT_TIMESTAMP('%Y-%m-%d %H:%M', u._detrics_synced_at, 'America/Mexico_City') AS Actualizado_al
+FROM ultima u
+INNER JOIN cuentas c ON c.platform_account_id = u.id;
+</code></pre>
+        </details>
+        <details class="sql-block sql-view">
+          <summary class="sql-head">
+            <div class="sql-title">
+              <strong>56 · Actividad diaria por publicación</strong>
+              <span>Crea <code>master_social_posts_daily</code>: lo que sumó cada publicación cada día, para filtrar por fecha de actividad en vez de fecha de publicación. Clic para ver el SQL.</span>
+            </div>
+          </summary>
+          <div class="sql-view-actions"><button class="copy-btn" type="button" data-copy-target="sql-56">Copiar SQL</button></div>
+          <pre id="sql-56"><code>-- 56_master_social_posts_daily.sql
+-- Actividad diaria por publicación de Instagram: lo que sumó cada publicación cada día.
+-- Alimenta la tabla de publicaciones del Looker cuando el filtro de fechas tiene que ser
+-- "lo que pasó en el período" y no "lo que se publicó en el período" (para eso, master_social_posts).
+--
+-- Fuente: ig_media_snapshot, foto diaria (full_append) del total acumulado de cada publicación de los
+-- últimos 3 meses (historial del transfer = 3_months: el transfer trae las publicaciones de ese rango
+-- por fecha de publicación; el timeframe de la tabla no se usa). Instagram solo informa totales de por
+-- vida por publicación, así que el día sale de restar la foto contra la del día anterior.
+--
+-- Fecha: la corrida programada es a las 4 a. m. de México, así que la foto del día D es el cierre de
+-- D-1. Se toma la primera corrida de cada día (la más cercana a medianoche), igual que los seguidores.
+--
+-- Primer día de cada publicación:
+--   - publicada después de que empezó la serie → su total entero (toda su actividad es nueva);
+--   - ya existía cuando empezó la serie → vacío (no hay foto anterior para restar).
+-- Una publicación que pasa los 3 meses deja de tener filas (no resta). Una baja (me gusta quitado,
+-- comentario borrado) da un valor negativo ese día; sumado en un período el total es correcto.
+-- Alcance no entra: el alcance de por vida no se reparte por día (contaría dos veces a la misma persona).
+-- Se dejan afuera los días sin ningún cambio.
+--
+-- Dependencias: ig_media_snapshot, ig_media_performance (texto, link, imagen, tipo), v_client_map.
+
+CREATE OR REPLACE VIEW `inmediata-510016.test.master_social_posts_daily` AS
+WITH
+  cuentas AS (
+    SELECT platform_account_id, ANY_VALUE(cliente) AS cliente, ANY_VALUE(grupo) AS grupo
+    FROM `inmediata-510016.test.v_client_map`
+    WHERE platform = 'instagram'
+    GROUP BY 1
+  ),
+  fotos AS (
+    SELECT * EXCEPT (rn) FROM (
+      SELECT _detrics_account_id AS id, username, media_id, DATE(timestamp) AS publicada,
+             DATE_SUB(DATE(_detrics_synced_at, 'America/Mexico_City'), INTERVAL 1 DAY) AS fecha,
+             views, likes, comments, shares, saved,
+             ROW_NUMBER() OVER (PARTITION BY media_id, DATE(_detrics_synced_at, 'America/Mexico_City') ORDER BY _detrics_synced_at ASC) AS rn
+      FROM `inmediata-510016.test.ig_media_snapshot`
+    ) WHERE rn = 1
+  ),
+  inicio AS (
+    SELECT id, MIN(fecha) AS inicio_serie FROM fotos GROUP BY 1
+  ),
+  deltas AS (
+    SELECT
+      f.*, i.inicio_serie,
+      LAG(f.fecha) OVER w IS NULL AS primera,
+      f.views    - LAG(f.views)    OVER w AS d_views,
+      f.likes    - LAG(f.likes)    OVER w AS d_likes,
+      f.comments - LAG(f.comments) OVER w AS d_comments,
+      f.shares   - LAG(f.shares)   OVER w AS d_shares,
+      f.saved    - LAG(f.saved)    OVER w AS d_saved
+    FROM fotos f
+    JOIN inicio i USING (id)
+    WINDOW w AS (PARTITION BY f.media_id ORDER BY f.fecha)
+  ),
+  diario AS (
+    SELECT
+      id, username, media_id, publicada, fecha,
+      -- Primera foto de una publicación nueva: todo su total es actividad nueva.
+      IF(primera, IF(fecha &gt; inicio_serie, views, NULL),    d_views)    AS views,
+      IF(primera, IF(fecha &gt; inicio_serie, likes, NULL),    d_likes)    AS likes,
+      IF(primera, IF(fecha &gt; inicio_serie, comments, NULL), d_comments) AS comments,
+      IF(primera, IF(fecha &gt; inicio_serie, shares, NULL),   d_shares)   AS shares,
+      IF(primera, IF(fecha &gt; inicio_serie, saved, NULL),    d_saved)    AS saved
+    FROM deltas
+  ),
+  meta AS (
+    SELECT media_id, ANY_VALUE(media_product_type) AS media_product_type, ANY_VALUE(media_type) AS media_type,
+           ANY_VALUE(permalink) AS permalink, ANY_VALUE(caption) AS caption, ANY_VALUE(media_url) AS media_url
+    FROM `inmediata-510016.test.ig_media_performance`
+    GROUP BY 1
+  )
+SELECT
+  d.fecha                                AS Fecha,
+  DATE_TRUNC(d.fecha, WEEK(MONDAY))      AS Semana,
+  DATE_TRUNC(d.fecha, MONTH)             AS Mes,
+  c.cliente                              AS Cliente,
+  c.grupo                                AS Grupo_empresarial,
+  'Instagram'                            AS Plataforma,
+  d.username                             AS Cuenta,
+  d.id                                   AS ID_de_cuenta,
+  d.media_id                             AS ID_de_publicacion,
+  d.publicada                            AS Fecha_de_publicacion,
+  CASE m.media_product_type WHEN 'REELS' THEN 'Reel' WHEN 'FEED' THEN 'Feed' WHEN 'STORY' THEN 'Historia' ELSE m.media_product_type END AS Tipo,
+  CASE m.media_type WHEN 'IMAGE' THEN 'Imagen' WHEN 'VIDEO' THEN 'Video' WHEN 'CAROUSEL_ALBUM' THEN 'Carrusel' ELSE m.media_type END AS Formato,
+  m.permalink                            AS Link,
+  m.caption                              AS Texto,
+  m.media_url                            AS Imagen,
+  d.views                                AS Visualizaciones,
+  d.likes                                AS Me_gusta,
+  d.comments                             AS Comentarios,
+  d.shares                               AS Compartidos,
+  d.saved                                AS Guardados,
+  IFNULL(d.likes, 0) + IFNULL(d.comments, 0) + IFNULL(d.shares, 0) + IFNULL(d.saved, 0) AS Interacciones
+FROM diario d
+INNER JOIN cuentas c ON c.platform_account_id = d.id
+LEFT JOIN meta m USING (media_id)
+WHERE IFNULL(d.views, 0) != 0 OR IFNULL(d.likes, 0) != 0 OR IFNULL(d.comments, 0) != 0
+   OR IFNULL(d.shares, 0) != 0 OR IFNULL(d.saved, 0) != 0;
+</code></pre>
+        </details>
         <div class="sql-block">
           <div class="sql-head">
             <div class="sql-title">
@@ -1923,7 +3110,7 @@ ORDER BY inversion_total DESC;
           <h5>Pendientes de la reunión 3 · viernes 16/10</h5>
           <div class="checklist todo">
           <div class="check-group">Detrics</div>
-          <label class="check"><input type="checkbox" data-k="r3-soma"><span class="box"></span><span class="txt">Página de Meta del Looker lista para la presentación de Soma, para que Jonathan la revise el martes 13 a primera hora<small>Paso 8</small></span><span class="owner detrics">Detrics</span></label>
+          <label class="check"><input type="checkbox" data-k="r3-soma" checked><span class="box"></span><span class="txt">Página de Meta del Looker lista para la presentación de Soma, para que Jonathan la revise el martes 13 a primera hora<small>Paso 8</small></span><span class="owner detrics">Detrics</span></label>
           <label class="check"><input type="checkbox" data-k="r3-meta-kpis" checked><span class="box"></span><span class="txt">Interacciones, ThruPlays, visitas al perfil y clics en el enlace sumados a las tablas de Meta, con la historia recargada<small>Paso 6</small></span><span class="owner detrics">Detrics</span></label>
           <label class="check"><input type="checkbox" data-k="r3-wta-ig" checked><span class="box"></span><span class="txt">WTA Querétaro sumada a la transferencia de Meta y transferencia de Instagram de Ser Madre creada<small>Paso 6</small></span><span class="owner detrics">Detrics</span></label>
           <div class="check-group">Definimos juntos</div>
