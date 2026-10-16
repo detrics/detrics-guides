@@ -2654,6 +2654,121 @@ WHERE r.cliente != 'Excluir';
         <details class="sql-block sql-view">
           <summary class="sql-head">
             <div class="sql-title">
+              <strong>49 · Conversiones de Google por acción</strong>
+              <span>Crea <code>master_google_conversions_daily</code>: cada acción de conversión de Google con su cliente y si cuenta como lead o como compra (<code>Es_lead</code>, <code>Es_compra</code>). Clic para ver el SQL.</span>
+            </div>
+          </summary>
+          <div class="sql-view-actions"><button class="copy-btn" type="button" data-copy-target="sql-49">Copiar SQL</button></div>
+          <pre id="sql-49"><code>-- 49_master_google_conversions_daily.sql
+-- Google Ads a grano fecha × cliente × campaña × acción de conversión.
+-- Alimenta el desglose de conversiones de la página de Google del Looker: qué acción es, de qué
+-- cliente, y si cuenta como lead o como compra.
+--
+-- Regla de lead y compra: la misma que master_marketing_daily (10_v_paid_ad_daily.sql).
+--   Compra = categoría PURCHASE, menos Compra_Luis_El_Flaco.
+--   Lead   = categorías de lead (SIGNUP, SUBMIT_LEAD_FORM, BOOK_APPOINTMENT, REQUEST_QUOTE, CONTACT,
+--            PHONE_CALL_LEAD, IMPORTED_LEAD, QUALIFIED_LEAD, CONVERTED_LEAD) + Compra_Luis_El_Flaco
+--            (Jonathan, 13-oct: es un lead; el valor 1 lo pone Google por defecto).
+--   Otra   = el resto (no suma ni a Leads ni a Compras).
+-- Una acción nueva entra sola con la regla de su categoría. Si una acción se clasifica distinto de
+-- su categoría (como Compra_Luis_El_Flaco), se agrega acá y en 10_v_paid_ad_daily.sql.
+--
+-- Leads y Compras de esta vista suman lo mismo que master_marketing_daily por cliente.
+-- Cliente: misma regla que 30_master_marketing_daily (campaign_map → cliente único de la cuenta
+-- → 'Sin asignar'; 'Excluir' no entra).
+--
+-- Dependencias: google_ads_conversions_daily, google_ads_campaign_daily, v_client_map, campaign_map.
+
+CREATE OR REPLACE VIEW `inmediata-510016.test.master_google_conversions_daily` AS
+WITH
+  accounts AS (
+    SELECT platform_account_id, COUNT(DISTINCT cliente) AS clients_in_account, ANY_VALUE(cliente) AS cliente_unico
+    FROM `inmediata-510016.test.v_client_map`
+    WHERE platform = 'google_ads'
+    GROUP BY platform_account_id
+  ),
+  campaigns AS (
+    SELECT TRIM(campaign_id) AS campaign_id, ANY_VALUE(TRIM(cliente)) AS cliente
+    FROM `inmediata-510016.test.campaign_map`
+    WHERE TRIM(IFNULL(campaign_id, '')) != '' AND TRIM(IFNULL(cliente, '')) != ''
+    GROUP BY 1
+  ),
+  grupos AS (
+    SELECT cliente, ANY_VALUE(grupo) AS grupo FROM `inmediata-510016.test.v_client_map` GROUP BY cliente
+  ),
+  acc AS (
+    SELECT _detrics_account_id, ANY_VALUE(customer_descriptive_name) AS account_name
+    FROM `inmediata-510016.test.google_ads_campaign_daily`
+    GROUP BY 1
+  ),
+  ch AS (
+    SELECT campaign_id, ANY_VALUE(campaign_advertising_channel_type) AS channel_type
+    FROM `inmediata-510016.test.google_ads_campaign_daily`
+    GROUP BY 1
+  ),
+  conv AS (
+    SELECT
+      c.*,
+      CASE
+        WHEN c.segments_conversion_action_name = 'Compra_Luis_El_Flaco' THEN 'Lead'
+        WHEN c.segments_conversion_action_category = 'PURCHASE' THEN 'Compra'
+        WHEN c.segments_conversion_action_category IN ('SIGNUP', 'SUBMIT_LEAD_FORM', 'BOOK_APPOINTMENT',
+             'REQUEST_QUOTE', 'CONTACT', 'PHONE_CALL_LEAD', 'IMPORTED_LEAD', 'QUALIFIED_LEAD',
+             'CONVERTED_LEAD') THEN 'Lead'
+        ELSE 'Otra'
+      END AS tipo
+    FROM `inmediata-510016.test.google_ads_conversions_daily` c
+  ),
+  assigned AS (
+    SELECT v.*, COALESCE(m.cliente, IF(a.clients_in_account = 1, a.cliente_unico, 'Sin asignar')) AS cliente
+    FROM conv v
+    INNER JOIN accounts a ON v._detrics_account_id = a.platform_account_id
+    LEFT JOIN campaigns m ON CAST(v.campaign_id AS STRING) = m.campaign_id
+  )
+SELECT
+  d.date                                 AS Fecha,
+  DATE_TRUNC(d.date, WEEK(MONDAY))       AS Semana,
+  DATE_TRUNC(d.date, MONTH)              AS Mes,
+  d.cliente                              AS Cliente,
+  g.grupo                                AS Grupo_empresarial,
+  'Google Ads'                           AS Plataforma,
+  acc.account_name                       AS Cuenta,
+  d._detrics_account_id                  AS ID_de_cuenta,
+  d.campaign_name                        AS Campana,
+  CAST(d.campaign_id AS STRING)          AS ID_de_campana,
+  CASE ch.channel_type
+    WHEN 'SEARCH'          THEN 'Search'
+    WHEN 'DISPLAY'         THEN 'Display'
+    WHEN 'VIDEO'           THEN 'YouTube'
+    WHEN 'PERFORMANCE_MAX' THEN 'Performance Max'
+    WHEN 'DEMAND_GEN'      THEN 'Demand Gen'
+    ELSE ch.channel_type
+  END                                    AS Tipo_de_campana,
+  d.segments_conversion_action_name      AS Accion_de_conversion,
+  d.segments_conversion_action_category  AS Categoria_de_Google,
+  d.tipo                                 AS Tipo_de_conversion,
+  d.tipo = 'Lead'                        AS Es_lead,
+  d.tipo = 'Compra'                      AS Es_compra,
+
+  -- Solo métricas sumables.
+  d.conversions                          AS Conversiones,
+  d.conversions_value                    AS Valor_de_conversiones,
+  IF(d.tipo = 'Lead', d.conversions, 0)          AS Leads,
+  IF(d.tipo = 'Compra', d.conversions, 0)        AS Compras,
+  IF(d.tipo = 'Compra', d.conversions_value, 0)  AS Valor_de_compras
+FROM assigned d
+LEFT JOIN grupos g USING (cliente)
+LEFT JOIN acc ON acc._detrics_account_id = d._detrics_account_id
+LEFT JOIN ch ON ch.campaign_id = d.campaign_id
+WHERE d.cliente != 'Excluir';
+
+-- Chequeo esperado: por cliente, SUM(Leads) y SUM(Compras) = master_marketing_daily con
+-- Plataforma = 'Google Ads'.
+</code></pre>
+        </details>
+        <details class="sql-block sql-view">
+          <summary class="sql-head">
+            <div class="sql-title">
               <strong>50 · Instagram por día</strong>
               <span>Crea <code>master_social_daily</code>: alcance diario, totales de 30 días de la cuenta, seguidores y seguidores nuevos. Clic para ver el SQL.</span>
             </div>
