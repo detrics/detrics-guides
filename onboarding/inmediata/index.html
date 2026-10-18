@@ -1434,7 +1434,7 @@ FROM cleaned WHERE tiktok_organic IS NOT NULL;
 --   purchases, purchase_value,                       -- Meta píxel; Google acciones PURCHASE; TikTok 0
 --   messaging_conversations, cost_per_messaging,     -- Meta solo (Nissan WhatsApp)
 --   conversions, conversions_value,                  -- Google solo
---   leads,                                           -- Meta conversaciones; Google acciones de lead + Compra_Luis_El_Flaco; TikTok NULL (sus leads son clics)
+--   leads,                                           -- Meta conversaciones; Google acciones de lead (SIGNUP, etc.); TikTok NULL (sus leads son clics)
 --   profile_visits_ads,                              -- Meta solo: results de conjuntos que optimizan por visitas al perfil
 --   video_views_p100                                 -- TikTok solo
 --
@@ -1569,14 +1569,15 @@ LEFT JOIN (
   ON ch.campaign_id = g.campaign_id
 LEFT JOIN (
   SELECT date, _detrics_account_id, ad_group_id,
-         -- Compra_Luis_El_Flaco está como PURCHASE en Google Ads pero es un lead, con valor 1 por default
-         -- (Jonathan, mail del 13-oct): se cuenta como lead y no como compra.
-         SUM(IF(segments_conversion_action_category = 'PURCHASE' AND segments_conversion_action_name != 'Compra_Luis_El_Flaco', conversions, 0))       AS purchases,
-         SUM(IF(segments_conversion_action_category = 'PURCHASE' AND segments_conversion_action_name != 'Compra_Luis_El_Flaco', conversions_value, 0)) AS purchase_value,
+         -- Compra en Google = acciones de categoría PURCHASE, con el valor que informa Google. Incluye
+         -- Compra_Luis_El_Flaco (venta de boletos, Jonathan en la reunión del 16-oct). Su valor es 1 por
+         -- conversión porque la etiqueta no manda el precio: se corrige en la etiqueta de Google Ads.
+         SUM(IF(segments_conversion_action_category = 'PURCHASE', conversions, 0))       AS purchases,
+         SUM(IF(segments_conversion_action_category = 'PURCHASE', conversions_value, 0)) AS purchase_value,
          -- Lead en Google = acciones de categoría de lead (hoy solo SIGNUP: los formularios de Nissan).
          SUM(IF(segments_conversion_action_category IN ('SIGNUP', 'SUBMIT_LEAD_FORM', 'BOOK_APPOINTMENT',
                 'REQUEST_QUOTE', 'CONTACT', 'PHONE_CALL_LEAD', 'IMPORTED_LEAD', 'QUALIFIED_LEAD',
-                'CONVERTED_LEAD') OR segments_conversion_action_name = 'Compra_Luis_El_Flaco', conversions, 0)) AS leads
+                'CONVERTED_LEAD'), conversions, 0)) AS leads
   FROM `inmediata-510016.test.google_ads_ad_group_conversions_daily`
   GROUP BY 1, 2, 3
 ) cv
@@ -1880,11 +1881,11 @@ LEFT JOIN grupos g USING (cliente)
 LEFT JOIN (
   SELECT date AS cv_date, _detrics_account_id AS cv_account, ad_group_id AS cv_ad_group,
          keyword_text AS cv_keyword, keyword_match_type AS cv_match,
-         SUM(IF(segments_conversion_action_category = 'PURCHASE' AND segments_conversion_action_name != 'Compra_Luis_El_Flaco', conversions, 0))       AS purchases,
-         SUM(IF(segments_conversion_action_category = 'PURCHASE' AND segments_conversion_action_name != 'Compra_Luis_El_Flaco', conversions_value, 0)) AS purchase_value,
+         SUM(IF(segments_conversion_action_category = 'PURCHASE', conversions, 0))       AS purchases,
+         SUM(IF(segments_conversion_action_category = 'PURCHASE', conversions_value, 0)) AS purchase_value,
          SUM(IF(segments_conversion_action_category IN ('SIGNUP', 'SUBMIT_LEAD_FORM', 'BOOK_APPOINTMENT',
                 'REQUEST_QUOTE', 'CONTACT', 'PHONE_CALL_LEAD', 'IMPORTED_LEAD', 'QUALIFIED_LEAD',
-                'CONVERTED_LEAD') OR segments_conversion_action_name = 'Compra_Luis_El_Flaco', conversions, 0)) AS leads
+                'CONVERTED_LEAD'), conversions, 0)) AS leads
   FROM `inmediata-510016.test.google_ads_keyword_conversions_daily`
   GROUP BY 1, 2, 3, 4, 5
 ) cv
@@ -2092,11 +2093,11 @@ WITH
            keyword_text, keyword_match_type, search_term_view_search_term,
            segments_search_term_match_type, 'Search',
            0.0, 0, 0,
-           IF(segments_conversion_action_category = 'PURCHASE' AND segments_conversion_action_name != 'Compra_Luis_El_Flaco', conversions, 0),
-           IF(segments_conversion_action_category = 'PURCHASE' AND segments_conversion_action_name != 'Compra_Luis_El_Flaco', conversions_value, 0),
+           IF(segments_conversion_action_category = 'PURCHASE', conversions, 0),
+           IF(segments_conversion_action_category = 'PURCHASE', conversions_value, 0),
            IF(segments_conversion_action_category IN ('SIGNUP', 'SUBMIT_LEAD_FORM', 'BOOK_APPOINTMENT',
               'REQUEST_QUOTE', 'CONTACT', 'PHONE_CALL_LEAD', 'IMPORTED_LEAD', 'QUALIFIED_LEAD',
-              'CONVERTED_LEAD') OR segments_conversion_action_name = 'Compra_Luis_El_Flaco', conversions, 0)
+              'CONVERTED_LEAD'), conversions, 0)
     FROM `inmediata-510016.test.google_ads_search_terms_conversions_daily`
     UNION ALL
     -- Performance Max: gasto
@@ -2112,11 +2113,11 @@ WITH
            CAST(NULL AS STRING), CAST(NULL AS STRING), campaign_search_term_view_search_term,
            CAST(NULL AS STRING), 'Performance Max',
            0.0, 0, 0,
-           IF(segments_conversion_action_category = 'PURCHASE' AND segments_conversion_action_name != 'Compra_Luis_El_Flaco', conversions, 0),
-           IF(segments_conversion_action_category = 'PURCHASE' AND segments_conversion_action_name != 'Compra_Luis_El_Flaco', conversions_value, 0),
+           IF(segments_conversion_action_category = 'PURCHASE', conversions, 0),
+           IF(segments_conversion_action_category = 'PURCHASE', conversions_value, 0),
            IF(segments_conversion_action_category IN ('SIGNUP', 'SUBMIT_LEAD_FORM', 'BOOK_APPOINTMENT',
               'REQUEST_QUOTE', 'CONTACT', 'PHONE_CALL_LEAD', 'IMPORTED_LEAD', 'QUALIFIED_LEAD',
-              'CONVERTED_LEAD') OR segments_conversion_action_name = 'Compra_Luis_El_Flaco', conversions, 0)
+              'CONVERTED_LEAD'), conversions, 0)
     FROM `inmediata-510016.test.google_ads_pmax_search_terms_conversions_daily`
     WHERE campaign_id IN (SELECT campaign_id FROM pmax_campaigns)
   ),
@@ -2298,11 +2299,11 @@ LEFT JOIN grupos g USING (cliente)
 LEFT JOIN channel ch ON ch.campaign_id = a.campaign_id
 LEFT JOIN (
   SELECT date AS cv_date, _detrics_account_id AS cv_account, ad_group_id AS cv_ad_group,
-         SUM(IF(segments_conversion_action_category = 'PURCHASE' AND segments_conversion_action_name != 'Compra_Luis_El_Flaco', conversions, 0))       AS purchases,
-         SUM(IF(segments_conversion_action_category = 'PURCHASE' AND segments_conversion_action_name != 'Compra_Luis_El_Flaco', conversions_value, 0)) AS purchase_value,
+         SUM(IF(segments_conversion_action_category = 'PURCHASE', conversions, 0))       AS purchases,
+         SUM(IF(segments_conversion_action_category = 'PURCHASE', conversions_value, 0)) AS purchase_value,
          SUM(IF(segments_conversion_action_category IN ('SIGNUP', 'SUBMIT_LEAD_FORM', 'BOOK_APPOINTMENT',
                 'REQUEST_QUOTE', 'CONTACT', 'PHONE_CALL_LEAD', 'IMPORTED_LEAD', 'QUALIFIED_LEAD',
-                'CONVERTED_LEAD') OR segments_conversion_action_name = 'Compra_Luis_El_Flaco', conversions, 0)) AS leads
+                'CONVERTED_LEAD'), conversions, 0)) AS leads
   FROM `inmediata-510016.test.google_ads_ad_group_conversions_daily`
   GROUP BY 1, 2, 3
 ) cv
@@ -2481,11 +2482,11 @@ CREATE OR REPLACE VIEW `inmediata-510016.test.master_device_daily` AS
 WITH
   google_cv AS (
     SELECT date, _detrics_account_id, ad_group_id, segments_device,
-           SUM(IF(segments_conversion_action_category = 'PURCHASE' AND segments_conversion_action_name != 'Compra_Luis_El_Flaco', conversions, 0))       AS purchases,
-           SUM(IF(segments_conversion_action_category = 'PURCHASE' AND segments_conversion_action_name != 'Compra_Luis_El_Flaco', conversions_value, 0)) AS purchase_value,
+           SUM(IF(segments_conversion_action_category = 'PURCHASE', conversions, 0))       AS purchases,
+           SUM(IF(segments_conversion_action_category = 'PURCHASE', conversions_value, 0)) AS purchase_value,
            SUM(IF(segments_conversion_action_category IN ('SIGNUP', 'SUBMIT_LEAD_FORM', 'BOOK_APPOINTMENT',
                   'REQUEST_QUOTE', 'CONTACT', 'PHONE_CALL_LEAD', 'IMPORTED_LEAD', 'QUALIFIED_LEAD',
-                  'CONVERTED_LEAD') OR segments_conversion_action_name = 'Compra_Luis_El_Flaco', conversions, 0)) AS leads
+                  'CONVERTED_LEAD'), conversions, 0)) AS leads
     FROM `inmediata-510016.test.google_ads_device_conversions_daily`
     GROUP BY 1, 2, 3, 4
   ),
@@ -2665,13 +2666,14 @@ WHERE r.cliente != 'Excluir';
 -- cliente, y si cuenta como lead o como compra.
 --
 -- Regla de lead y compra: la misma que master_marketing_daily (10_v_paid_ad_daily.sql).
---   Compra = categoría PURCHASE, menos Compra_Luis_El_Flaco.
+--   Compra = categoría PURCHASE, con el valor que informa Google. Incluye Compra_Luis_El_Flaco
+--            (venta de boletos, Jonathan en la reunión del 16-oct; su valor es 1 por conversión porque
+--            la etiqueta no manda el precio).
 --   Lead   = categorías de lead (SIGNUP, SUBMIT_LEAD_FORM, BOOK_APPOINTMENT, REQUEST_QUOTE, CONTACT,
---            PHONE_CALL_LEAD, IMPORTED_LEAD, QUALIFIED_LEAD, CONVERTED_LEAD) + Compra_Luis_El_Flaco
---            (Jonathan, 13-oct: es un lead; el valor 1 lo pone Google por defecto).
+--            PHONE_CALL_LEAD, IMPORTED_LEAD, QUALIFIED_LEAD, CONVERTED_LEAD).
 --   Otra   = el resto (no suma ni a Leads ni a Compras).
--- Una acción nueva entra sola con la regla de su categoría. Si una acción se clasifica distinto de
--- su categoría (como Compra_Luis_El_Flaco), se agrega acá y en 10_v_paid_ad_daily.sql.
+-- Una acción nueva entra sola con la regla de su categoría. Si alguna vez una acción tiene que
+-- contarse distinto de su categoría, la excepción va acá y en las vistas 10, 40, 42, 44 y 48.
 --
 -- Leads y Compras de esta vista suman lo mismo que master_marketing_daily por cliente.
 -- Cliente: misma regla que 30_master_marketing_daily (campaign_map → cliente único de la cuenta
@@ -2710,7 +2712,6 @@ WITH
     SELECT
       c.*,
       CASE
-        WHEN c.segments_conversion_action_name = 'Compra_Luis_El_Flaco' THEN 'Lead'
         WHEN c.segments_conversion_action_category = 'PURCHASE' THEN 'Compra'
         WHEN c.segments_conversion_action_category IN ('SIGNUP', 'SUBMIT_LEAD_FORM', 'BOOK_APPOINTMENT',
              'REQUEST_QUOTE', 'CONTACT', 'PHONE_CALL_LEAD', 'IMPORTED_LEAD', 'QUALIFIED_LEAD',
@@ -3232,7 +3233,7 @@ ORDER BY inversion_total DESC;
           <label class="check"><input type="checkbox" data-k="r3-new-campaigns" checked><span class="box"></span><span class="txt">Campañas nuevas de cuentas compartidas (Plaza México, GS Sports, LA México): Jonathan pegó el script nuevo el 16/10 y se creó la pestaña Campañas nuevas. Inmediata elige el cliente de cada campaña en la columna F y aplica el cambio con Detrics › Sincronizar mapa ahora<small>Paso 7.3</small></span><span class="owner both">Inmediata y Detrics</span></label>
           <label class="check"><input type="checkbox" data-k="r3-leads-google" checked><span class="box"></span><span class="txt">Leads de Google Ads: las 7 acciones SIGNUP de Nissan cuentan como lead. Las acciones de compra (PURCHASE), incluida Compra_Luis_El_Flaco, cuentan como compra con el valor que informa Google (Jonathan, 16/10)<small>Paso 8</small></span><span class="owner both">Inmediata y Detrics</span></label>
           <label class="check"><input type="checkbox" data-k="r3-leads-tiktok" checked><span class="box"></span><span class="txt">Leads de TikTok: las campañas "Leads… Whatsapp" de Nissan optimizan por clic al botón de WhatsApp. Se cuentan como clics, no como leads. En Meta, lead = conversación de WhatsApp iniciada<small>Paso 8</small></span><span class="owner both">Inmediata y Detrics</span></label>
-          <label class="check"><input type="checkbox" data-k="r3-flaco-value" checked><span class="box"></span><span class="txt">Google Ads de Luis El Flaco: la conversión "Compra_Luis_El_Flaco" es un lead, no una venta (el valor de 1 lo pone Google por defecto). En el reporte se cuenta como lead<small>Paso 8</small></span><span class="owner both">Inmediata y Detrics</span></label>
+          <label class="check"><input type="checkbox" data-k="r3-flaco-value" checked><span class="box"></span><span class="txt">Google Ads de Luis El Flaco: la conversión "Compra_Luis_El_Flaco" es una venta de boletos y cuenta como compra (Jonathan, 16/10). Su valor es 1 por compra porque la etiqueta no manda el precio: para ver el valor real en el ROAS, se configura en la etiqueta de conversión de Google Ads<small>Paso 8</small></span><span class="owner both">Inmediata y Detrics</span></label>
           </div>
         </div>
       </div>
