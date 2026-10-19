@@ -722,7 +722,7 @@
       <div class="mile">
         <div class="mile-top"><span class="pin"><i><b>2</b></i></span><em>Fin de la semana 2</em></div>
         <h3>Revisión de datos</h3>
-        <p>Las 15 fuentes en BigQuery y la tabla de nombres para validar.</p>
+        <p>Las fuentes del mapa en BigQuery con su histórico y el diccionario de datos para revisar.</p>
       </div>
       <div class="mile">
         <div class="mile-top"><span class="pin"><i><b>3</b></i></span><em>Fin de la semana 3</em></div>
@@ -944,6 +944,7 @@
           <label class="check"><input type="checkbox" data-k="r1-leads"><span class="box"></span><span class="txt">Qué es un lead en cada cliente (formulario de GA4, conversión de Google Ads, formulario de Meta, conversación de WhatsApp, llamada), qué conversiones cuentan en cada plataforma y qué clientes miden compras e ingresos<small>Paso 6</small></span><span class="owner carat">Esparta</span></label>
           <label class="check"><input type="checkbox" data-k="r1-map"><span class="box"></span><span class="txt">Correcciones del mapa de clientes: los IDs de Instagram de Juegos de la Mesa Redonda, Neco, Puertas Andreu, Stamp By Me y Zumex; el Google Ads de Sclincs (9 dígitos) y si Sclincs sigue en el informe; qué propiedades de Search Console de Sungrow cuentan (están por idioma); el Instagram y el Facebook de Zumex; EMDR, Grupo Eco Netson y Proyme sin cuentas<small>Paso 3.2</small></span><span class="owner carat">Esparta</span></label>
           <label class="check"><input type="checkbox" data-k="r1-sources"><span class="box"></span><span class="txt">Conectar en Data Sources los usuarios que administran las cuentas que faltan: TikTok Business de Neco, Stamp By Me y WashTec; GA4, Search Console y Facebook de Puertas Andreu; los Instagram que administra otro usuario<small>Paso 2.2</small></span><span class="owner carat">Esparta</span></label>
+          <label class="check"><input type="checkbox" data-k="r1-tiktok"><span class="box"></span><span class="txt">Volver a conectar TikTok Orgánico (Bodegas Nodus) en Data Sources: TikTok pide permisos nuevos para las métricas de cuenta y hoy esas tablas fallan en las transferencias de la prueba<small>Paso 2.2</small></span><span class="owner carat">Esparta</span></label>
           <div class="check-group">Lienzzo</div>
           <label class="check"><input type="checkbox" data-k="r1-owner"><span class="box"></span><span class="txt">Quién de Lienzzo crea la consulta programada de las 08:00 y el Apps Script del mapa con su cuenta, para que sigan corriendo cuando termine el proyecto. Borja le da el rol BigQuery Admin en el proyecto<small>Paso 8</small></span><span class="owner carat">Lienzzo</span></label>
           <div class="check-group">Definimos juntos</div>
@@ -951,7 +952,7 @@
           <label class="check"><input type="checkbox" data-k="r1-currency"><span class="box"></span><span class="txt">Moneda del informe: EUR en todas las cuentas de Meta y LinkedIn Ads; Zumex tiene cuentas de Google Ads en México y Estados Unidos<small>Paso 6</small></span><span class="owner both">Esparta y Detrics</span></label>
           <label class="check"><input type="checkbox" data-k="r1-agenda"><span class="box"></span><span class="txt">Reuniones 2, 3 y 4 agendadas y canal de Slack abierto<small>Paso 1.4</small></span><span class="owner both">Esparta y Detrics</span></label>
           <div class="check-group">Detrics</div>
-          <label class="check"><input type="checkbox" data-k="r1-transfers" checked><span class="box"></span><span class="txt">Destination nueva (detrics_warehouse) y 9 transferencias con 43 tablas creadas con las cuentas del mapa que ya están conectadas. Primera corrida el 20/10; el histórico se carga después<small>Paso 5</small></span><span class="owner detrics">Detrics</span></label>
+          <label class="check"><input type="checkbox" data-k="r1-transfers" checked><span class="box"></span><span class="txt">Destination nueva (detrics_warehouse) y 9 transferencias con 43 tablas creadas con las cuentas del mapa que ya están conectadas. Carga histórica lanzada el 19/10<small>Paso 5</small></span><span class="owner detrics">Detrics</span></label>
           <label class="check"><input type="checkbox" data-k="r1-sheet" checked><span class="box"></span><span class="txt">Mapa de clientes pasado a la hoja de Google de Detrics con el formato de la plantilla; la columna Notas marca las cuentas que no cruzan<small>Paso 3</small></span><span class="owner detrics">Detrics</span></label>
           <label class="check"><input type="checkbox" data-k="r1-share"><span class="box"></span><span class="txt">Hoja del mapa compartida como Editor con Borja, Gerard y Juan<small>Paso 3.3</small></span><span class="owner detrics">Detrics</span></label>
           <label class="check"><input type="checkbox" data-k="r1-conv"><span class="box"></span><span class="txt">Pestaña Conversiones en el mapa: cada conversión de cada cuenta marcada como Lead, Compra, Otra o Excluir, con las reglas por defecto cargadas para que Esparta las corrija<small>Paso 6</small></span><span class="owner detrics">Detrics</span></label>
@@ -963,17 +964,16 @@
     <div class="step">
       <div class="step-header">
         <div class="step-number">5</div>
-        <h4>Transferencias y tabla de nombres <small>Semana 2</small></h4>
+        <h4>Transferencias y diccionario de datos <small>Semana 2</small></h4>
       </div>
       <div class="step-body">
         <ul class="plain">
-          <li>En la nueva Destination, rearmamos las transferencias de la prueba (GA4, Search Console, Google Ads y Meta Ads) y separamos en varias tablas los campos que hoy dan error de sincronización.</li>
-          <li>Creamos, en la misma Destination, las transferencias de las 11 fuentes nuevas, con las cuentas del mapa de clientes.</li>
-          <li>Traemos el histórico que cada plataforma pone a disposición, cerca de 3 años. Desde ahí, cada día nuevo queda guardado en su BigQuery.</li>
-          <li>Las transferencias corren todos los días y solo traen los datos nuevos.</li>
-          <li>Armamos la tabla de nombres: a cada campo que entrega Detrics le asignamos el nombre que usa Esparta, cruzado contra sus dashboards actuales.</li>
+          <li>En la Destination nueva (<code>detrics_warehouse</code>) creamos una transferencia por plataforma con las cuentas del mapa de clientes y tablas diseñadas para el informe. Las transferencias de la prueba siguen corriendo en <code>detrics_raw</code> hasta que el informe esté validado; después Esparta decide si las apaga.</li>
+          <li>Traemos el histórico que cada plataforma pone a disposición: 24 meses en anuncios y GA4, 16 en Search Console, 6 en publicaciones. Desde ahí, cada día nuevo queda guardado en su BigQuery.</li>
+          <li>Las transferencias corren todos los días y solo traen los datos nuevos. Seguidores y métricas acumuladas de redes sociales se guardan como una foto diaria desde el primer día.</li>
+          <li>Entregamos el diccionario de datos: qué columna hay en cada tabla, de qué campo de la plataforma sale y cómo se suma.</li>
         </ul>
-        <p>Cierra con la <strong>reunión 2</strong>: revisamos las 15 fuentes sincronizando y Esparta valida o ajusta la tabla de nombres.</p>
+        <p>Cierra con la <strong>reunión 2</strong>: revisamos las fuentes sincronizando y el diccionario de datos.</p>
       </div>
     </div>
 
@@ -984,8 +984,8 @@
       </div>
       <div class="step-body">
         <ul class="plain">
-          <li>Unimos las 15 fuentes en una tabla con las mismas métricas para todas las plataformas.</li>
-          <li>Aplicamos la tabla de nombres de Esparta. Un cambio en esa tabla aplica a todos los clientes.</li>
+          <li>Armamos las tablas consolidadas, una por tema: inversión y resultados de anuncios (Google, Meta y LinkedIn con las mismas columnas), conversiones por acción, web (GA4), SEO (Search Console), redes sociales y publicaciones. Cada una tiene todos los clientes y una columna Cliente.</li>
+          <li>Aplicamos la pestaña <strong>Conversiones</strong> del mapa: qué conversión de cada cuenta cuenta como lead o como compra. Un cambio en la pestaña aplica a toda la historia, sin volver a cargar datos.</li>
           <li>Cruzamos con el mapa de clientes para asignar cada cuenta a su cliente, y de ahí salen las tablas por cliente.</li>
           <li>Validamos los números contra los dashboards de Supermetrics.</li>
         </ul>
@@ -1108,7 +1108,7 @@
       <label class="check"><input type="checkbox" data-k="reports"><span class="box"></span><span class="txt">Dashboards actuales compartidos como Editor<small>Paso 4.2</small></span><span class="owner carat">Esparta</span></label>
       <div class="check-group">Semanas 2 a 4 · Detrics</div>
       <label class="check"><input type="checkbox" data-k="transfers"><span class="box"></span><span class="txt">Transferencias de las 15 fuentes creadas y carga histórica completa<small>Paso 5</small></span><span class="owner detrics">Detrics</span></label>
-      <label class="check"><input type="checkbox" data-k="names"><span class="box"></span><span class="txt">Tabla de nombres validada por Esparta en la reunión 2<small>Paso 5</small></span><span class="owner both">Esparta y Detrics</span></label>
+      <label class="check"><input type="checkbox" data-k="names"><span class="box"></span><span class="txt">Diccionario de datos revisado con Esparta en la reunión 2<small>Paso 5</small></span><span class="owner both">Esparta y Detrics</span></label>
       <label class="check"><input type="checkbox" data-k="tables"><span class="box"></span><span class="txt">Tablas consolidadas validadas contra Supermetrics en la reunión 3<small>Paso 6</small></span><span class="owner both">Esparta y Detrics</span></label>
       <label class="check"><input type="checkbox" data-k="dash"><span class="box"></span><span class="txt">Dashboard multicliente entregado en la reunión 4<small>Paso 7</small></span><span class="owner both">Esparta y Detrics</span></label>
       <div class="check-group">Cierre · lo que sigue corriendo sin Detrics</div>
