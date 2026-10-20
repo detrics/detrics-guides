@@ -1164,7 +1164,7 @@ function bqRun(sql) {
       <div class="step-body">
         <div class="todo-call" style="margin-top:0">
           <h5>Pendientes de la reunión de inicio · martes 20/10</h5>
-          <p>Lo que quedó abierto en la reunión de inicio, con quién lo resuelve. Las marcas quedan guardadas en este navegador.</p>
+          <p>Lo que quedó abierto en la reunión de inicio, con quién lo resuelve.</p>
           <div class="checklist todo">
           <div class="check-group">Esparta</div>
           <label class="check"><input type="checkbox" data-k="r1-iam"><span class="box"></span><span class="txt">Roles MCP Tool User, BigQuery Job User y BigQuery Data Editor para support@, tomas@ e ignacio.goyanes@detrics.io. Hoy la cuenta de servicio de Detrics escribe en el proyecto, pero las personas no ven ningún dataset. Si Google rechaza el dominio, el administrador habilita detrics.io en la política de la organización<small>Paso 1.3</small></span><span class="owner carat">Esparta</span></label>
@@ -1277,7 +1277,7 @@ function bqRun(sql) {
 -- =====================================================================
 -- El dashboard lee solo tablas. La logica vive en las vistas v_master_* (archivos 00 a 08) y esta
 -- consulta las guarda como tablas una vez por dia. Con 176 cuentas, las vistas solas no aguantan
--- (Goya, 2026-10-19).
+-- (decidido el 2026-10-19).
 --
 -- Consulta programada "Esparta · masters diarios": la crea alguien de Lienzzo con su cuenta
 -- (BigQuery Admin en espartainformes2026v2), diaria a las 08:00 Europe/Madrid (los transfers
@@ -1403,7 +1403,7 @@ AS SELECT * FROM `espartainformes2026v2.detrics_warehouse.v_master_social_posts_
 <section class="section" id="checklist">
   <div class="container">
     <h2 class="section-title">Checklist del proyecto</h2>
-    <p class="section-lead">Todos los pasos, de la reunión de inicio a la última sesión con Tom. Las marcas quedan guardadas en este navegador.</p>
+    <p class="section-lead">Todos los pasos, de la reunión de inicio a la última sesión con Tom.</p>
     <p class="progress" aria-live="polite"><b id="done">0</b> de <b id="total">0</b> completos</p>
     <div class="checklist" id="list">
       <div class="check-group">Día 1 · Reunión de inicio</div>
