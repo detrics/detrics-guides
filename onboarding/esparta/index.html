@@ -911,7 +911,36 @@
             <ol>
               <li>La cuenta de Lienzzo necesita <strong>BigQuery Data Editor</strong> y <strong>BigQuery Job User</strong> en el proyecto (con BigQuery Admin ya los tiene) y acceso de Editor a la hoja del mapa.</li>
               <li>En la hoja del mapa, <strong>Extensiones › Apps Script</strong>. Borrar el contenido del editor y pegar el archivo completo.</li>
-              <li>En el menú de la izquierda, <strong>Servicios</strong> (+) › <strong>BigQuery API</strong> › Agregar.</li>
+              <li>En el menú de la izquierda, <strong>Servicios</strong> (+) › <strong>BigQuery API</strong> › Agregar. Si BigQuery API no aparece en la lista o <strong>Agregar</strong> da error, sumarlo desde el archivo de configuración del proyecto:
+                <ol>
+                  <li>En la barra izquierda, clic en <strong>Configuración del proyecto</strong> (el ícono de engranaje) y tildar <strong>Mostrar el archivo de manifiesto "appsscript.json" en el editor</strong>.</li>
+                  <li>Volver a <strong>Editor</strong> (el ícono <code>&lt;&gt;</code>). En la lista de archivos aparece <code>appsscript.json</code>: abrirlo, borrar todo su contenido, pegar el bloque de abajo con el botón <strong>Copiar JSON</strong> y guardar con <strong>Ctrl + S</strong>.</li>
+                  <li>En <strong>Servicios</strong>, a la izquierda, aparece <strong>BigQuery</strong>. Seguir con el paso siguiente.</li>
+                </ol>
+                <div class="sql-block">
+                  <div class="sql-head">
+                    <div class="sql-title">
+                      <strong>appsscript.json · BigQuery API activada</strong>
+                      <span>Reemplaza todo el contenido de <code>appsscript.json</code>. Solo hace falta si Servicios (+) no funcionó.</span>
+                    </div>
+                    <button class="copy-btn" type="button" data-copy-target="json-manifest">Copiar JSON</button>
+                  </div>
+                  <pre id="json-manifest"><code>{
+  "timeZone": "Europe/Madrid",
+  "dependencies": {
+    "enabledAdvancedServices": [
+      {
+        "userSymbol": "BigQuery",
+        "serviceId": "bigquery",
+        "version": "v2"
+      }
+    ]
+  },
+  "exceptionLogging": "STACKDRIVER",
+  "runtimeVersion": "V8"
+}</code></pre>
+                </div>
+              </li>
               <li>Elegir la función <code>syncClientMapToBigQuery</code> y <strong>Ejecutar</strong>. La primera vez pide autorización con la cuenta de Lienzzo. Al terminar, las tablas <code>client_map</code> y <code>conversion_map</code> existen en <code>detrics_warehouse</code> y aparece la pestaña Conversiones si no estaba.</li>
               <li>Elegir la función <code>installDailyTrigger</code> y <strong>Ejecutar</strong>: queda la corrida diaria a las 03:00 (Madrid), antes de la consulta programada.</li>
               <li>Para aplicar un cambio del mapa al momento, en la hoja: menú <strong>Detrics › Sincronizar mapa ahora</strong>.</li>
