@@ -935,8 +935,7 @@
  * la columna Tipo vacía y la fila resaltada. Alguien de Esparta elige Lead / Compra / Otra / Excluir
  * en la lista desplegable, y la próxima sincronización lo aplica a toda la historia de esa conversión.
  *
- * Adaptado del script de Inmediata (growth/migrations/inmediata/apps-script/sync-client-map.gs):
- * mismo patrón, sin mapeo por campaña (en Esparta ninguna cuenta se comparte entre clientes).
+ * En Esparta ninguna cuenta se comparte entre clientes, por eso no hay mapeo por campaña.
  *
  * Setup (una vez, lo hace Lienzzo o Esparta con su cuenta, así el trigger sobrevive al proyecto):
  *   1. Pegar este archivo en Extensiones › Apps Script del sheet del mapa.
@@ -1275,9 +1274,8 @@ function bqRun(sql) {
               <pre id="sql-90"><code>-- =====================================================================
 -- 90 · Materializar los 18 masters (cuerpo de la consulta programada)
 -- =====================================================================
--- El dashboard lee solo tablas. La logica vive en las vistas v_master_* (archivos 00 a 08) y esta
--- consulta las guarda como tablas una vez por dia. Con 176 cuentas, las vistas solas no aguantan
--- (decidido el 2026-10-19).
+-- El dashboard lee solo tablas. La logica vive en las vistas v_master_* y esta
+-- consulta las guarda como tablas una vez por dia. Con 176 cuentas, las vistas solas no aguantan.
 --
 -- Consulta programada "Esparta · masters diarios": la crea alguien de Lienzzo con su cuenta
 -- (BigQuery Admin en espartainformes2026v2), diaria a las 08:00 Europe/Madrid (los transfers
