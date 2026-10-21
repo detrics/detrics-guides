@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-e04EtjSh2E3lqb3Vi+95JULDZj4ytHXTvCd7aBU/hqk='; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://storage.googleapis.com; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Mz42p8fVcgN9B0HTKGLVMQuRRUDdNtunNTGQL3Ic9VE='; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://storage.googleapis.com; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="robots" content="noindex, nofollow">
 <title>Onboarding Esparta: data warehouse en BigQuery</title>
@@ -807,7 +807,7 @@
           </li>
           <li data-n="1.4">
             <strong>Cerramos la agenda</strong>
-            Les mostramos las dos opciones para el dashboard multicliente, Looker Studio o una aplicación web sobre Vercel, y eligen una. Agendamos las reuniones de revisión de las semanas 2, 3 y 4 y abrimos el canal de Slack compartido.
+            Les mostramos las dos opciones para el dashboard multicliente, Looker Studio o una aplicación web sobre Vercel, y eligen una. Decidido el 20/10: aplicación web sobre Vercel. Agendamos las reuniones de revisión de las semanas 2, 3 y 4 y abrimos el canal de Slack compartido.
           </li>
         </ol>
       </div>
@@ -1195,22 +1195,22 @@ function bqRun(sql) {
           <p>Lo que quedó abierto en la reunión de inicio, con quién lo resuelve.</p>
           <div class="checklist todo">
           <div class="check-group">Esparta</div>
-          <label class="check"><input type="checkbox" data-k="r1-iam"><span class="box"></span><span class="txt">Roles MCP Tool User, BigQuery Job User y BigQuery Data Editor para support@, tomas@ e ignacio.goyanes@detrics.io. Hoy la cuenta de servicio de Detrics escribe en el proyecto, pero las personas no ven ningún dataset. Si Google rechaza el dominio, el administrador habilita detrics.io en la política de la organización<small>Paso 1.3</small></span><span class="owner carat">Esparta</span></label>
-          <label class="check"><input type="checkbox" data-k="r1-reports"><span class="box"></span><span class="txt">Los 3 o 4 informes que usan hoy (Supermetrics o Looker Studio) compartidos como Editor, y el informe en blanco si eligen Looker Studio<small>Pasos 4.1 y 4.2</small></span><span class="owner carat">Esparta</span></label>
-          <label class="check"><input type="checkbox" data-k="r1-leads"><span class="box"></span><span class="txt">Qué es un lead en cada cliente (formulario de GA4, conversión de Google Ads, formulario de Meta, conversación de WhatsApp, llamada), qué conversiones cuentan en cada plataforma y qué clientes miden compras e ingresos<small>Paso 6</small></span><span class="owner carat">Esparta</span></label>
-          <label class="check"><input type="checkbox" data-k="r1-map"><span class="box"></span><span class="txt">Correcciones del mapa de clientes: los IDs de Instagram de Juegos de la Mesa Redonda, Neco, Puertas Andreu, Stamp By Me y Zumex; el Google Ads de Sclincs (9 dígitos) y si Sclincs sigue en el informe; qué propiedades de Search Console de Sungrow cuentan (están por idioma); el Instagram y el Facebook de Zumex; EMDR, Grupo Eco Netson y Proyme sin cuentas<small>Paso 3.2</small></span><span class="owner carat">Esparta</span></label>
+          <label class="check"><input type="checkbox" data-k="r1-iam"><span class="box"></span><span class="txt">Roles MCP Tool User, BigQuery Job User y BigQuery Data Editor para support@, tomas@ e ignacio.goyanes@detrics.io. Hoy la cuenta de servicio de Detrics escribe en el proyecto, pero las personas no ven ningún dataset. Si Google rechaza el dominio, el administrador habilita detrics.io en la política de la organización. Además, BigQuery Admin para support@detrics.io, para crear la consulta programada de las tablas consolidadas. Borja (20/10): le dio acceso total al Cloud Console a Juan y el 21/10 ve con Gerard el control total para Lienzzo y los roles de Detrics<small>Paso 1.3</small></span><span class="owner carat">Esparta</span></label>
+          <label class="check"><input type="checkbox" data-k="r1-reports"><span class="box"></span><span class="txt">Los Looker Studio que usan hoy compartidos como Editor con support@detrics.io y con Lienzzo (Borja los reenvía, 20/10)<small>Paso 4.2</small></span><span class="owner carat">Esparta</span></label>
+          <label class="check"><input type="checkbox" data-k="r1-leads"><span class="box"></span><span class="txt">Qué miden en cada cliente (leads, ventas) y con qué métrica en cada caso: conversaciones de WhatsApp, formularios, compras del píxel, facturación. Se carga en la pestaña Conversiones del mapa<small>Paso 6</small></span><span class="owner carat">Esparta</span></label>
+          <label class="check"><input type="checkbox" data-k="r1-map"><span class="box"></span><span class="txt">Correcciones del mapa de clientes: los IDs de Instagram de Juegos de la Mesa Redonda, Neco, Puertas Andreu, Stamp By Me y Zumex; el Google Ads de Sclincs (9 dígitos) y si Sclincs sigue en el informe; qué propiedades de Search Console de Sungrow cuentan (están por idioma); el Instagram y el Facebook de Zumex; EMDR, Grupo Eco Netson y Proyme sin cuentas. Borja lo reenvió a su equipo el 20/10<small>Paso 3.2</small></span><span class="owner carat">Esparta</span></label>
           <label class="check"><input type="checkbox" data-k="r1-sources"><span class="box"></span><span class="txt">Conectar en Data Sources los usuarios que administran las cuentas que faltan: TikTok Business de Neco, Stamp By Me y WashTec; GA4, Search Console y Facebook de Puertas Andreu; los Instagram que administra otro usuario<small>Paso 2.2</small></span><span class="owner carat">Esparta</span></label>
           <label class="check"><input type="checkbox" data-k="r1-tiktok"><span class="box"></span><span class="txt">Volver a conectar TikTok Orgánico (Bodegas Nodus) en Data Sources: TikTok pide permisos nuevos para las métricas de cuenta y hoy esas tablas fallan en las transferencias de la prueba<small>Paso 2.2</small></span><span class="owner carat">Esparta</span></label>
           <div class="check-group">Lienzzo</div>
           <label class="check"><input type="checkbox" data-k="r1-owner"><span class="box"></span><span class="txt">Quién de Lienzzo crea la consulta programada de las 08:00 y el Apps Script del mapa con su cuenta, para que sigan corriendo cuando termine el proyecto. Borja le da el rol BigQuery Admin en el proyecto (los tres roles del paso 1.3 no alcanzan para crear una consulta programada). El script se instala en el paso 3.4; la consulta, en el 8.1<small>Pasos 1.3, 3.4 y 8.1</small></span><span class="owner carat">Lienzzo</span></label>
           <div class="check-group">Definimos juntos</div>
-          <label class="check"><input type="checkbox" data-k="r1-dash"><span class="box"></span><span class="txt">Dashboard: Looker Studio o aplicación web sobre Vercel<small>Paso 1.4</small></span><span class="owner both">Esparta y Detrics</span></label>
+          <label class="check"><input type="checkbox" data-k="r1-dash" checked><span class="box"></span><span class="txt">Dashboard: aplicación web sobre Vercel, elegida por Borja el 20/10 (Lienzzo ya despliega ahí)<small>Paso 1.4</small></span><span class="owner both">Esparta y Detrics</span></label>
           <label class="check"><input type="checkbox" data-k="r1-currency"><span class="box"></span><span class="txt">Moneda del informe: EUR en todas las cuentas de Meta y LinkedIn Ads; Zumex tiene cuentas de Google Ads en México y Estados Unidos<small>Paso 6</small></span><span class="owner both">Esparta y Detrics</span></label>
           <label class="check"><input type="checkbox" data-k="r1-agenda"><span class="box"></span><span class="txt">Reuniones 2, 3 y 4 agendadas y canal de Slack abierto<small>Paso 1.4</small></span><span class="owner both">Esparta y Detrics</span></label>
           <div class="check-group">Detrics</div>
           <label class="check"><input type="checkbox" data-k="r1-transfers" checked><span class="box"></span><span class="txt">Destination nueva (detrics_warehouse) y 9 transferencias con 43 tablas creadas con las cuentas del mapa que ya están conectadas. Carga histórica lanzada el 19/10<small>Paso 5</small></span><span class="owner detrics">Detrics</span></label>
           <label class="check"><input type="checkbox" data-k="r1-sheet" checked><span class="box"></span><span class="txt">Mapa de clientes pasado a la hoja de Google de Detrics con el formato de la plantilla; la columna Notas marca las cuentas que no cruzan<small>Paso 3</small></span><span class="owner detrics">Detrics</span></label>
-          <label class="check"><input type="checkbox" data-k="r1-share"><span class="box"></span><span class="txt">Hoja del mapa compartida como Editor con Borja, Gerard y Juan<small>Paso 3.3</small></span><span class="owner detrics">Detrics</span></label>
+          <label class="check"><input type="checkbox" data-k="r1-share" checked><span class="box"></span><span class="txt">Hoja del mapa compartida como Editor con Borja, Gerard y Juan<small>Paso 3.3</small></span><span class="owner detrics">Detrics</span></label>
           <label class="check"><input type="checkbox" data-k="r1-conv"><span class="box"></span><span class="txt">Pestaña Conversiones en el mapa: cada conversión de cada cuenta marcada como Lead, Compra, Otra o Excluir, con las reglas por defecto cargadas para que Esparta las corrija<small>Paso 6</small></span><span class="owner detrics">Detrics</span></label>
           </div>
         </div>
@@ -1527,7 +1527,7 @@ AS SELECT * FROM `espartainformes2026v2.detrics_warehouse.v_master_social_posts_
       document.getElementById('done').textContent = n;
     }
     all.forEach(function (b) {
-      b.checked = !!state[b.dataset.k];
+      if (b.dataset.k in state) b.checked = !!state[b.dataset.k];
       b.addEventListener('change', function () {
         state[b.dataset.k] = b.checked;
         try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
