@@ -1085,6 +1085,7 @@ function bqRun(sql) {
               <li>Copiar el script con el botón del paso 2.1, pegarlo y guardar con <strong>Ctrl + S</strong>.</li>
               <li>Elegir <code>syncClientMapToBigQuery</code> y clic en <strong>Ejecutar</strong>. Si Google vuelve a pedir autorización, aceptar como en el paso 2.1.</li>
               <li>En el <strong>Registro de ejecución</strong> aparece una línea por pestaña con su cantidad de filas, y las filas nuevas que agregó, si hubo.</li>
+              <li>En el menú de la izquierda, el reloj (<strong>Activadores</strong>): tiene que figurar <code>syncClientMapToBigQuery</code>, diario, con la cuenta de Álvaro como propietario. Si no figura, elegir <code>installDailyTrigger</code> y <strong>Ejecutar</strong> una vez.</li>
             </ol>
             <div class="tip blue"><span class="tip-icon">&#9432;</span><span>El activador ya instalado sigue andando con la versión nueva. No hace falta correr <code>installDailyTrigger</code> otra vez.</span></div>
           </li>
@@ -1168,7 +1169,7 @@ function bqRun(sql) {
             <div class="copyable"><span class="label">Correo</span><code>ignacio.goyanes@detrics.io</code><button class="copy-btn" type="button" data-copy="ignacio.goyanes@detrics.io">Copiar</button></div>
           </li>
         </ol>
-        <div class="tip green"><span class="tip-icon">&#10003;</span><span>VMP puede quitar estos accesos cuando quiera, desde Team Members en Detrics y desde IAM en Google Cloud. El BigQuery, las fuentes y las transferencias siguen andando aunque se quiten.</span></div>
+        <div class="tip green"><span class="tip-icon">&#10003;</span><span>VMP puede quitar estos accesos cuando quiera, desde Team Members en Detrics y desde IAM en Google Cloud. El BigQuery, las fuentes y las transferencias siguen andando aunque se quiten. Las tablas del dashboard también, una vez hecho el paso 6.</span></div>
       </div>
     </div>
 
@@ -1204,6 +1205,8 @@ function bqRun(sql) {
           <div class="checklist todo">
           <div class="check-group">Álvaro</div>
           <label class="check"><input type="checkbox" data-k="r4-script"><span class="box"></span><span class="txt">Volver a pegar el Apps Script en el sheet del mapa, con la versión nueva que suma las pestañas de trabajo<small>Paso 2.2</small></span><span class="owner carat">VMP</span></label>
+          <label class="check"><input type="checkbox" data-k="r4-sq"><span class="box"></span><span class="txt">Pasar la consulta programada "VMP · orders_attributed" a su cuenta, y al día siguiente verificar que la corrida de las 08:00 figure con ella<small>Paso 6.1</small></span><span class="owner carat">VMP</span></label>
+          <label class="check"><input type="checkbox" data-k="r4-lookercreds"><span class="box"></span><span class="txt">Pasar cada fuente de datos del Looker a sus credenciales, hasta que ninguna muestre un correo de Detrics<small>Paso 6.2</small></span><span class="owner carat">VMP</span></label>
           <label class="check"><input type="checkbox" data-k="r4-campanas"><span class="box"></span><span class="txt">Marca de las 2 campañas que quedan en la pestaña <a href="https://docs.google.com/spreadsheets/d/1NOwp_at_0R6gGIGI-fZ2xMxFH4WJpzWpTKkCFux-zpI/edit" target="_blank" rel="noopener">Campañas</a>: Sales20260710142909 (TikTok, ARS 134 mil desde julio) y GHS - PMAX #2 (Google)<small>Paso 2.3</small></span><span class="owner carat">VMP</span></label>
           <label class="check"><input type="checkbox" data-k="r4-tiktok"><span class="box"></span><span class="txt">Avisar cuando la agencia aplique en TikTok la plantilla con IDs, con la fecha de corte</span><span class="owner carat">VMP</span></label>
           <div class="check-group">Detrics</div>
@@ -1249,8 +1252,55 @@ function bqRun(sql) {
           <li>Construido sobre las tablas consolidadas: sumar una marca nueva o una cuenta nueva al mapa la deja disponible en el dashboard sin tocar nada más.</li>
           <li>Álvaro puede seguir preguntándole a Claude conectado al BigQuery de VMP para los cortes que no estén en el dashboard.</li>
         </ul>
-        <p><strong>Las fuentes de datos del Looker van con la cuenta de Álvaro.</strong> Mientras construimos, conectamos las tablas con nuestras cuentas. Antes de la entrega, Álvaro pasa cada fuente de datos a sus credenciales: en el informe, <strong>Recurso › Administrar fuentes de datos agregadas › Editar</strong>, clic en las credenciales de arriba a la izquierda y elegir <strong>Credenciales del propietario</strong> con su cuenta. Así el dashboard sigue leyendo BigQuery cuando nos quiten los accesos del paso 3.3.</p>
+        <p><strong>Las fuentes de datos del Looker van con la cuenta de Álvaro.</strong> Mientras construimos, conectamos las tablas con nuestras cuentas. Antes de la entrega, Álvaro pasa cada fuente de datos a sus credenciales (paso 6.2). Así el dashboard sigue leyendo BigQuery cuando nos quiten los accesos del paso 3.3.</p>
         <p>Cierra con la <strong>reunión 3</strong>: recorrido del dashboard con Álvaro y el equipo de VMP, ajustes finales y entrega.</p>
+      </div>
+    </div>
+
+    <!-- STEP 6 -->
+    <div class="phase-head"><h3>Cierre del proyecto</h3><span class="owner carat">Equipo de VMP</span></div>
+    <div class="step is-carat">
+      <div class="step-header">
+        <div class="step-number">6</div>
+        <h4>Lo que sigue corriendo sin Detrics <small>Reunión 4, jueves 22/10</small></h4>
+      </div>
+      <div class="step-body">
+        <p>Las transferencias corren con la cuenta de servicio de Detrics y no dependen de ninguna persona. Tres piezas corren con la cuenta de quien las crea: la consulta programada que arma las tablas del dashboard (paso 6.1), el Apps Script del mapa de marcas (paso 2.2) y las fuentes de datos del Looker (paso 6.2). La consulta programada hoy corre con support@detrics.io: si esa cuenta pierde el acceso al proyecto, las tablas <code>master_*</code> dejan de actualizarse y el dashboard queda congelado en el último día. Por eso pasa a la cuenta de Álvaro.</p>
+        <ol class="substeps">
+          <li data-n="6.1">
+            <strong>Pasar la consulta programada a la cuenta de Álvaro</strong>
+            Es la consulta "VMP · orders_attributed": BigQuery la ejecuta sola todos los días a las 08:00 (hora de Argentina), cuando ya terminaron las transferencias, y reconstruye <code>orders_attributed</code> y las tablas <code>master_*</code> en <code>detrics_raw</code>. No se crea de nuevo: se le cambia la cuenta con la que corre.
+            <div class="url-box">
+              <div class="url-icon"><svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg></div>
+              <a href="https://console.cloud.google.com/bigquery/transfers?project=analytics-beauty-web" target="_blank" rel="noopener">console.cloud.google.com/bigquery/transfers</a>
+            </div>
+            <ol>
+              <li>Verificar que la cuenta de Álvaro tenga el rol <strong>Propietario</strong> o <strong>BigQuery Admin</strong> en <code>analytics-beauty-web</code> (IAM, igual que en el paso 3.3). Cambiar la cuenta de una consulta programada pide el permiso <code>bigquery.transfers.update</code>, que Data Editor y Job User no incluyen.</li>
+              <li>Con la cuenta de Álvaro, abrir el link de arriba (BigQuery › <strong>Transferencias de datos</strong>) y verificar arriba que esté elegido el proyecto <code>analytics-beauty-web</code>.</li>
+              <li>Clic en <strong>VMP · orders_attributed</strong> (fuente "Scheduled Query").</li>
+              <li>Arriba a la derecha, menú <strong>Más</strong> (&#8942;) › <strong>Actualizar credenciales</strong>. En algunas versiones de la consola la opción está dentro de <strong>Editar</strong>.</li>
+              <li>Google pide elegir la cuenta: elegir la de Álvaro y aceptar los permisos.</li>
+              <li>En la pestaña <strong>Configuración</strong> de la consulta, revisar la notificación por correo: dejarla activada para que el aviso de una corrida fallida le llegue a Álvaro.</li>
+              <li><strong>Al día siguiente</strong>, en la pestaña <strong>Historial de ejecuciones</strong>, la corrida de las 08:00 tiene que figurar como correcta, y en <code>detrics_raw</code> las tablas <code>master_*</code> con fecha de modificación de ese día.</li>
+            </ol>
+            <div class="tip blue"><span class="tip-icon">&#9432;</span><span>Alternativa si la opción no aparece: crear una consulta programada nueva con la cuenta de Álvaro. Copiar el SQL de la consulta actual (<strong>Editar</strong>, seleccionar todo y copiar), pegarlo en una pestaña de consulta nueva, <strong>Programar</strong> › <strong>Crear una consulta programada</strong>, nombre <code>VMP · orders_attributed</code>, diaria a las 08:00 hora de Argentina (11:00 UTC si la consola solo acepta UTC), ubicación <strong>US</strong>, sin tabla de destino. Después, pausar la consulta vieja con <strong>Inhabilitar</strong>.</span></div>
+            <div class="tip amber"><span class="tip-icon">&#9888;</span><span>Cuando Detrics cambie el SQL de las tablas consolidadas, Álvaro abre la consulta programada › <strong>Editar</strong>, reemplaza el SQL y guarda. La programación y la cuenta no cambian.</span></div>
+          </li>
+          <li data-n="6.2">
+            <strong>Pasar las fuentes de datos del Looker a la cuenta de Álvaro</strong>
+            Cada fuente de datos del informe lee BigQuery con las credenciales de quien la conectó. Las conectamos nosotros mientras construíamos: si no se cambian, los gráficos dan error el día que se quiten nuestros accesos del paso 3.3. Se hace una vez por fuente, con la cuenta de Álvaro.
+            <ol>
+              <li>Abrir el informe <a href="https://datastudio.google.com/reporting/9c3bb67b-0eca-4ac7-8468-0e7232381fdf" target="_blank" rel="noopener">VMP · Dashboard</a> con la cuenta de Álvaro y pasar a modo edición (<strong>Editar</strong>, arriba a la derecha).</li>
+              <li>Menú <strong>Recurso › Administrar las fuentes de datos agregadas</strong>. Aparece la lista de fuentes, una por tabla <code>master_*</code>.</li>
+              <li>En la primera, clic en <strong>Editar</strong>.</li>
+              <li>Arriba a la izquierda, junto al nombre de la fuente, clic en <strong>Credenciales de datos</strong> (muestra el correo de quien la conectó).</li>
+              <li>Elegir <strong>Credenciales del propietario</strong> y clic en <strong>Actualizar</strong>. Ahora tiene que figurar el correo de Álvaro.</li>
+              <li>Clic en <strong>Listo</strong> y volver a la lista. Repetir los pasos 3 a 5 con cada fuente hasta que ninguna muestre un correo de Detrics.</li>
+              <li>Recorrer las 6 páginas del informe: todos los gráficos tienen que cargar sin error.</li>
+            </ol>
+            <div class="tip blue"><span class="tip-icon">&#9432;</span><span>Si una fuente no ofrece <strong>Editar</strong> en esa lista, está incrustada en un gráfico: se edita desde el panel del gráfico, en el lápiz al lado del nombre de la fuente, con los mismos pasos 4 y 5.</span></div>
+          </li>
+        </ol>
       </div>
     </div>
   </div>
@@ -1297,7 +1347,8 @@ function bqRun(sql) {
       <label class="check"><input type="checkbox" data-k="looker" data-done checked><span class="box"></span><span class="txt">Informe de Looker Studio en blanco creado y compartido como Editor con support@, tomas@ e ignacio.goyanes@detrics.io<small>Paso 3.4</small></span><span class="owner carat">VMP</span></label>
       <div class="check-group">Semanas 1 y 2 · Detrics</div>
       <label class="check"><input type="checkbox" data-k="tables" data-done checked><span class="box"></span><span class="txt">Tablas consolidadas por marca armadas y validadas en la reunión 2<small>Paso 4</small></span><span class="owner both">VMP y Detrics</span></label>
-      <label class="check"><input type="checkbox" data-k="lookercreds"><span class="box"></span><span class="txt">Fuentes de datos del Looker con las credenciales de Álvaro<small>Paso 5</small></span><span class="owner carat">VMP</span></label>
+      <label class="check"><input type="checkbox" data-k="lookercreds"><span class="box"></span><span class="txt">Fuentes de datos del Looker con las credenciales de Álvaro<small>Paso 6.2</small></span><span class="owner carat">VMP</span></label>
+      <label class="check"><input type="checkbox" data-k="sqowner"><span class="box"></span><span class="txt">Consulta programada de las 08:00 corriendo con la cuenta de Álvaro<small>Paso 6.1</small></span><span class="owner carat">VMP</span></label>
       <label class="check"><input type="checkbox" data-k="dash"><span class="box"></span><span class="txt">Dashboard llave en mano de ACF, NIC y Beauty Web entregado en la reunión 3<small>Paso 5</small></span><span class="owner both">VMP y Detrics</span></label>
       <div class="check-group">Meses 2 a 4 · Consultoría con Tom</div>
       <label class="check"><input type="checkbox" data-k="s1"><span class="box"></span><span class="txt">Sesión 1: el modelo de datos<small>Consultoría</small></span><span class="owner both">VMP y Detrics</span></label>
