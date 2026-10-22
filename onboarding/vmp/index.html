@@ -1207,6 +1207,7 @@ function bqRun(sql) {
           <label class="check"><input type="checkbox" data-k="r4-script"><span class="box"></span><span class="txt">Volver a pegar el Apps Script en el sheet del mapa, con la versión nueva que suma las pestañas de trabajo<small>Paso 2.2</small></span><span class="owner carat">VMP</span></label>
           <label class="check"><input type="checkbox" data-k="r4-sq"><span class="box"></span><span class="txt">Pasar la consulta programada "VMP · orders_attributed" a su cuenta, y al día siguiente verificar que la corrida de las 08:00 figure con ella<small>Paso 6.1</small></span><span class="owner carat">VMP</span></label>
           <label class="check"><input type="checkbox" data-k="r4-lookercreds"><span class="box"></span><span class="txt">Pasar cada fuente de datos del Looker a sus credenciales, hasta que ninguna muestre un correo de Detrics<small>Paso 6.2</small></span><span class="owner carat">VMP</span></label>
+          <label class="check"><input type="checkbox" data-k="r4-manual"><span class="box"></span><span class="txt">Cargar el <a href="https://docs.google.com/document/d/1e7msRursPD4eDuvsG9UMizYFaazelcCyLQr1S5Z_t30/edit" target="_blank" rel="noopener">manual del warehouse</a> en un proyecto de Claude con BigQuery conectado<small>Paso 6.3</small></span><span class="owner carat">VMP</span></label>
           <label class="check"><input type="checkbox" data-k="r4-campanas"><span class="box"></span><span class="txt">Marca de las 2 campañas que quedan en la pestaña <a href="https://docs.google.com/spreadsheets/d/1NOwp_at_0R6gGIGI-fZ2xMxFH4WJpzWpTKkCFux-zpI/edit" target="_blank" rel="noopener">Campañas</a>: Sales20260710142909 (TikTok, ARS 134 mil desde julio) y GHS - PMAX #2 (Google)<small>Paso 2.3</small></span><span class="owner carat">VMP</span></label>
           <label class="check"><input type="checkbox" data-k="r4-tiktok"><span class="box"></span><span class="txt">Avisar cuando la agencia aplique en TikTok la plantilla con IDs, con la fecha de corte</span><span class="owner carat">VMP</span></label>
           <div class="check-group">Detrics</div>
@@ -1299,6 +1300,22 @@ function bqRun(sql) {
               <li>Recorrer las 6 páginas del informe: todos los gráficos tienen que cargar sin error.</li>
             </ol>
             <div class="tip blue"><span class="tip-icon">&#9432;</span><span>Si una fuente no ofrece <strong>Editar</strong> en esa lista, está incrustada en un gráfico: se edita desde el panel del gráfico, en el lápiz al lado del nombre de la fuente, con los mismos pasos 4 y 5.</span></div>
+          </li>
+          <li data-n="6.3">
+            <strong>El manual del warehouse, para Claude</strong>
+            Explica qué tabla responde cada pregunta, cómo se atribuye cada orden y los cuidados de cada número (venta paga, órdenes únicas, seguidores, Instagram a 30 días). Está escrito para dárselo a Claude como contexto: con el manual en un proyecto y BigQuery conectado, Claude consulta las tablas correctas sin que haya que explicárselas.
+            <div class="url-box">
+              <div class="url-icon"><svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg></div>
+              <a href="https://docs.google.com/document/d/1e7msRursPD4eDuvsG9UMizYFaazelcCyLQr1S5Z_t30/edit" target="_blank" rel="noopener">Manual del warehouse de marketing · VMP</a>
+            </div>
+            <ol>
+              <li>Abrir el manual y descargarlo: <strong>Archivo › Descargar › Markdown (.md)</strong>.</li>
+              <li>En claude.ai, <strong>Proyectos › Crear proyecto</strong>, por ejemplo "VMP · Datos de marketing".</li>
+              <li>Subir el archivo .md a <strong>Conocimiento del proyecto</strong>.</li>
+              <li>En <strong>Instrucciones del proyecto</strong>, pegar el texto que figura al principio del manual, en "Cómo dárselo a Claude".</li>
+              <li>Conectar BigQuery al proyecto con la cuenta de Álvaro.</li>
+            </ol>
+            <div class="tip blue"><span class="tip-icon">&#9432;</span><span>Cuando Detrics actualice el manual, se descarga de nuevo y se reemplaza el archivo en el proyecto.</span></div>
           </li>
         </ol>
       </div>
