@@ -1156,7 +1156,7 @@ function updateExchangeRates() {
   const auto = [];
   FX_CURRENCIES.forEach((cur) =&gt; {
     const url = `https://api.frankfurter.dev/v1/${from}..${to}?base=${cur}&amp;symbols=EUR`;
-    const rates = JSON.parse(UrlFetchApp.fetch(url).getContentText()).rates;
+    const rates = fetchJsonWithRetry(url).rates;
     const byMonth = {};
     Object.keys(rates).forEach((day) =&gt; {
       const m = day.slice(0, 7);
@@ -1176,6 +1176,22 @@ function updateExchangeRates() {
   if (!rows.length) return;
   sheet.getRange(headerRows + 1, 1, rows.length, 4).setNumberFormat('@').setValues(rows);
   console.log(`${auto.length} tipos de cambio mensuales del BCE escritos en "${FX_TAB}".`);
+}
+
+// Tres intentos con 30 s y 60 s de espera: un corte breve del BCE no deja la corrida sin tipos.
+function fetchJsonWithRetry(url) {
+  let lastError;
+  for (let attempt = 0; attempt &lt; 3; attempt++) {
+    if (attempt) Utilities.sleep(30000 * attempt);
+    try {
+      const res = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
+      if (res.getResponseCode() === 200) return JSON.parse(res.getContentText());
+      lastError = new Error(`HTTP ${res.getResponseCode()}`);
+    } catch (e) {
+      lastError = e;
+    }
+  }
+  throw lastError;
 }
 
 // 'AAAA-MM' más n meses.
