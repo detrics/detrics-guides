@@ -949,7 +949,7 @@
               <div class="sql-head">
                 <div class="sql-title">
                   <strong>Apps Script · Mapa de clientes a BigQuery</strong>
-                  <span>Se pega en <strong>Extensiones › Apps Script</strong> de la hoja del mapa (paso 2 de arriba). Escribe <code>client_map</code>, <code>conversion_map</code> y <code>tipos_de_cambio</code> en <code>detrics_warehouse</code> y agrega a la pestaña Conversiones las conversiones nuevas para clasificar. Versión del 27/10.</span>
+                  <span>Se pega en <strong>Extensiones › Apps Script</strong> de la hoja del mapa (paso 2 de arriba). Escribe <code>client_map</code>, <code>conversion_map</code> y <code>tipos_de_cambio</code> en <code>detrics_warehouse</code> y agrega a la pestaña Conversiones las conversiones nuevas para clasificar. Completa la pestaña Tipos de cambio con el promedio mensual del Banco Central Europeo: cada mes usa el del mes anterior. Versión del 28/10.</span>
                 </div>
                 <button class="copy-btn" type="button" data-copy-target="script-mapa">Copiar script</button>
               </div>
@@ -964,6 +964,11 @@
  * los últimos 30 días que quedaron en "Sin clasificar" y las agrega a la pestaña "Conversiones" con
  * la columna Tipo vacía y la fila resaltada. Alguien de Esparta elige Lead / Compra / Otra / Excluir
  * en la lista desplegable, y la próxima sincronización lo aplica a toda la historia de esa conversión.
+ *
+ * Tipos de cambio: antes de sincronizar, completa la pestaña "Tipos de cambio" con una fila por mes y
+ * moneda. Cada mes usa el promedio del mes anterior del Banco Central Europeo (api.frankfurter.dev, sin
+ * clave). Las filas automáticas llevan "BCE, promedio de …" en Notas y se reescriben en cada corrida;
+ * una fila escrita a mano para la misma moneda y mes tiene prioridad y se conserva.
  *
  * En Esparta ninguna cuenta se comparte entre clientes, por eso no hay mapeo por campaña.
  *
@@ -985,6 +990,11 @@ const CONVERSIONS_TAB = 'Conversiones';
 const CONVERSIONS_HEADER = ['Plataforma', 'Cuenta', 'ID de cuenta', 'Conversión', 'Categoría', 'Tipo', 'Detectada el', 'Conversiones (30 días)'];
 const CONVERSION_TYPES = ['Lead', 'Compra', 'Otra', 'Excluir'];
 const NEW_ROW_COLOR = '#fff2cc'; // amarillo claro: falta elegir el tipo
+
+const FX_TAB = 'Tipos de cambio';
+const FX_CURRENCIES = ['USD']; // monedas de las cuentas que no facturan en EUR
+const FX_FIRST_MONTH = '2024-10'; // primer mes con datos en el informe
+const FX_NOTE = 'BCE, promedio de ';
 
 const TABLES = [
   {
@@ -1021,7 +1031,7 @@ const TABLES = [
   },
   {
     table: 'tipos_de_cambio',
-    tabs: ['Tipos de cambio'],
+    tabs: [FX_TAB],
     headerRows: 2, // fila 1 = encabezados, fila 2 = cómo funciona
     columns: ['moneda', 'desde', 'eur_por_unidad', 'notas'],
   },
@@ -1037,6 +1047,12 @@ function onOpen() {
 // Lo que corre el trigger diario y el menú: sincroniza y después busca conversiones nuevas.
 function syncClientMapToBigQuery() {
   ensureConversionsTab();
+  try {
+    updateExchangeRates();
+  } catch (e) {
+    // Si el BCE no responde, quedan los tipos de la corrida anterior.
+    console.log(`Tipos de cambio sin actualizar: ${e.message}`);
+  }
   TABLES.forEach(syncTables);
   appendNewConversions();
 }
@@ -1118,6 +1134,55 @@ function appendNewConversions() {
     .setValues(fresh)
     .setBackground(NEW_ROW_COLOR);
   console.log(`${fresh.length} conversiones nuevas agregadas a "${CONVERSIONS_TAB}".`);
+}
+
+// Reescribe las filas automáticas de "Tipos de cambio": por cada mes desde FX_FIRST_MONTH hasta el actual,
+// el promedio de los tipos diarios del BCE del mes anterior. Las filas a mano quedan como están.
+function updateExchangeRates() {
+  const sheet = SpreadsheetApp.getActive().getSheetByName(FX_TAB);
+  if (!sheet) return;
+  const headerRows = 2;
+  const last = sheet.getLastRow();
+  const current = last &gt; headerRows ? sheet.getRange(headerRows + 1, 1, last - headerRows, 4).getDisplayValues() : [];
+  const manual = current.filter((r) =&gt; r[0].trim() &amp;&amp; !r[3].startsWith(FX_NOTE));
+  const manualKeys = new Set(manual.map((r) =&gt; r[0].trim().toUpperCase() + '|' + r[1].trim().slice(0, 7)));
+
+  const months = [];
+  const now = Utilities.formatDate(new Date(), TIMEZONE, 'yyyy-MM');
+  for (let m = FX_FIRST_MONTH; m &lt;= now; m = addMonths(m, 1)) months.push(m);
+  const from = addMonths(FX_FIRST_MONTH, -1) + '-01';
+  const to = Utilities.formatDate(new Date(), TIMEZONE, 'yyyy-MM-dd');
+
+  const auto = [];
+  FX_CURRENCIES.forEach((cur) =&gt; {
+    const url = `https://api.frankfurter.dev/v1/${from}..${to}?base=${cur}&amp;symbols=EUR`;
+    const rates = JSON.parse(UrlFetchApp.fetch(url).getContentText()).rates;
+    const byMonth = {};
+    Object.keys(rates).forEach((day) =&gt; {
+      const m = day.slice(0, 7);
+      (byMonth[m] = byMonth[m] || []).push(rates[day].EUR);
+    });
+    months.forEach((m) =&gt; {
+      const prev = addMonths(m, -1);
+      const days = byMonth[prev];
+      if (!days || manualKeys.has(cur + '|' + m)) return;
+      const avg = days.reduce((a, b) =&gt; a + b, 0) / days.length;
+      auto.push([cur, m + '-01', avg.toFixed(4), FX_NOTE + prev]);
+    });
+  });
+
+  const rows = manual.concat(auto).sort((a, b) =&gt; (a[0] + a[1]).localeCompare(b[0] + b[1]));
+  if (last &gt; headerRows) sheet.getRange(headerRows + 1, 1, last - headerRows, 4).clearContent();
+  if (!rows.length) return;
+  sheet.getRange(headerRows + 1, 1, rows.length, 4).setNumberFormat('@').setValues(rows);
+  console.log(`${auto.length} tipos de cambio mensuales del BCE escritos en "${FX_TAB}".`);
+}
+
+// 'AAAA-MM' más n meses.
+function addMonths(ym, n) {
+  const [y, m] = ym.split('-').map(Number);
+  const d = new Date(Date.UTC(y, m - 1 + n, 1));
+  return d.getUTCFullYear() + '-' + String(d.getUTCMonth() + 1).padStart(2, '0');
 }
 
 function conversionKey(plataforma, idCuenta, conversion) {
