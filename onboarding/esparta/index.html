@@ -764,7 +764,7 @@
         <ol class="substeps">
           <li data-n="1.1">
             <strong>Activamos el plan de Detrics</strong>
-            Detrics para BigQuery, hasta 250 cuentas en total, con pago mensual. Detrics cambia el plan sobre la suscripción que Esparta ya tiene, así que no hace falta cargar una tarjeta nueva. Las transferencias de la prueba siguen corriendo.
+            Detrics para BigQuery, hasta 250 cuentas en total, con pago mensual. Detrics cambia el plan sobre la suscripción que Esparta ya tiene, con la misma tarjeta. Las transferencias de la prueba siguen corriendo.
           </li>
           <li data-n="1.2">
             <strong>Revisamos el proyecto de Google Cloud</strong>
@@ -773,7 +773,7 @@
               <div class="url-icon"><svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg></div>
               <a href="https://console.cloud.google.com/billing/linkedaccount?project=espartainformes2026v2" target="_blank" rel="noopener">console.cloud.google.com/billing</a>
             </div>
-            <div class="tip amber"><span class="tip-icon">&#9888;</span><span>Sin facturación activa, BigQuery no acepta cargas de datos y las transferencias fallan. Google le factura BigQuery directamente a Esparta.</span></div>
+            <div class="tip amber"><span class="tip-icon">&#9888;</span><span>BigQuery acepta cargas de datos con la facturación activa: es la condición para que corran las transferencias. Google le factura BigQuery directamente a Esparta.</span></div>
           </li>
           <li data-n="1.3">
             <strong>Dan acceso en Google Cloud a Soporte de Detrics, Tom e Ignacio</strong>
@@ -800,9 +800,9 @@
             <div class="copyable"><span class="label">Rol</span><code>roles/bigquery.jobUser</code><button class="copy-btn" type="button" data-copy="roles/bigquery.jobUser">Copiar</button></div>
             <div class="copyable"><span class="label">Rol</span><code>roles/bigquery.dataEditor</code><button class="copy-btn" type="button" data-copy="roles/bigquery.dataEditor">Copiar</button></div>
             <div class="copyable"><span class="label">Rol</span><code>roles/bigquery.admin</code><button class="copy-btn" type="button" data-copy="roles/bigquery.admin">Copiar</button></div>
-            <div class="tip amber"><span class="tip-icon">&#9888;</span><span><strong>Un cuarto rol para quien cree la consulta programada.</strong> Crear o editar una consulta programada en BigQuery pide el permiso <code>bigquery.transfers.update</code>, que los tres roles de arriba no incluyen. Lo trae <strong>BigQuery Admin</strong>. Se lo dan a la cuenta de Lienzzo que la va a crear en el paso 8.1 y, si Detrics la arma primero durante la construcción, también a <code>support@detrics.io</code>. Con Admin no hace falta sumar Job User ni Data Editor a esa cuenta.</span></div>
+            <div class="tip amber"><span class="tip-icon">&#9888;</span><span><strong>Un cuarto rol para quien cree la consulta programada.</strong> Crear o editar una consulta programada en BigQuery pide el permiso <code>bigquery.transfers.update</code>, que trae <strong>BigQuery Admin</strong>. Se lo dan a la cuenta de Lienzzo que la va a crear en el paso 8.1 y, si Detrics la arma primero durante la construcción, también a <code>support@detrics.io</code>. BigQuery Admin ya incluye Job User y Data Editor.</span></div>
             <div class="tip blue"><span class="tip-icon">&#9432;</span><span>Si la consola está en español, los roles pueden aparecer traducidos. Búsquenlos por <code>mcp</code>, <code>Job User</code> y <code>Data Editor</code>, o por su ID, que figura arriba.</span></div>
-            <div class="tip amber"><span class="tip-icon">&#9888;</span><span>Si Google muestra un error de dominio no permitido, la organización restringe las cuentas externas. El administrador de Google Cloud de Esparta tiene que habilitar el dominio <code>detrics.io</code> y después repetir este paso.</span></div>
+            <div class="tip amber"><span class="tip-icon">&#9888;</span><span>Si Google muestra un error de dominio, la organización restringe las cuentas externas: el administrador de Google Cloud de Esparta habilita el dominio <code>detrics.io</code> y repite este paso.</span></div>
             <div class="tip green"><span class="tip-icon">&#10003;</span><span>Esparta puede quitar estos accesos cuando quiera desde la misma pantalla. Los datos quedan en su proyecto.</span></div>
           </li>
           <li data-n="1.4">
@@ -907,11 +907,11 @@
           </li>
           <li data-n="3.4">
             <strong>Instalen el Apps Script del mapa (lo hace Lienzzo con su cuenta)</strong>
-            Lo revisamos en la reunión de inicio. Es el script que copia cada noche las pestañas <strong>Mapa de clientes</strong> y <strong>Conversiones</strong> de la hoja de Google a BigQuery, y agrega a la pestaña Conversiones las conversiones nuevas que aparecen sin clasificar. Corre con la cuenta de quien lo instala, por eso lo instala Lienzzo y no Detrics: así sigue corriendo cuando termine el proyecto. El código está abajo, listo para pegar.
+            Lo revisamos en la reunión de inicio. Es el script que copia cada noche las pestañas <strong>Mapa de clientes</strong> y <strong>Conversiones</strong> de la hoja de Google a BigQuery, y agrega a la pestaña Conversiones las conversiones nuevas para clasificar. Corre con la cuenta de quien lo instala, por eso lo instala Lienzzo: así sigue corriendo cuando termine el proyecto. El código está abajo, listo para pegar.
             <ol>
               <li>La cuenta de Lienzzo necesita <strong>BigQuery Data Editor</strong> y <strong>BigQuery Job User</strong> en el proyecto (con BigQuery Admin ya los tiene) y acceso de Editor a la hoja del mapa.</li>
               <li>En la hoja del mapa, <strong>Extensiones › Apps Script</strong>. Borrar el contenido del editor y pegar el archivo completo.</li>
-              <li>En el menú de la izquierda, <strong>Servicios</strong> (+) › <strong>BigQuery API</strong> › Agregar. Si BigQuery API no aparece en la lista o <strong>Agregar</strong> da error, sumarlo desde el archivo de configuración del proyecto:
+              <li>En el menú de la izquierda, <strong>Servicios</strong> (+) › <strong>BigQuery API</strong> › Agregar. Si BigQuery API falta en la lista o <strong>Agregar</strong> da error, sumarlo desde el archivo de configuración del proyecto:
                 <ol>
                   <li>En la barra izquierda, clic en <strong>Configuración del proyecto</strong> (el ícono de engranaje) y tildar <strong>Mostrar el archivo de manifiesto "appsscript.json" en el editor</strong>.</li>
                   <li>Volver a <strong>Editor</strong> (el ícono <code>&lt;&gt;</code>). En la lista de archivos aparece <code>appsscript.json</code>: abrirlo, borrar todo su contenido, pegar el bloque de abajo con el botón <strong>Copiar JSON</strong> y guardar con <strong>Ctrl + S</strong>.</li>
@@ -921,7 +921,7 @@
                   <div class="sql-head">
                     <div class="sql-title">
                       <strong>appsscript.json · BigQuery API activada</strong>
-                      <span>Reemplaza todo el contenido de <code>appsscript.json</code>. Solo hace falta si Servicios (+) no funcionó.</span>
+                      <span>Reemplaza todo el contenido de <code>appsscript.json</code>. Solo hace falta si Servicios (+) dio error.</span>
                     </div>
                     <button class="copy-btn" type="button" data-copy-target="json-manifest">Copiar JSON</button>
                   </div>
@@ -941,7 +941,7 @@
 }</code></pre>
                 </div>
               </li>
-              <li>Elegir la función <code>syncClientMapToBigQuery</code> y <strong>Ejecutar</strong>. La primera vez pide autorización con la cuenta de Lienzzo. Al terminar, las tablas <code>client_map</code> y <code>conversion_map</code> existen en <code>detrics_warehouse</code> y aparece la pestaña Conversiones si no estaba.</li>
+              <li>Elegir la función <code>syncClientMapToBigQuery</code> y <strong>Ejecutar</strong>. La primera vez pide autorización con la cuenta de Lienzzo. Al terminar, las tablas <code>client_map</code> y <code>conversion_map</code> existen en <code>detrics_warehouse</code> y la hoja tiene la pestaña Conversiones.</li>
               <li>Elegir la función <code>installDailyTrigger</code> y <strong>Ejecutar</strong>: queda la corrida diaria a las 03:00 (Madrid), antes de la consulta programada.</li>
               <li>Para aplicar un cambio del mapa al momento, en la hoja: menú <strong>Detrics › Sincronizar mapa ahora</strong>.</li>
             </ol>
@@ -949,7 +949,7 @@
               <div class="sql-head">
                 <div class="sql-title">
                   <strong>Apps Script · Mapa de clientes a BigQuery</strong>
-                  <span>Se pega en <strong>Extensiones › Apps Script</strong> de la hoja del mapa (paso 2 de arriba). Escribe <code>client_map</code>, <code>conversion_map</code> y <code>tipos_de_cambio</code> en <code>detrics_warehouse</code> y agrega a la pestaña Conversiones las conversiones nuevas sin clasificar. Versión del 27/10.</span>
+                  <span>Se pega en <strong>Extensiones › Apps Script</strong> de la hoja del mapa (paso 2 de arriba). Escribe <code>client_map</code>, <code>conversion_map</code> y <code>tipos_de_cambio</code> en <code>detrics_warehouse</code> y agrega a la pestaña Conversiones las conversiones nuevas para clasificar. Versión del 27/10.</span>
                 </div>
                 <button class="copy-btn" type="button" data-copy-target="script-mapa">Copiar script</button>
               </div>
@@ -1202,21 +1202,21 @@ function bqRun(sql) {
           <p>Lo que quedó abierto en la reunión de inicio, con quién lo resuelve.</p>
           <div class="checklist todo">
           <div class="check-group">Esparta</div>
-          <label class="check"><input type="checkbox" data-k="r1-iam"><span class="box"></span><span class="txt">Roles MCP Tool User, BigQuery Job User y BigQuery Data Editor para support@, tomas@ e ignacio.goyanes@detrics.io. Hoy la cuenta de servicio de Detrics escribe en el proyecto, pero las personas no ven ningún dataset. Si Google rechaza el dominio, el administrador habilita detrics.io en la política de la organización. Además, BigQuery Admin para support@detrics.io, para crear la consulta programada de las tablas consolidadas. Borja (20/10): le dio acceso total al Cloud Console a Juan y el 21/10 ve con Gerard el control total para Lienzzo y los roles de Detrics<small>Paso 1.3</small></span><span class="owner carat">Esparta</span></label>
+          <label class="check"><input type="checkbox" data-k="r1-iam"><span class="box"></span><span class="txt">Roles MCP Tool User, BigQuery Job User y BigQuery Data Editor para support@, tomas@ e ignacio.goyanes@detrics.io. Hoy solo la cuenta de servicio de Detrics escribe en el proyecto; con estos roles las personas también ven los datasets. Si Google rechaza el dominio, el administrador habilita detrics.io en la política de la organización. Además, BigQuery Admin para support@detrics.io, para crear la consulta programada de las tablas consolidadas. Borja (20/10): le dio acceso total al Cloud Console a Juan y el 21/10 ve con Gerard el control total para Lienzzo y los roles de Detrics<small>Paso 1.3</small></span><span class="owner carat">Esparta</span></label>
           <label class="check"><input type="checkbox" data-k="r1-reports"><span class="box"></span><span class="txt">Los Looker Studio que usan hoy compartidos como Editor con support@detrics.io y con Lienzzo (Borja los reenvía, 20/10)<small>Paso 4.2</small></span><span class="owner carat">Esparta</span></label>
           <label class="check"><input type="checkbox" data-k="r1-leads"><span class="box"></span><span class="txt">Qué miden en cada cliente (leads, ventas) y con qué métrica en cada caso: conversaciones de WhatsApp, formularios, compras del píxel, facturación. Se carga en la pestaña Conversiones del mapa<small>Paso 6</small></span><span class="owner carat">Esparta</span></label>
-          <label class="check"><input type="checkbox" data-k="r1-map"><span class="box"></span><span class="txt">Correcciones del mapa de clientes: los IDs de Instagram de Juegos de la Mesa Redonda, Neco, Puertas Andreu, Stamp By Me y Zumex; el Google Ads de Sclincs (9 dígitos) y si Sclincs sigue en el informe; qué propiedades de Search Console de Sungrow cuentan (están por idioma); el Instagram y el Facebook de Zumex; EMDR, Grupo Eco Netson y Proyme sin cuentas. Borja lo reenvió a su equipo el 20/10<small>Paso 3.2</small></span><span class="owner carat">Esparta</span></label>
+          <label class="check"><input type="checkbox" data-k="r1-map"><span class="box"></span><span class="txt">Correcciones del mapa de clientes: los IDs de Instagram de Juegos de la Mesa Redonda, Neco, Puertas Andreu, Stamp By Me y Zumex; el Google Ads de Sclincs (9 dígitos) y si Sclincs sigue en el informe; qué propiedades de Search Console de Sungrow cuentan (están por idioma); el Instagram y el Facebook de Zumex; qué cuentas tienen EMDR, Grupo Eco Netson y Proyme. Borja lo reenvió a su equipo el 20/10<small>Paso 3.2</small></span><span class="owner carat">Esparta</span></label>
           <label class="check"><input type="checkbox" data-k="r1-sources"><span class="box"></span><span class="txt">Conectar en Data Sources los usuarios que administran las cuentas que faltan: TikTok Business de Neco, Stamp By Me y WashTec; GA4, Search Console y Facebook de Puertas Andreu; los Instagram que administra otro usuario<small>Paso 2.2</small></span><span class="owner carat">Esparta</span></label>
           <label class="check"><input type="checkbox" data-k="r1-tiktok"><span class="box"></span><span class="txt">Volver a conectar TikTok Orgánico (Bodegas Nodus) en Data Sources: TikTok pide permisos nuevos para las métricas de cuenta y hoy esas tablas fallan en las transferencias de la prueba<small>Paso 2.2</small></span><span class="owner carat">Esparta</span></label>
           <div class="check-group">Lienzzo</div>
-          <label class="check"><input type="checkbox" data-k="r1-owner"><span class="box"></span><span class="txt">Quién de Lienzzo crea la consulta programada de las 08:00 y el Apps Script del mapa con su cuenta, para que sigan corriendo cuando termine el proyecto. Borja le da el rol BigQuery Admin en el proyecto (los tres roles del paso 1.3 no alcanzan para crear una consulta programada). El script se instala en el paso 3.4; la consulta, en el 8.1<small>Pasos 1.3, 3.4 y 8.1</small></span><span class="owner carat">Lienzzo</span></label>
+          <label class="check"><input type="checkbox" data-k="r1-owner"><span class="box"></span><span class="txt">Quién de Lienzzo crea la consulta programada de las 08:00 y el Apps Script del mapa con su cuenta, para que sigan corriendo cuando termine el proyecto. Borja le da el rol BigQuery Admin en el proyecto (crear una consulta programada pide ese rol). El script se instala en el paso 3.4; la consulta, en el 8.1<small>Pasos 1.3, 3.4 y 8.1</small></span><span class="owner carat">Lienzzo</span></label>
           <div class="check-group">Definimos juntos</div>
           <label class="check"><input type="checkbox" data-k="r1-dash" checked><span class="box"></span><span class="txt">Dashboard: aplicación web sobre Vercel, elegida por Borja el 20/10 (Lienzzo ya despliega ahí)<small>Paso 1.4</small></span><span class="owner both">Esparta y Detrics</span></label>
           <label class="check"><input type="checkbox" data-k="r1-currency"><span class="box"></span><span class="txt">Moneda del informe: EUR en todas las cuentas de Meta y LinkedIn Ads; Zumex tiene cuentas de Google Ads en México y Estados Unidos<small>Paso 6</small></span><span class="owner both">Esparta y Detrics</span></label>
           <label class="check"><input type="checkbox" data-k="r1-agenda"><span class="box"></span><span class="txt">Reuniones 2, 3 y 4 agendadas y canal de Slack abierto<small>Paso 1.4</small></span><span class="owner both">Esparta y Detrics</span></label>
           <div class="check-group">Detrics</div>
           <label class="check"><input type="checkbox" data-k="r1-transfers" checked><span class="box"></span><span class="txt">Destination nueva (detrics_warehouse) y 9 transferencias con 43 tablas creadas con las cuentas del mapa que ya están conectadas. Carga histórica lanzada el 19/10<small>Paso 5</small></span><span class="owner detrics">Detrics</span></label>
-          <label class="check"><input type="checkbox" data-k="r1-sheet" checked><span class="box"></span><span class="txt">Mapa de clientes pasado a la hoja de Google de Detrics con el formato de la plantilla; la columna Notas marca las cuentas que no cruzan<small>Paso 3</small></span><span class="owner detrics">Detrics</span></label>
+          <label class="check"><input type="checkbox" data-k="r1-sheet" checked><span class="box"></span><span class="txt">Mapa de clientes pasado a la hoja de Google de Detrics con el formato de la plantilla; la columna Notas marca las cuentas con diferencias<small>Paso 3</small></span><span class="owner detrics">Detrics</span></label>
           <label class="check"><input type="checkbox" data-k="r1-share" checked><span class="box"></span><span class="txt">Hoja del mapa compartida como Editor con Borja, Gerard y Juan<small>Paso 3.3</small></span><span class="owner detrics">Detrics</span></label>
           <label class="check"><input type="checkbox" data-k="r1-conv"><span class="box"></span><span class="txt">Pestaña Conversiones en el mapa: cada conversión de cada cuenta marcada como Lead, Compra, Otra o Excluir, con las reglas por defecto cargadas para que Esparta las corrija<small>Paso 6</small></span><span class="owner detrics">Detrics</span></label>
           </div>
@@ -1239,10 +1239,10 @@ function bqRun(sql) {
               <div class="url-icon"><svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg></div>
               <a href="https://console.cloud.google.com/iam-admin/serviceaccounts?project=espartainformes2026v2" target="_blank" rel="noopener">console.cloud.google.com/iam-admin/serviceaccounts</a>
             </div>
-            <div class="tip blue"><span class="tip-icon">&#9432;</span><span><strong>Las cuentas de servicio no están dentro de BigQuery.</strong> Están en otra sección de Google Cloud, <strong>IAM y administración</strong>. Sin el enlace se llega así: menú <strong>☰</strong> arriba a la izquierda › <strong>IAM y administración</strong> › <strong>Cuentas de servicio</strong>. También sirve escribir <code>cuentas de servicio</code> en la barra de búsqueda de arriba. Si la consola está en inglés: <strong>IAM &amp; Admin</strong> › <strong>Service Accounts</strong>.</span></div>
+            <div class="tip blue"><span class="tip-icon">&#9432;</span><span><strong>Las cuentas de servicio se crean en IAM y administración</strong>, una sección de Google Cloud. El camino desde cualquier pantalla: menú <strong>☰</strong> arriba a la izquierda › <strong>IAM y administración</strong> › <strong>Cuentas de servicio</strong>. También sirve escribir <code>cuentas de servicio</code> en la barra de búsqueda de arriba. Si la consola está en inglés: <strong>IAM &amp; Admin</strong> › <strong>Service Accounts</strong>.</span></div>
             <ol>
               <li>Abran el enlace de arriba. En el selector de proyecto, arriba a la izquierda, tiene que figurar <code>espartainformes2026v2</code>. Si figura otro, click en el selector y elijan ese.</li>
-              <li>Arriba de la lista hay un botón <strong>+ Crear cuenta de servicio</strong> (<strong>+ Create service account</strong>). Si está gris o da error de permisos, esa cuenta de Google no puede crearlas: lo hace la persona que administra Google Cloud en Esparta (rol Propietario del proyecto).</li>
+              <li>Arriba de la lista hay un botón <strong>+ Crear cuenta de servicio</strong> (<strong>+ Create service account</strong>). Si está gris o da error de permisos, la crea la persona que administra Google Cloud en Esparta (rol Propietario del proyecto).</li>
               <li>En <strong>Nombre de la cuenta de servicio</strong> peguen el de abajo; el ID y el correo se completan solos. Click en <strong>Crear y continuar</strong>.</li>
             </ol>
             <div class="copyable"><span class="label">Nombre</span><code>dashboard-esparta</code><button class="copy-btn" type="button" data-copy="dashboard-esparta">Copiar</button></div>
@@ -1260,13 +1260,13 @@ function bqRun(sql) {
               <li>La prueba de la clave. Vuelvan a <strong>Cuentas de servicio</strong> (enlace de arriba) y hagan click en el correo de <code>dashboard-esparta</code> en la lista. Arriba hay pestañas: <strong>Claves</strong> (<strong>Keys</strong>) › botón <strong>Agregar clave</strong> (<strong>Add key</strong>) › <strong>Crear clave nueva</strong> › tipo <strong>JSON</strong> › <strong>Crear</strong>.</li>
               <li>Si el navegador descarga un archivo <code>.json</code>, está todo listo. Si aparece un aviso de que la creación de claves está inhabilitada, sigan con R2.2.</li>
             </ol>
-            <div class="tip amber"><span class="tip-icon">&#9888;</span><span><strong>El archivo <code>.json</code> funciona como una contraseña.</strong> Quien lo tenga puede leer las tablas del informe. Guárdenlo en el gestor de contraseñas de Lienzzo, no lo manden por correo ni por Slack, y no hace falta pasárselo a Detrics: Lienzzo lo carga en Vercel el día de la entrega. Si se pierde, se borra la clave y se crea otra.</span></div>
+            <div class="tip amber"><span class="tip-icon">&#9888;</span><span><strong>El archivo <code>.json</code> funciona como una contraseña.</strong> Quien lo tenga puede leer las tablas del informe. Guárdenlo en el gestor de contraseñas de Lienzzo y compártanlo solo desde ahí. Queda en manos de Lienzzo, que lo carga en Vercel el día de la entrega. Si se pierde, se borra la clave y se crea otra.</span></div>
           </li>
           <li data-n="R2.2">
             <strong>Solo si la clave está bloqueada: habilitarla para este proyecto</strong>
             Google activa en las organizaciones nuevas una política que impide crear claves de cuentas de servicio. Se puede desactivar solo para <code>espartainformes2026v2</code>; el resto de la organización sigue igual. Lo hace el superadministrador de Google Workspace de Esparta.
             <ol>
-              <li>Darse el permiso. Abran <strong>IAM</strong> y en el selector de arriba elijan la <strong>organización</strong> (<code>espartadigital.com</code>), no el proyecto. <strong>Otorgar acceso</strong> › su propio correo › rol <strong>Administrador de políticas de la organización</strong> › <strong>Guardar</strong>.</li>
+              <li>Darse el permiso. Abran <strong>IAM</strong> y en el selector de arriba elijan la <strong>organización</strong> (<code>espartadigital.com</code>), un nivel arriba del proyecto. <strong>Otorgar acceso</strong> › su propio correo › rol <strong>Administrador de políticas de la organización</strong> › <strong>Guardar</strong>.</li>
             </ol>
             <div class="copyable"><span class="label">Rol</span><code>roles/orgpolicy.policyAdmin</code><button class="copy-btn" type="button" data-copy="roles/orgpolicy.policyAdmin">Copiar</button></div>
             <div class="url-box">
@@ -1279,26 +1279,26 @@ function bqRun(sql) {
               <li>Abran la política › <strong>Administrar política</strong> › en <strong>Fuente de la política</strong> elijan <strong>Anular la política del superior</strong> › <strong>Agregar una regla</strong> › <strong>Aplicación: Desactivada</strong> › <strong>Listo</strong> › <strong>Establecer política</strong>.</li>
               <li>Esperen unos minutos y repitan el punto 7 de R2.1. Ahora se tiene que descargar el <code>.json</code>.</li>
             </ol>
-            <div class="tip blue"><span class="tip-icon">&#9432;</span><span>Si prefieren no tocar la política, Vercel también puede conectarse a Google Cloud sin clave (federación de identidad). Lo configura Lienzzo en la entrega; el dashboard es el mismo.</span></div>
+            <div class="tip blue"><span class="tip-icon">&#9432;</span><span>Otra opción, con la política como está: Vercel se conecta a Google Cloud por federación de identidad, una relación de confianza entre las dos plataformas en lugar de un archivo de clave. Lo configura Lienzzo en la entrega; el dashboard es el mismo.</span></div>
           </li>
           <li data-n="R2.3">
             <strong>Lienzzo: Apps Script del mapa y consulta programada</strong>
             <ol>
-              <li>Instalar el Apps Script del mapa de clientes con una cuenta de Lienzzo (paso 3.4). Sin él, los cambios en el mapa, en la pestaña Conversiones y en Tipos de cambio no llegan a BigQuery.</li>
+              <li>Instalar el Apps Script del mapa de clientes con una cuenta de Lienzzo (paso 3.4). Con el script instalado, los cambios en el mapa, en la pestaña Conversiones y en Tipos de cambio llegan a BigQuery cada noche.</li>
               <li>Definir quién de Lienzzo queda como dueño de la consulta programada de las 08:00 (paso 8.1). Hasta la entrega la mantiene Detrics; en la reunión 4 le pasamos las credenciales a esa persona.</li>
             </ol>
           </li>
           <li data-n="R2.4">
-            <strong>Cuentas del mapa que todavía no llegan al informe</strong>
-            Cada línea dice qué cuenta es, por qué hoy no tiene datos y qué hace falta. "Conectar en Data Sources" significa: en Detrics, menú <strong>Data Sources</strong>, elegir la plataforma y entrar con un usuario que administre esa cuenta. Una vez conectada, Detrics la suma a su transferencia y llega con su historia.
+            <strong>Estado del mapa al 28/10, con las respuestas de Marta</strong>
+            "Conectar en Data Sources" significa: en Detrics, menú <strong>Data Sources</strong>, elegir la plataforma y entrar con un usuario que administre esa cuenta. Una vez conectada, Detrics la suma a su transferencia y llega con su historia.
             <ol>
-              <li><strong>Zumex, página de Facebook.</strong> En el mapa figura el número <code>108089193039095</code>, pero ese número es la <em>cuenta publicitaria</em> de Meta ("ZUMEX GROUP"), donde se pagan los anuncios, no la <em>página</em> de Facebook, que es donde se publica. Hace falta: el ID de la página de Zumex (en la página, <strong>Información › Transparencia de la página</strong>) y conectar esa página en Data Sources › Facebook Pages.</li>
-              <li><strong>Absotec, anuncios de Facebook e Instagram.</strong> Absotec es cliente nuevo. Su Google Analytics, Search Console y Google Ads ya llegan. Su cuenta publicitaria de Meta (<code>act_499731237698513</code>, la de los anuncios en Facebook e Instagram) no está conectada en Detrics, así que su inversión en Meta no aparece. Hace falta conectarla en Data Sources › Facebook Ads.</li>
-              <li><strong>INVE Aquaculture e INVE LATAM, redes.</strong> Clientes nuevos, cargados como dos clientes. Sus dos páginas de Facebook y sus dos cuentas de Instagram no están conectadas. Hace falta conectarlas en Data Sources › Facebook Pages e Instagram.</li>
-              <li><strong>Puertas Andreu, Instagram.</strong> El ID del mapa no coincide con la cuenta conectada. La conectada es <code>17841410968308214</code> ("andreu | access engineering") y ya la usamos. Solo hace falta confirmar que es la correcta.</li>
-              <li><strong>Juegos de la Mesa Redonda, Search Console.</strong> La propiedad <code>https://juegosdelamesaredonda.es/blog/</code> dejó de estar verificada: Google no deja leerla y no hay datos desde el 20/10. Hace falta que alguien con acceso abra Search Console, elija esa propiedad › <strong>Configuración</strong> › <strong>Verificación de la propiedad</strong> y la vuelva a verificar.</li>
-              <li><strong>Weber.</strong> Dijeron "no lo vamos a reportar". Hace falta aclarar qué: el evento <code>file_access</code> de GA4, todo su GA4 o Weber entero en el informe.</li>
-              <li><strong>Sclinics y Sungrow, Google Analytics.</strong> Sclinics tiene dos propiedades de GA4: "SCLINICS" (<code>557879872</code>, la que usamos) y "SCLINICS 2" (<code>559100135</code>); hace falta saber cuál es la buena. Sungrow tiene conectada "SUNGROW-Spain + Andorra" (<code>525717266</code>) pero el mapa no le pone GA4; hace falta saber si entra al informe.</li>
+              <li><strong>Pendiente · INVE Aquaculture e INVE LATAM, redes.</strong> Falta conectar sus dos páginas de Facebook y sus dos cuentas de Instagram en Data Sources › Facebook Pages e Instagram. Sobre la pregunta de Marta: el dashboard es uno solo para todos los clientes. Eligiendo los dos INVE en el filtro de cliente se ven juntos, cada uno en su fila.</li>
+              <li><strong>Pendiente · Juegos de la Mesa Redonda, Search Console.</strong> La propiedad conectada hoy es <code>https://juegosdelamesaredonda.es/blog/</code>. Falta conectar la del dominio principal, <code>juegosdelamesaredonda.es</code>, en Data Sources › Google Search Console, con un usuario que la administre en Search Console.</li>
+              <li><strong>Listo · Zumex, Facebook.</strong> Conectadas las páginas Zumex Group (<code>153318241392756</code>) y Zumex LATAM (<code>376726192790232</code>). Detrics las carga en el mapa.</li>
+              <li><strong>Listo · Absotec, Meta Ads.</strong> Cuenta <code>499731237698513</code> conectada.</li>
+              <li><strong>Listo · Puertas Andreu, Instagram.</strong> Confirmada la <code>17841410968308214</code> ("andreu | access engineering").</li>
+              <li><strong>Listo · Weber.</strong> Deja de ser cliente a fin de noviembre: sale del informe.</li>
+              <li><strong>Listo · Sclinics y Sungrow, Google Analytics.</strong> Sclinics usa "SCLINICS" (<code>557879872</code>). Sungrow suma "SUNGROW-Spain + Andorra" (<code>525717266</code>), ya cargada en el mapa.</li>
             </ol>
           </li>
           <li data-n="R2.5">
@@ -1310,14 +1310,14 @@ function bqRun(sql) {
             Para esos clientes el dashboard muestra también ventas: número de compras, facturación, ticket medio y retorno de la inversión (facturación / inversión en anuncios). Hace falta que nos digan:
             <ol>
               <li>Si en sus informes de esos clientes reportan ventas, o solo leads.</li>
-              <li>Si las compras de Google Analytics coinciden con las ventas reales de la tienda (Shopify, WooCommerce o la que usen). Si no coinciden, usamos el número de Google Analytics igual, pero avisado en el dashboard.</li>
-              <li>Juegos de la Mesa Redonda: sus campañas registran compras, pero la propiedad de Google Analytics del mapa es la del blog y no tiene ninguna. ¿Cuál es la propiedad de la tienda?</li>
+              <li>Si las compras de Google Analytics coinciden con las ventas reales de la tienda (Shopify, WooCommerce o la que usen). Si difieren, el dashboard usa el número de Google Analytics.</li>
+              <li>Juegos de la Mesa Redonda: sus campañas registran compras, pero la propiedad de Google Analytics del mapa es la del blog, que registra cero compras. ¿Cuál es la propiedad de la tienda?</li>
             </ol>
           </li>
           <li data-n="R2.6">
             <strong>Pestaña Conversiones y dominio del dashboard</strong>
             <ol>
-              <li>Repasar juntos la pestaña <strong>Conversiones</strong> del mapa, cliente por cliente: qué cuenta como lead y qué no.</li>
+              <li>Repasar juntos la pestaña <strong>Conversiones</strong> del mapa, cliente por cliente: qué cuenta como lead y qué queda en Otra.</li>
               <li>Elegir la dirección del dashboard, por ejemplo <code>informes.espartadigital.com</code>. En la entrega, quien administre el DNS de espartadigital.com agrega el registro que pida Vercel.</li>
             </ol>
           </li>
@@ -1325,7 +1325,7 @@ function bqRun(sql) {
         <ol class="substeps" start="7">
           <li data-n="R2.7">
             <strong>Límites de gasto en Google Cloud</strong>
-            El dashboard solo lee y pide sesión antes de cada consulta, y leer todas las tablas del informe cuesta céntimos. Igual dejamos dos barreras en el proyecto, para que un error o una clave filtrada nunca se conviertan en una factura grande. Lo hace quien administre la facturación de Google Cloud.
+            El dashboard solo lee y pide sesión antes de cada consulta, y leer todas las tablas del informe cuesta céntimos. Igual dejamos dos barreras en el proyecto que ponen un techo al gasto ante un error o una clave filtrada. Lo hace quien administre la facturación de Google Cloud.
             <p style="margin-top:10px"><strong>1. Un tope diario de BigQuery (corta).</strong></p>
             <div class="url-box">
               <div class="url-icon"><svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg></div>
@@ -1333,7 +1333,7 @@ function bqRun(sql) {
             </div>
             <ol>
               <li>Abran <strong>Cuotas y límites del sistema</strong> (enlace de arriba), con <code>espartainformes2026v2</code> en el selector.</li>
-              <li>En el filtro escriban <code>Query usage per day</code>. Aparecen dos filas del servicio BigQuery API; elijan la que <strong>no</strong> dice "per user" (es la del proyecto entero).</li>
+              <li>En el filtro escriban <code>Query usage per day</code>. Aparecen dos filas del servicio BigQuery API; elijan la que dice solo <strong>Query usage per day</strong>, la del proyecto entero (la otra termina en "per user").</li>
               <li>Márquenla › <strong>Editar</strong> (o el lápiz) › en el valor nuevo pongan <strong>1 TiB</strong>. Si la consola pide el número en MiB, es <code>1048576</code>. › <strong>Enviar solicitud</strong>. Bajar una cuota se aprueba al momento.</li>
             </ol>
             <div class="copyable"><span class="label">MiB</span><code>1048576</code><button class="copy-btn" type="button" data-copy="1048576">Copiar</button></div>
@@ -1349,7 +1349,7 @@ function bqRun(sql) {
               <li><strong>Importe:</strong> importe especificado, <strong>50 €</strong> al mes (hoy el proyecto gasta mucho menos; si se acerca, algo raro pasa). <strong>Siguiente</strong>.</li>
               <li><strong>Umbrales:</strong> 50 %, 90 % y 100 % del importe real. Marquen <strong>Enviar alertas por correo a administradores y usuarios de facturación</strong> y, si quieren, sumen otros correos. <strong>Finalizar</strong>.</li>
             </ol>
-            <div class="tip amber"><span class="tip-icon">&#9888;</span><span>Un presupuesto solo avisa: no frena el gasto. El que frena es el tope diario del punto 1. Por eso van los dos.</span></div>
+            <div class="tip amber"><span class="tip-icon">&#9888;</span><span>Un presupuesto avisa; el que frena el gasto es el tope diario del punto 1. Por eso van los dos.</span></div>
           </li>
         </ol>
         <div class="todo-call">
@@ -1391,7 +1391,7 @@ function bqRun(sql) {
       <div class="step-body">
         <ul class="plain">
           <li>Armamos las tablas consolidadas, una por tema: inversión y resultados de anuncios (Google, Meta y LinkedIn con las mismas columnas), conversiones por acción, web (GA4), SEO (Search Console), redes sociales y publicaciones. Cada una tiene todos los clientes y una columna Cliente.</li>
-          <li>Aplicamos la pestaña <strong>Conversiones</strong> del mapa: qué conversión de cada cuenta cuenta como lead o como compra. Un cambio en la pestaña aplica a toda la historia, sin volver a cargar datos.</li>
+          <li>Aplicamos la pestaña <strong>Conversiones</strong> del mapa: qué conversión de cada cuenta cuenta como lead o como compra. Un cambio en la pestaña aplica a toda la historia con los datos ya cargados.</li>
           <li>Cruzamos con el mapa de clientes para asignar cada cuenta a su cliente, y de ahí salen las tablas por cliente.</li>
           <li>Validamos los números contra los dashboards de Supermetrics.</li>
         </ul>
@@ -1419,29 +1419,29 @@ function bqRun(sql) {
     <div class="step is-carat">
       <div class="step-header">
         <div class="step-number">8</div>
-        <h4>Lo que sigue corriendo sin Detrics <small>Reunión 4 y después</small></h4>
+        <h4>Lo que queda en manos de Esparta y Lienzzo <small>Reunión 4 y después</small></h4>
       </div>
       <div class="step-body">
-        <p>Las transferencias corren con la cuenta de servicio de Detrics y no dependen de ninguna persona. Hay tres piezas que sí corren con la cuenta de quien las crea: la consulta programada que arma las tablas consolidadas, el Apps Script del mapa de clientes (paso 3.4) y las credenciales del dashboard. Si las crea alguien de Detrics, dejan de funcionar el día que Esparta quite nuestros accesos. Por eso las crea Lienzzo o Esparta con su propia cuenta, y Detrics entrega el código listo para pegar.</p>
+        <p>Las transferencias corren con la cuenta de servicio de Detrics, independiente de las personas. Hay tres piezas que sí corren con la cuenta de quien las crea: la consulta programada que arma las tablas consolidadas, el Apps Script del mapa de clientes (paso 3.4) y las credenciales del dashboard. Si las crea alguien de Detrics, dejan de funcionar el día que Esparta quite nuestros accesos. Por eso las crea Lienzzo o Esparta con su propia cuenta, y Detrics entrega el código listo para pegar.</p>
         <ol class="substeps">
           <li data-n="8.1">
             <strong>La consulta programada de las 08:00, creada por Lienzzo</strong>
             Es una consulta SQL que BigQuery ejecuta sola todos los días a las 08:00 (hora de Madrid), cuando ya terminaron las transferencias, y reconstruye las tablas <code>master_*</code> que lee el dashboard. Detrics entrega el archivo <code>90_materializar.sql</code> en la reunión 3 y lo actualiza cada vez que cambia una tabla.
             <ol>
-              <li>Borja da a la cuenta de Lienzzo el rol <strong>BigQuery Admin</strong> en <code>espartainformes2026v2</code> (IAM, igual que en el paso 1.3). Crear una consulta programada pide el permiso <code>bigquery.transfers.update</code>, que Data Editor y Job User no incluyen.</li>
+              <li>Borja da a la cuenta de Lienzzo el rol <strong>BigQuery Admin</strong> en <code>espartainformes2026v2</code> (IAM, igual que en el paso 1.3). Crear una consulta programada pide el permiso <code>bigquery.transfers.update</code>, que viene con BigQuery Admin.</li>
               <li>Con esa cuenta, abrir BigQuery en la consola de Google Cloud y verificar el proyecto en el selector de arriba.</li>
-              <li>Abrir una pestaña de consulta nueva y pegar el contenido completo de <code>90_materializar.sql</code>. Botón <strong>Ejecutar</strong> una vez: tiene que terminar sin error y las tablas <code>master_*</code> aparecen en el dataset <code>detrics_warehouse</code>.</li>
+              <li>Abrir una pestaña de consulta nueva y pegar el contenido completo de <code>90_materializar.sql</code>. Botón <strong>Ejecutar</strong> una vez: tiene que terminar bien y las tablas <code>master_*</code> aparecen en el dataset <code>detrics_warehouse</code>.</li>
               <li>Arriba de la consulta, <strong>Programar</strong> › <strong>Crear una consulta programada</strong>.</li>
               <li>Nombre: <code>Esparta · masters diarios</code>. Repetición: <strong>Diaria</strong>. Hora: <strong>08:00</strong> si la consola ofrece zona horaria Europe/Madrid; si solo acepta UTC, <strong>07:00 UTC</strong> (06:00 UTC en horario de verano). Ubicación de procesamiento: <strong>US</strong>, la misma del dataset.</li>
-              <li>Sin tabla de destino: el SQL ya dice en qué tablas escribe. Sin notificaciones por Pub/Sub; activar el aviso por correo si falla.</li>
+              <li>Tabla de destino: vacía, el SQL ya dice en qué tablas escribe. Notificaciones: activar el aviso por correo si falla; Pub/Sub queda vacío.</li>
               <li><strong>Guardar</strong>. Al día siguiente, en BigQuery › <strong>Transferencias de datos</strong>, la consulta tiene que figurar con una ejecución correcta a las 08:00 y las tablas <code>master_*</code> con fecha de modificación de ese día.</li>
             </ol>
             <div class="url-box">
               <div class="url-icon"><svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg></div>
               <a href="https://console.cloud.google.com/bigquery/transfers?project=espartainformes2026v2" target="_blank" rel="noopener">console.cloud.google.com/bigquery/transfers</a>
             </div>
-            <div class="tip blue"><span class="tip-icon">&#9432;</span><span>Si la consulta la creó otra persona (por ejemplo alguien de Detrics durante la construcción), no hace falta crearla de nuevo: en <strong>Transferencias de datos</strong> abrir la consulta › <strong>Editar</strong> › <strong>Actualizar credenciales</strong> con la cuenta de Lienzzo. Desde ese momento corre con esa cuenta. En la línea de comandos es <code>bq update --transfer_config --update_credentials &lt;id de la transferencia&gt;</code>.</span></div>
-            <div class="tip amber"><span class="tip-icon">&#9888;</span><span>Cuando Detrics cambie <code>90_materializar.sql</code>, Lienzzo abre la consulta programada › <strong>Editar</strong>, reemplaza el SQL y guarda. La programación no cambia.</span></div>
+            <div class="tip blue"><span class="tip-icon">&#9432;</span><span>Si la consulta la creó otra persona (por ejemplo alguien de Detrics durante la construcción), alcanza con pasarla a la cuenta de Lienzzo: en <strong>Transferencias de datos</strong> abrir la consulta › <strong>Editar</strong> › <strong>Actualizar credenciales</strong> con la cuenta de Lienzzo. Desde ese momento corre con esa cuenta. En la línea de comandos es <code>bq update --transfer_config --update_credentials &lt;id de la transferencia&gt;</code>.</span></div>
+            <div class="tip amber"><span class="tip-icon">&#9888;</span><span>Cuando Detrics cambie <code>90_materializar.sql</code>, Lienzzo abre la consulta programada › <strong>Editar</strong>, reemplaza el SQL y guarda. La programación queda igual.</span></div>
             <div class="sql-block" id="bloque-sq">
               <div class="sql-head">
                 <div class="sql-title">
@@ -1562,7 +1562,7 @@ AS SELECT * FROM `espartainformes2026v2.detrics_warehouse.v_master_captacion_dai
           </li>
           <li data-n="8.3">
             <strong>Los accesos de Detrics</strong>
-            Después de la última sesión con Tom, Esparta revisa en IAM los tres correos del paso 1.3 y los quita si ya no los necesita. La cuenta de servicio <code>big-query@detrics-production.iam.gserviceaccount.com</code> se queda: es la que ejecuta las transferencias.
+            Después de la última sesión con Tom, Esparta revisa en IAM los tres correos del paso 1.3 y quita los que sobren. La cuenta de servicio <code>big-query@detrics-production.iam.gserviceaccount.com</code> se queda: es la que ejecuta las transferencias.
           </li>
         </ol>
       </div>
@@ -1619,7 +1619,7 @@ AS SELECT * FROM `espartainformes2026v2.detrics_warehouse.v_master_captacion_dai
       <label class="check"><input type="checkbox" data-k="names"><span class="box"></span><span class="txt">Diccionario de datos revisado con Esparta en la reunión 2<small>Paso 5</small></span><span class="owner both">Esparta y Detrics</span></label>
       <label class="check"><input type="checkbox" data-k="tables"><span class="box"></span><span class="txt">Tablas consolidadas validadas contra Supermetrics en la reunión 3<small>Paso 6</small></span><span class="owner both">Esparta y Detrics</span></label>
       <label class="check"><input type="checkbox" data-k="dash"><span class="box"></span><span class="txt">Dashboard multicliente entregado en la reunión 4<small>Paso 7</small></span><span class="owner both">Esparta y Detrics</span></label>
-      <div class="check-group">Cierre · lo que sigue corriendo sin Detrics</div>
+      <div class="check-group">Cierre · lo que queda en manos de Esparta y Lienzzo</div>
       <label class="check"><input type="checkbox" data-k="sq"><span class="box"></span><span class="txt">Consulta programada de las 08:00 creada por Lienzzo con su cuenta<small>Paso 8.1</small></span><span class="owner carat">Lienzzo</span></label>
       <label class="check"><input type="checkbox" data-k="lookercreds"><span class="box"></span><span class="txt">Fuentes de datos del dashboard con credenciales de Esparta o Lienzzo<small>Paso 8.2</small></span><span class="owner carat">Esparta</span></label>
       <label class="check"><input type="checkbox" data-k="revoke"><span class="box"></span><span class="txt">Accesos de Detrics en Google Cloud revisados después de la última sesión con Tom<small>Paso 8.3</small></span><span class="owner carat">Esparta</span></label>
