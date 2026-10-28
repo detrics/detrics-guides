@@ -2793,7 +2793,8 @@ WHERE d.cliente != 'Excluir';
 -- Total móvil de 30 días (verificado 2026-10-13): la tabla tiene timeframe "yesterday" pero el transfer
 -- lo ignora y pide los últimos 30 días. Ser Madre 12-oct: 4.281 visitas = 13-sep a 12-oct en la API
 -- (el día solo, 37). VMP tiene el mismo comportamiento. Por eso las columnas van con sufijo _30_dias
--- y no se suman entre fechas.
+-- y no se suman entre fechas. Causa: el transfer usa el período de su propia configuración, no el de la
+-- tabla. Detrics está sumando la opción "yesterday" a los transfers (28-oct-2026).
 --
 -- Dependencias: ig_account_reach_daily, ig_account_snapshot, ig_followers_snapshot, v_client_map.
 
@@ -2878,6 +2879,9 @@ LEFT JOIN seguidores s ON s.id = a.id AND s.fecha = a.fecha;
 -- Imagen: media_url, que Detrics guarda en su almacenamiento (el link no vence). La tabla pide solo
 -- media_url, como VMP: con media_url y thumbnail_url juntos Detrics no re-alojaba ninguna imagen
 -- (0 de 64; con solo media_url, 61 de 64 — los 3 restantes son videos sin imagen). 2026-10-13.
+--
+-- Duración del video: la API de Instagram no la entrega (confirmado por producto de Detrics el 28-oct-2026).
+-- Por eso no hay columna de duración.
 --
 -- Dependencias: ig_media_performance, v_client_map.
 
