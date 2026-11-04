@@ -1309,10 +1309,10 @@ function bqRun(sql) {
     <div class="step is-carat">
       <div class="step-header">
         <div class="step-number">R2</div>
-        <h4>Reunión 2 · miércoles 28/10 <small>Con pantalla compartida. Para los puntos R2.1 y R2.2 hace falta la persona que administra Google Cloud en Esparta</small></h4>
+        <h4>Reunión 2 · miércoles 28/10 <small>Pasó a la reunión 3 del 04/11. Con pantalla compartida. Para los puntos R2.1 y R2.2 hace falta la persona que administra Google Cloud en Esparta</small></h4>
       </div>
       <div class="step-body">
-        <p>El dashboard se construye en local y se entrega la semana del 2/11 con su código: Lienzzo lo publica en su cuenta de Vercel. Para esa entrega el dashboard necesita una <strong>cuenta de servicio</strong>, un usuario técnico del proyecto de Google Cloud que solo puede leer las tablas del informe. En esta reunión la creamos y probamos que Google deja generar su clave, porque muchas organizaciones lo tienen bloqueado de fábrica.</p>
+        <p>El dashboard se construye en local y se entrega la semana del 9/11 con su código: Lienzzo lo publica en su cuenta de Vercel. Para esa entrega el dashboard necesita una <strong>cuenta de servicio</strong>, un usuario técnico del proyecto de Google Cloud que solo puede leer las tablas del informe. En esta reunión la creamos y probamos que Google deja generar su clave, porque muchas organizaciones lo tienen bloqueado de fábrica.</p>
         <ol class="substeps">
           <li data-n="R2.1">
             <strong>Crear la cuenta de servicio del dashboard</strong>
@@ -1373,8 +1373,8 @@ function bqRun(sql) {
             <strong>Estado del mapa al 28/10, con las respuestas de Marta</strong>
             "Conectar en Data Sources" significa: en Detrics, menú <strong>Data Sources</strong>, elegir la plataforma y entrar con un usuario que administre esa cuenta. Una vez conectada, Detrics la suma a su transferencia y llega con su historia.
             <ol>
-              <li><strong>Pendiente · INVE Aquaculture e INVE LATAM, redes.</strong> Falta conectar sus dos páginas de Facebook y sus dos cuentas de Instagram en Data Sources › Facebook Pages e Instagram. Sobre la pregunta de Marta: el dashboard es uno solo para todos los clientes. Eligiendo los dos INVE en el filtro de cliente se ven juntos, cada uno en su fila.</li>
-              <li><strong>Pendiente · Juegos de la Mesa Redonda, Search Console.</strong> La propiedad conectada hoy es <code>https://juegosdelamesaredonda.es/blog/</code>. Falta conectar la del dominio principal, <code>juegosdelamesaredonda.es</code>, en Data Sources › Google Search Console, con un usuario que la administre en Search Console.</li>
+              <li><strong>Listo · INVE Aquaculture e INVE LATAM.</strong> Sin campañas activas: quedan con lo que ya está conectado (Marta, 28/10).</li>
+              <li><strong>Listo · Juegos de la Mesa Redonda, Search Console.</strong> Conectada la propiedad del dominio principal, <code>juegosdelamesaredonda.es</code> (Marta, 28/10).</li>
               <li><strong>Listo · Zumex, Facebook.</strong> Conectadas las páginas Zumex Group (<code>153318241392756</code>) y Zumex LATAM (<code>376726192790232</code>). Detrics las carga en el mapa.</li>
               <li><strong>Listo · Absotec, Meta Ads.</strong> Cuenta <code>499731237698513</code> conectada.</li>
               <li><strong>Listo · Puertas Andreu, Instagram.</strong> Confirmada la <code>17841410968308214</code> ("andreu | access engineering").</li>
@@ -1439,10 +1439,104 @@ function bqRun(sql) {
           <label class="check"><input type="checkbox" data-k="r2-sa"><span class="box"></span><span class="txt">Cuenta de servicio <code>dashboard-esparta</code> creada, con Job User en el proyecto y Data Viewer en <code>detrics_warehouse</code><small>R2.1</small></span><span class="owner carat">Esparta</span></label>
           <label class="check"><input type="checkbox" data-k="r2-key"><span class="box"></span><span class="txt">Clave JSON creada y guardada por Lienzzo, o política desactivada en el proyecto<small>R2.1 y R2.2</small></span><span class="owner carat">Lienzzo</span></label>
           <label class="check"><input type="checkbox" data-k="r2-script"><span class="box"></span><span class="txt">Apps Script del mapa instalado con una cuenta de Lienzzo<small>Paso 3.4</small></span><span class="owner carat">Lienzzo</span></label>
-          <label class="check"><input type="checkbox" data-k="r2-map"><span class="box"></span><span class="txt">Pendientes del mapa respondidos y cuentas conectadas<small>R2.4</small></span><span class="owner carat">Esparta</span></label>
+          <label class="check"><input type="checkbox" data-k="r2-map" checked><span class="box"></span><span class="txt">Pendientes del mapa respondidos y cuentas conectadas<small>R2.4</small></span><span class="owner carat">Esparta</span></label>
           <label class="check"><input type="checkbox" data-k="r2-sales"><span class="box"></span><span class="txt">Lista de clientes con ventas confirmada<small>R2.5</small></span><span class="owner both">Esparta y Detrics</span></label>
           <label class="check"><input type="checkbox" data-k="r2-limits"><span class="box"></span><span class="txt">Tope diario de BigQuery en 1 TiB y presupuesto de 50 € con aviso por correo<small>R2.7</small></span><span class="owner carat">Esparta</span></label>
           <label class="check"><input type="checkbox" data-k="r2-domain"><span class="box"></span><span class="txt">Dirección del dashboard elegida<small>R2.6</small></span><span class="owner carat">Esparta</span></label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- REUNIÓN 3 -->
+    <div class="step is-carat">
+      <div class="step-header">
+        <div class="step-number">R3</div>
+        <h4>Reunión 3 · miércoles 04/11 <small>Con pantalla compartida, 30 minutos. Suma los puntos de la reunión 2, que pasó a esta fecha</small></h4>
+      </div>
+      <div class="step-body">
+        <p>El dashboard ya muestra sus datos reales de BigQuery desde el 30/10 y las tablas se reconstruyen cada día a las 08:00 de Madrid. En esta reunión lo recorremos juntos y anotamos lo que hay que ajustar. Detrics aplica los cambios esta semana y <strong>la entrega a Lienzzo pasa a la semana que viene</strong> (lunes 9, martes 10 o miércoles 11/11), con el dashboard ya corregido. Por eso hoy dejamos lista la preparación de la entrega, sin hacerla todavía.</p>
+        <ol class="substeps">
+          <li data-n="R3.1">
+            <strong>Recorrido del dashboard y comentarios</strong>
+            <div class="url-box">
+              <div class="url-icon"><svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg></div>
+              <span>esparta-dashboard.vercel.app</span>
+            </div>
+            <ol>
+              <li>Entren con el usuario y la clave que mandamos por correo el 30/10. El cliente y el período se eligen arriba a la derecha de cada página; por defecto se ven todos los clientes en el mes en curso.</li>
+              <li>Elijan <strong>un cliente que conozcan bien</strong> y el <strong>mes pasado completo</strong> (octubre). Abran al lado el informe que le mandaron ese mes, el de Looker con Supermetrics o Metricool.</li>
+              <li>Recorran las siete páginas en orden y comparen los números principales:
+                <ul class="plain" style="margin:8px 0">
+                  <li><strong>Resumen:</strong> inversión total, leads, sesiones y el embudo de captación.</li>
+                  <li><strong>Pago:</strong> inversión, clics y leads por plataforma (Google, Meta, LinkedIn) y por campaña. Todo en euros: las cuentas en dólares se convierten con el tipo medio del mes anterior del Banco Central Europeo.</li>
+                  <li><strong>Web:</strong> usuarios, sesiones por canal y duración media. Orgánico es solo Organic Search, como en sus informes.</li>
+                  <li><strong>SEO:</strong> clics, impresiones y posición media de Search Console, con búsquedas y páginas.</li>
+                  <li><strong>IA:</strong> visitas que llegan desde ChatGPT, Perplexity, Gemini y Copilot.</li>
+                  <li><strong>Redes sociales:</strong> seguidores, alcance, interacciones y la grilla de publicaciones. Las de LinkedIn tienen un botón "Ver en LinkedIn" en lugar de la imagen.</li>
+                  <li><strong>Email:</strong> hoy solo Abessis, con su última campaña en agosto. Para verla, elijan "Últimos 90 días" o "Este año".</li>
+                </ul>
+              </li>
+              <li>Cada diferencia se anota con cinco datos: <strong>página, cliente, período, el número que esperaban y el que ven</strong>. Con eso la revisamos sin volver a preguntar. Una diferencia de 1 a 3 % en sesiones o usuarios es normal entre la API de Google Analytics y Looker.</li>
+              <li>Sumen también lo que quieran cambiar del diseño: un gráfico que falta, una métrica que no usan, el orden de las páginas, nombres de columnas.</li>
+            </ol>
+            <div class="tip"><span class="tip-icon">&#9432;</span><span>Lo que no se llega a ver en la reunión lo pueden mandar por correo hasta el viernes 6/11, con los mismos cinco datos. Así entra en la versión que se entrega.</span></div>
+          </li>
+          <li data-n="R3.2">
+            <strong>Pestaña Conversiones: qué cuenta como lead</strong>
+            La pestaña Conversiones del mapa decide qué suma como lead en el dashboard. Un cambio ahí aplica a toda la historia, sin volver a cargar datos.
+            <ol>
+              <li>Abran la hoja del mapa › pestaña <strong>Conversiones</strong>. Filtren por <strong>Cliente</strong> y revisen la columna <strong>Tipo</strong>: Lead, Compra, Otra o Excluir.</li>
+              <li>Las filas en amarillo esperan que les elijan un tipo. Las del 28/10 en "Detectada el" son las que sumamos ese día.</li>
+              <li>Dos que cambian mucho los leads de su cliente: <strong>Sclinics, <code>scroll_90</code></strong> (hoy cuenta como Lead porque es evento clave en su GA4: 224 en 30 días contra 71 contactos reales) y <strong>Weber, <code>file_access</code></strong> (Weber sale del informe a fin de noviembre; si no lo reportan, pasa a Otra).</li>
+              <li>Hasta que Lienzzo instale el Apps Script del mapa (R3.3), los cambios de la pestaña llegan a BigQuery cuando Detrics los carga. Al terminar la reunión cargamos lo que hayan cambiado y el dashboard lo muestra al día siguiente.</li>
+            </ol>
+          </li>
+          <li data-n="R3.3">
+            <strong>Preparar la entrega a Lienzzo (la entrega es la semana que viene)</strong>
+            Hoy no se traspasa nada: el dashboard sigue en la cuenta de Vercel de Detrics mientras aplicamos los comentarios de R3.1. Para que la entrega de la semana que viene dure una sola reunión, esto queda listo antes:
+            <ol>
+              <li><strong>Quién de Lienzzo recibe el dashboard.</strong> Una persona con cuenta en Vercel y rol de administrador en el proyecto <code>espartainformes2026v2</code>. Esa misma persona queda como dueña de la consulta programada de las 08:00 (paso 8.1) y del Apps Script.</li>
+              <li><strong>Cuenta de servicio y clave.</strong> Lienzzo crea <code>dashboard-esparta</code> con los pasos de R2.1, cuando le quede cómodo antes de la entrega. Si Google bloquea la clave, sigue R2.2. El archivo <code>.json</code> queda en el gestor de contraseñas de Lienzzo; no hace falta mandárnoslo.</li>
+              <li><strong>Apps Script del mapa (paso 3.4).</strong> Este conviene instalarlo <strong>esta semana</strong>: no depende de los cambios del dashboard y, una vez instalado, cada cambio en las pestañas Mapa de clientes, Conversiones y Tipos de cambio llega solo a BigQuery cada noche.</li>
+              <li><strong>Dirección del dashboard (R2.6).</strong> Elegir la dirección, por ejemplo <code>informes.espartadigital.com</code>, y quién administra el DNS de <code>espartadigital.com</code>. En la entrega esa persona agrega el registro que pida Vercel, que tarda unos minutos.</li>
+              <li><strong>Fecha de la reunión 4 (entrega).</strong> Lunes 9, martes 10 o miércoles 11/11, con la persona de Lienzzo del punto 1.</li>
+            </ol>
+            <div class="tip"><span class="tip-icon">&#9432;</span><span>En la reunión 4: Lienzzo descarga el código, lo publica en su Vercel con la clave del punto 2 y sus propios usuario y clave del login, y probamos juntos que muestra lo mismo que la versión de Detrics. Después Esparta quita la cuenta de servicio de Detrics (<code>esparta-dashboard@dataplug-373101</code>) de los permisos del proyecto.</span></div>
+          </li>
+          <li data-n="R3.4">
+            <strong>Clientes que venden online</strong>
+            Siguen abiertas las tres preguntas de R2.5: si reportan ventas en Calzados Benavente, Stamp By Me, Publikea, A Doce Voltios, The Timeless Tin, Zumex, Bodegas Nodus, Ceilhit y Olorama; si las compras de Google Analytics coinciden con las de la tienda; y cuál es la propiedad de Google Analytics de la tienda de Juegos de la Mesa Redonda.
+          </li>
+          <li data-n="R3.5">
+            <strong>Leads que llegan por Google Sheets</strong>
+            Algunos clientes les mandan sus leads en una hoja de Google. Detrics todavía no trae Google Sheets a BigQuery; el equipo de producto sigue el pedido en el hilo de correo del 2/11. Para dimensionarlo, nos sirve saber:
+            <ol>
+              <li>Qué clientes reportan así y cuántos leads por mes, más o menos.</li>
+              <li>Qué columnas tiene la hoja (fecha, canal, campaña, tipo de lead) y si todas las hojas tienen el mismo formato.</li>
+              <li>Cada cuánto se actualiza.</li>
+            </ol>
+          </li>
+          <li data-n="R3.6">
+            <strong>Límites de gasto en Google Cloud</strong>
+            Los dos pasos de R2.7: tope diario de BigQuery en 1 TiB y presupuesto de 50 € al mes con aviso por correo. Los hace quien administre la facturación de Google Cloud y llevan cinco minutos.
+          </li>
+        </ol>
+        <div class="todo-call">
+          <h5>Al terminar la reunión 3</h5>
+          <div class="checklist todo">
+          <label class="check"><input type="checkbox" data-k="r3-review"><span class="box"></span><span class="txt">Dashboard recorrido con un cliente contra su informe de octubre; comentarios anotados con página, cliente, período y números<small>R3.1</small></span><span class="owner both">Esparta y Detrics</span></label>
+          <label class="check"><input type="checkbox" data-k="r3-feedback"><span class="box"></span><span class="txt">Comentarios que falten, por correo hasta el viernes 6/11<small>R3.1</small></span><span class="owner carat">Esparta</span></label>
+          <label class="check"><input type="checkbox" data-k="r3-apply"><span class="box"></span><span class="txt">Comentarios aplicados en el dashboard y lista de cambios enviada antes de la reunión 4<small>R3.1</small></span><span class="owner detrics">Detrics</span></label>
+          <label class="check"><input type="checkbox" data-k="r3-conv"><span class="box"></span><span class="txt">Pestaña Conversiones revisada, con Sclinics <code>scroll_90</code> y las filas en amarillo resueltas<small>R3.2</small></span><span class="owner carat">Esparta</span></label>
+          <label class="check"><input type="checkbox" data-k="r3-owner"><span class="box"></span><span class="txt">Persona de Lienzzo que recibe el dashboard, la consulta programada y el Apps Script<small>R3.3</small></span><span class="owner carat">Lienzzo</span></label>
+          <label class="check"><input type="checkbox" data-k="r3-script"><span class="box"></span><span class="txt">Apps Script del mapa instalado esta semana<small>R3.3 · Paso 3.4</small></span><span class="owner carat">Lienzzo</span></label>
+          <label class="check"><input type="checkbox" data-k="r3-key"><span class="box"></span><span class="txt">Cuenta de servicio <code>dashboard-esparta</code> y su clave listas antes de la entrega<small>R3.3 · R2.1 y R2.2</small></span><span class="owner carat">Lienzzo</span></label>
+          <label class="check"><input type="checkbox" data-k="r3-domain"><span class="box"></span><span class="txt">Dirección del dashboard y responsable del DNS<small>R3.3</small></span><span class="owner carat">Esparta</span></label>
+          <label class="check"><input type="checkbox" data-k="r3-date"><span class="box"></span><span class="txt">Reunión 4 de entrega agendada: lunes 9, martes 10 o miércoles 11/11<small>R3.3</small></span><span class="owner both">Esparta y Detrics</span></label>
+          <label class="check"><input type="checkbox" data-k="r3-sales"><span class="box"></span><span class="txt">Clientes con ventas confirmados<small>R3.4</small></span><span class="owner carat">Esparta</span></label>
+          <label class="check"><input type="checkbox" data-k="r3-sheets"><span class="box"></span><span class="txt">Clientes que reportan leads por Google Sheets, con formato y frecuencia de la hoja<small>R3.5</small></span><span class="owner carat">Esparta</span></label>
+          <label class="check"><input type="checkbox" data-k="r3-limits"><span class="box"></span><span class="txt">Tope diario de BigQuery y presupuesto con aviso<small>R3.6</small></span><span class="owner carat">Esparta</span></label>
           </div>
         </div>
       </div>
