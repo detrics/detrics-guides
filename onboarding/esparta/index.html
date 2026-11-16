@@ -1440,14 +1440,101 @@ function bqRun(sql) {
       </div>
     </div>
 
+    <!-- TRASPASO (R5) -->
+    <div class="step is-carat">
+      <div class="step-header">
+        <div class="step-number">R5</div>
+        <h4>Traspaso · viernes 20/11, 13:00 (Madrid) <small>Con Lienzzo. Lienzzo queda dueño del dashboard</small></h4>
+      </div>
+      <div class="step-body">
+        <p>Los cambios que lleguen hasta el <strong>miércoles 18/11</strong> entran antes del traspaso; lo que llegue después lo toma Lienzzo. Los puntos van de más a menos prioritario.</p>
+        <ol class="substeps">
+          <li data-n="R5.1">
+            <strong>Las diferencias de la revisión del 16/11</strong>
+            <ol>
+              <li><strong>Zumex, inversión y leads de Meta (octubre).</strong> El dashboard trae la cuenta publicitaria ZUMEX GROUP (<code>act_108089193039095</code>), la del mapa: 3.518,40 €, 635.319 impresiones, 7.596 clics en el enlace y 882 clientes potenciales, igual que Meta. La hoja de Sofía dice 4.110,13 € y 1.147 leads, con las mismas impresiones y clics. Si los anuncios de la página Zumex LATAM salen de otra cuenta publicitaria, esa cuenta no está conectada. Para cerrarlo: el ID de cada página y de cada cuenta publicitaria desde la que se pautan sus anuncios (si hay una segunda, la conecta en Detrics alguien con acceso), una captura del Administrador de anuncios de octubre a nivel cuenta y de dónde sale el número de su informe.</li>
+              <li><strong>Tipo de cambio.</strong> Las cuentas de Google Ads de Zumex USA y Zumex Group México facturan en dólares: de ahí los 35 € de diferencia en Google (2.504 € contra 2.539,27 €). Mándennos el tipo que usan para pasar a euros y lo cargamos en la pestaña Tipos de cambio.</li>
+              <li><strong>Calzados Benavente, compras de Google Ads.</strong> Resuelto: Google Ads da 173,11 compras y 6.969,67 € en octubre, como la hoja de Sara. Google sigue moviendo compras entre días más de 30 días después del clic; desde el 16/11 Detrics vuelve a bajar 60 días de conversiones cada noche.</li>
+              <li><strong>Calzados Benavente, abril de 2026.</strong> Purchase | GAds (143) y Purchase | Shopify (204) estaban las dos como principales y el dashboard suma las dos. Si es la misma compra medida dos veces, para abril queda solo una.</li>
+              <li><strong>Conversiones que cambian de un año a otro</strong> (Stamp By Me, Juegos de la Mesa Redonda): Sofía manda el caso por correo, con el nombre exacto de cada conversión y desde qué fecha vale cada una.</li>
+            </ol>
+          </li>
+          <li data-n="R5.2">
+            <strong>Leads de HubSpot y ventas de las tiendas: los datos ya se cargan</strong>
+            Desde el 16/11 se cargan en BigQuery los contactos de HubSpot de DCD, Flexbrick, Bodegas Nodus, Aceites de las Heras, Cebollas Aparici y Ceilhit, los pedidos de WooCommerce de Aceites de las Heras, Bodegas Nodus y Ceilhit y las ventas de Shopify de Stamp By Me. Todavía no se ven en el dashboard: para mostrarlos faltan estas respuestas, que no llegamos a ver en la reunión. Si llegan después del 18/11, las aplica Lienzzo con el manual.
+            <ol>
+              <li><strong>Qué contactos de HubSpot cuentan como lead:</strong> todos los contactos nuevos (en octubre todos entraron por formulario) o solo una parte, por ejemplo los que llegan a MQL o SQL, como usa Flexbrick. En Aceites de las Heras y Bodegas Nodus casi todos figuran como «Tráfico directo»: si sus formularios no son de HubSpot o la web no tiene el código de seguimiento, el canal va a salir casi todo directo.</li>
+              <li><strong>«Reemplaza» o «Se muestran los dos»</strong>, por cliente, como dice la pestaña HubSpot: Bodegas Nodus, Ceilhit, DCD y Flexbrick reemplazan; Aceites de las Heras y Cebollas Aparici muestran los dos. Octubre, al lado de lo que muestra el dashboard:
+                <div class="sheet"><div class="sheet-scroll"><table>
+                  <tr><th>Cliente</th><th>HubSpot, octubre</th><th>Dashboard hoy, octubre</th></tr>
+                  <tr><td>DCD</td><td>41 (38 de búsqueda de pago)</td><td>39 en Google Ads («Formulario HS», el mismo formulario)</td></tr>
+                  <tr><td>Flexbrick</td><td>43 (21 de búsqueda de pago)</td><td>39 en GA4 (clics en teléfono y mail y <code>generate_lead</code>)</td></tr>
+                  <tr><td>Bodegas Nodus</td><td>93 (69 directo, 9 orgánico, 8 redes de pago)</td><td>24 Google Ads, 21 GA4 y 4 Meta</td></tr>
+                  <tr><td>Ceilhit</td><td>7</td><td>12 Google Ads y 6 GA4</td></tr>
+                  <tr><td>Aceites de las Heras</td><td>58 (49 directo, 6 búsqueda de pago)</td><td>11 en Google Ads</td></tr>
+                  <tr><td>Cebollas Aparici</td><td>18 (13 orgánico)</td><td>23 en GA4 (clics en WhatsApp, mail y teléfono)</td></tr>
+                </table></div></div>
+              </li>
+              <li><strong>Servalesa y Sungrow:</strong> casi sin contactos en HubSpot (1 y 0 en octubre), así que no se cargan. Servalesa cuenta 525 leads en GA4, casi todos <code>form_submit</code>: si no es el número que reportan, falta saber de dónde sale el real.</li>
+              <li><strong>Ventas de las tiendas:</strong> si los pedidos y la facturación de la tienda pasan a ser las ventas del cliente, qué estados del pedido cuentan (completado, en proceso; sin cancelados ni reembolsados) y si la facturación va con o sin IVA y envío. Los pedidos traen el IVA y el envío por separado, así que cualquiera de las dos sirve.</li>
+            </ol>
+          </li>
+          <li data-n="R5.3">
+            <strong>Antes del viernes, de Lienzzo</strong>
+            <ol>
+              <li><strong>Quién queda dueño:</strong> la cuenta de Google de Lienzzo que se queda con la consulta programada, el Apps Script del mapa y el proyecto en Vercel. Mejor una que no dependa de una sola persona.</li>
+              <li><strong>Rol BigQuery Admin</strong> para esa cuenta en <code>espartainformes2026v2</code> (lo da Borja en IAM). Hace falta para quedarse con la consulta programada de las 08:00.</li>
+              <li><strong>Cuenta de servicio y clave:</strong> <code>dashboard-esparta</code>, con los pasos de R2.1 (si Google bloquea la clave, R2.2). El <code>.json</code> queda en su gestor de contraseñas.</li>
+              <li><strong>GitHub, Vercel y Claude:</strong> el usuario u organización de GitHub donde va a vivir el repositorio (privado), un team de Vercel donde crear el proyecto, y la cuenta de Claude con la que se conecta el MCP de Detrics.</li>
+            </ol>
+          </li>
+          <li data-n="R5.4">
+            <strong>En la reunión, en este orden</strong>
+            <ol>
+              <li><strong>Consulta programada de las 08:00 (Madrid):</strong> pasa a la cuenta de Lienzzo (paso 8.1) y verificamos que corre.</li>
+              <li><strong>Código y Vercel:</strong> hacemos público el repositorio un rato, Lienzzo lo sube a su GitHub privado y lo publica en su Vercel con sus variables (dataset, clave de la cuenta de servicio, usuario y clave del login, <code>AUTH_SECRET</code>). Probamos juntos que muestra lo mismo que la versión de Detrics.</li>
+              <li><strong>Apps Script del mapa:</strong> Lienzzo lo instala con su cuenta (paso 3.4). Desde ahí cada cambio en la hoja llega solo a BigQuery cada noche; hasta hoy los cargamos a mano.</li>
+              <li><strong>Cambios del día a día:</strong> cómo sumar una conversión a una transferencia de Detrics y llevarla al dashboard con el MCP de Detrics desde Claude.</li>
+              <li><strong>Accesos:</strong> Esparta quita del proyecto la cuenta de servicio del dashboard de Detrics (<code>esparta-dashboard@dataplug-373101</code>). Las transferencias de Detrics escriben con otra cuenta de servicio, que queda.</li>
+              <li><strong>Documentación:</strong> el manual del warehouse y el diccionario de datos, actualizados al 16/11, y el SQL de las vistas.</li>
+            </ol>
+          </li>
+          <li data-n="R5.5">
+            <strong>Prioridad baja, se puede hacer después</strong>
+            <ol>
+              <li>La dirección del dashboard (por ejemplo <code>informes.espartadigital.com</code>, R2.6) y los límites de gasto de Google Cloud (tope diario de BigQuery en 1 TiB y presupuesto de 50 € al mes con aviso, R2.7).</li>
+              <li><strong>Leads que llegan por Google Sheets</strong>, como el Excel del CRM de Zumex: segunda fase. Detrics todavía no trae Google Sheets a BigQuery; producto sigue el pedido en el hilo de correo del 2/11. Para dimensionarlo: qué clientes reportan así, qué columnas tiene la hoja y cada cuánto se actualiza.</li>
+            </ol>
+          </li>
+        </ol>
+        <div class="todo-call">
+          <h5>Antes del traspaso</h5>
+          <div class="checklist todo">
+          <label class="check"><input type="checkbox" data-k="r5-meta"><span class="box"></span><span class="txt">Zumex: IDs de páginas y cuentas publicitarias, captura de octubre y fuente de su informe<small>R5.1</small></span><span class="owner carat">Esparta</span></label>
+          <label class="check"><input type="checkbox" data-k="r5-fx"><span class="box"></span><span class="txt">Tipo de cambio que usan para pasar dólares a euros<small>R5.1</small></span><span class="owner carat">Esparta</span></label>
+          <label class="check"><input type="checkbox" data-k="r5-gads" checked><span class="box"></span><span class="txt">Calzados Benavente: Google Ads vuelve a bajar 60 días de conversiones (16/11)<small>R5.1</small></span><span class="owner detrics">Detrics</span></label>
+          <label class="check"><input type="checkbox" data-k="r5-april"><span class="box"></span><span class="txt">Calzados Benavente: abril de 2026, una o dos compras principales<small>R5.1</small></span><span class="owner carat">Esparta</span></label>
+          <label class="check"><input type="checkbox" data-k="r5-yoy"><span class="box"></span><span class="txt">Caso de conversiones que cambian de año (Stamp By Me, Juegos) por correo<small>R5.1</small></span><span class="owner carat">Esparta</span></label>
+          <label class="check"><input type="checkbox" data-k="r5-transfers" checked><span class="box"></span><span class="txt">HubSpot (6 clientes), WooCommerce (3) y Shopify (1) cargándose en BigQuery (16/11)<small>R5.2</small></span><span class="owner detrics">Detrics</span></label>
+          <label class="check"><input type="checkbox" data-k="r4-hubspot-rule"><span class="box"></span><span class="txt">Qué contactos de HubSpot cuentan, «Reemplaza» o «Se muestran los dos» por cliente, Servalesa y Sungrow, y ventas de WooCommerce y Shopify<small>R5.2</small></span><span class="owner carat">Esparta</span></label>
+          <label class="check"><input type="checkbox" data-k="r4-owner"><span class="box"></span><span class="txt">Persona de Lienzzo que recibe el dashboard, la consulta programada y el Apps Script<small>R5.3</small></span><span class="owner carat">Lienzzo</span></label>
+          <label class="check"><input type="checkbox" data-k="r5-access"><span class="box"></span><span class="txt">BigQuery Admin para la cuenta de Lienzzo, cuenta de servicio con clave, GitHub, Vercel y Claude<small>R5.3</small></span><span class="owner both">Esparta y Lienzzo</span></label>
+          <label class="check"><input type="checkbox" data-k="r4-handover"><span class="box"></span><span class="txt">En el traspaso: consulta programada, dashboard en el Vercel de Lienzzo, accesos de Detrics quitados y documentación<small>R5.4</small></span><span class="owner both">Esparta, Lienzzo y Detrics</span></label>
+          <label class="check"><input type="checkbox" data-k="r4-script"><span class="box"></span><span class="txt">Apps Script del mapa (versión del 04/11) instalado con una cuenta de Lienzzo<small>R5.4 · Paso 3.4</small></span><span class="owner carat">Lienzzo</span></label>
+          <label class="check"><input type="checkbox" data-k="r4-sheets"><span class="box"></span><span class="txt">Clientes que reportan leads por Google Sheets, con formato y frecuencia de la hoja<small>R5.5</small></span><span class="owner carat">Esparta</span></label>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- REUNIÓN 4 -->
     <div class="step is-carat">
       <div class="step-header">
         <div class="step-number">R4</div>
-        <h4>Reunión 4 · lunes 16/11, 14:00 (Madrid) <small>Entrega final del dashboard a Esparta y Lienzzo</small></h4>
+        <h4>Reunión 4 · lunes 16/11 <small>Hecha. Los puntos abiertos pasan al traspaso del viernes 20/11</small></h4>
       </div>
       <div class="step-body">
-        <p>En esta reunión entregamos el dashboard y Lienzzo pasa a ser dueño de todo. <strong>Mándennos los cambios lo antes posible</strong>: cada uno lleva tiempo aplicarlo, y lo que llegue hasta el <strong>jueves 12/11</strong> entra en la versión del 16. El dashboard se entrega ese día con los cambios que hayan llegado. Los puntos van de más a menos prioritario.</p>
+        <p>Revisamos el dashboard contra sus informes de octubre en tres clientes: Zumex (Sofía), Calzados Benavente y MBY (Sara). MBY coincide. Las diferencias de Zumex y Calzados Benavente, HubSpot y las tiendas, y la entrega siguen en el bloque del traspaso, arriba. Lo que sigue en R4.1 vale para revisar el resto de los clientes.</p>
         <ol class="substeps">
           <li data-n="R4.1">
             <strong>Cómo reporta cada cliente, en la hoja del mapa</strong>
@@ -1460,58 +1547,15 @@ function bqRun(sql) {
               <li><strong>Comentarios del dashboard:</strong> cada diferencia con su informe, con página, período, el número que esperaban, el que ven y de dónde creen que viene. Una conversión que reportan y no aparece en Conversiones va ahí, con la página «Falta una conversión». Respondemos en la misma fila.</li>
             </ol>
           </li>
-          <li data-n="R4.2">
-            <strong>Leads de HubSpot y ventas de las tiendas, a confirmar en la reunión</strong>
-            El 09/11 Esparta conectó en Detrics el HubSpot de 8 clientes y la tienda online de 4, y completó 6 filas en la pestaña <strong>HubSpot</strong>. Todavía no entra nada al informe: Detrics empieza a traer esos datos cuando se confirmen estos cuatro puntos. Lo que se confirme en esta reunión se construye hasta el miércoles 18/11 y entra en la entrega del viernes 20/11.
-            <ol>
-              <li><strong>Qué cuenta como lead en HubSpot.</strong> Las 6 filas dicen lo mismo: cada <strong>contacto</strong> nuevo es un lead el día en que se creó, y su canal es la <strong>Fuente original de tráfico</strong> de HubSpot (Búsqueda orgánica, Búsqueda de pago, Redes sociales de pago, Directo…). Falta saber si cuentan todos los contactos o solo una parte: por ejemplo, solo los que llegan por un formulario de la web, sin los importados a mano ni los clientes y proveedores que ya estaban en la base. Si filtran por una propiedad (etapa del ciclo de vida, origen del registro), cuál y con qué valor. En octubre, todos los contactos nuevos de los 6 HubSpot entraron por formulario, ninguno importado. En Aceites de las Heras (49 de 58) y Bodegas Nodus (69 de 93) la mayoría figura como «Tráfico directo»: si sus formularios no son de HubSpot o la web no tiene el código de seguimiento de HubSpot, el canal de esos leads va a salir casi todo como directo.</li>
-              <li><strong>Qué pasa con los leads que ya muestra el dashboard.</strong> En <strong>Bodegas Nodus, Ceilhit, DCD y Flexbrick</strong> la fila dice «Reemplaza»: el número de leads del cliente pasa a ser el de HubSpot, y los formularios, llamadas y clics de Google Ads, GA4 y Meta quedan como detalle por plataforma. En <strong>Aceites de las Heras y Cebollas Aparici</strong> dice «Se muestran los dos»: HubSpot aparece como una línea más al lado de los leads de las plataformas, sin sumarse. Confirmar que es así en cada uno. Contactos nuevos en HubSpot en octubre, al lado de los leads que hoy muestra el dashboard:
-                <div class="sheet"><div class="sheet-scroll"><table>
-                  <tr><th>Cliente</th><th>HubSpot, octubre</th><th>Dashboard hoy, octubre</th></tr>
-                  <tr><td>DCD</td><td>41 (38 de búsqueda de pago)</td><td>39 en Google Ads («Formulario HS», el mismo formulario)</td></tr>
-                  <tr><td>Flexbrick</td><td>43 (21 de búsqueda de pago)</td><td>39 en GA4 (clics en teléfono y mail y <code>generate_lead</code>)</td></tr>
-                  <tr><td>Bodegas Nodus</td><td>93 (69 directo, 9 orgánico, 8 redes de pago)</td><td>24 Google Ads, 21 GA4 y 4 Meta</td></tr>
-                  <tr><td>Ceilhit</td><td>7</td><td>12 Google Ads y 6 GA4</td></tr>
-                  <tr><td>Aceites de las Heras</td><td>58 (49 directo, 6 búsqueda de pago)</td><td>11 en Google Ads</td></tr>
-                  <tr><td>Cebollas Aparici</td><td>18 (13 orgánico)</td><td>23 en GA4 (clics en WhatsApp, mail y teléfono)</td></tr>
-                </table></div></div>
-              </li>
-              <li><strong>Servalesa y Sungrow.</strong> Los dos tienen el HubSpot conectado desde el 09/11 (portales <code>147095666</code> y <code>148328433</code>), pero no tienen fila en la pestaña HubSpot. Sin fila no sabemos si quieren verlo en el informe ni cómo contarlo. Si lo quieren, completen su fila con las mismas columnas que el resto; si no, no se construye. En octubre Servalesa tuvo 1 contacto nuevo en HubSpot y Sungrow ninguno, así que hoy HubSpot no refleja los leads de ninguno de los dos. Servalesa cuenta 525 leads en GA4, casi todos del evento <code>form_submit</code>: si ese número no es el que reportan, falta saber de dónde sale el real.</li>
-              <li><strong>Ventas de las tiendas.</strong> También el 09/11 se conectaron las tiendas de <strong>Aceites de las Heras, Bodegas Nodus y Ceilhit</strong> (WooCommerce) y <strong>Stamp By Me</strong> (Shopify). Hoy las ventas de esos clientes salen de GA4 (<code>purchase</code>), Google Ads y Meta, que registran menos pedidos que la tienda. La pregunta es si los pedidos y la facturación de la tienda pasan a ser las ventas del cliente en el dashboard, y en ese caso: qué estados del pedido cuentan (completado, en proceso; sin cancelados ni reembolsados) y si la facturación va con o sin IVA y envío.</li>
-            </ol>
-          </li>
-          <li data-n="R4.3">
-            <strong>Apps Script del mapa, antes del 16/11</strong>
-            Lo instala Lienzzo con su cuenta siguiendo el paso 3.4, con la versión del 04/11. Desde ese momento cada cambio en la hoja llega solo a BigQuery cada noche y se ve en el dashboard al día siguiente. Hasta entonces, Detrics carga los cambios a mano. Esa misma persona de Lienzzo recibe el dashboard y la consulta programada de las 08:00 (paso 8.1). Avísennos cuando corra la primera vez: revisamos que las tres tablas se actualizaron.
-          </li>
-          <li data-n="R4.4">
-            <strong>Leads que llegan por Google Sheets</strong>
-            Detrics todavía no trae Google Sheets a BigQuery; producto sigue el pedido en el hilo de correo del 2/11. Para dimensionarlo: qué clientes reportan así y cuántos leads por mes, qué columnas tiene la hoja y si todas tienen el mismo formato, y cada cuánto se actualiza.
-          </li>
-          <li data-n="R4.5">
-            <strong>La entrega, en la reunión</strong>
-            <ol>
-              <li><strong>Consulta programada de las 08:00 (Madrid)</strong>: pasa a la cuenta de Lienzzo, que necesita el rol BigQuery Admin en el proyecto.</li>
-              <li><strong>Cuenta de servicio y clave:</strong> Lienzzo crea <code>dashboard-esparta</code> con los pasos de R2.1 (si Google bloquea la clave, R2.2). El <code>.json</code> queda en su gestor de contraseñas.</li>
-              <li><strong>Código y Vercel:</strong> hacemos público el repositorio un rato, Lienzzo lo sube a un GitHub privado y lo publica en su Vercel con sus variables (dataset, clave del punto 2, usuario y clave del login). Probamos juntos que muestra lo mismo que la versión de Detrics.</li>
-              <li><strong>Accesos:</strong> después, Esparta quita la cuenta de servicio de Detrics (<code>esparta-dashboard@dataplug-373101</code>) de los permisos del proyecto.</li>
-              <li><strong>Prioridad baja, se puede hacer después:</strong> la dirección del dashboard (por ejemplo <code>informes.espartadigital.com</code>, R2.6) y los límites de gasto de Google Cloud (tope diario de BigQuery en 1 TiB y presupuesto de 50 € al mes con aviso, R2.7).</li>
-            </ol>
-          </li>
         </ol>
         <div class="todo-call">
-          <h5>Antes de la reunión 4</h5>
+          <h5>Al terminar la reunión 4</h5>
           <div class="checklist todo">
           <label class="check"><input type="checkbox" data-k="r4-changes"><span class="box"></span><span class="txt">Cambios y comentarios en la hoja del mapa, lo antes posible y hasta el jueves 12/11<small>R4.1</small></span><span class="owner carat">Esparta</span></label>
           <label class="check"><input type="checkbox" data-k="r4-conv"><span class="box"></span><span class="txt">Conversiones revisadas cliente por cliente en Conversiones y Lo que se reporta, con Sclinics <code>scroll_90</code>, Weber y las filas en amarillo<small>R4.1</small></span><span class="owner carat">Esparta</span></label>
           <label class="check"><input type="checkbox" data-k="r4-kpi"><span class="box"></span><span class="txt">KPI principal de cada cliente en las columnas R y S del mapa, con los clientes que venden online<small>R4.1</small></span><span class="owner carat">Esparta</span></label>
           <label class="check"><input type="checkbox" data-k="r4-hubspot" checked><span class="box"></span><span class="txt">HubSpot conectado en 8 clientes y fila completa en 6 en la pestaña HubSpot (09/11)<small>R4.2</small></span><span class="owner carat">Esparta</span></label>
-          <label class="check"><input type="checkbox" data-k="r4-hubspot-rule"><span class="box"></span><span class="txt">Confirmado en la reunión: qué contactos de HubSpot cuentan, «Reemplaza» o «Se muestran los dos» por cliente, Servalesa y Sungrow, y ventas de WooCommerce y Shopify<small>R4.2</small></span><span class="owner carat">Esparta</span></label>
-          <label class="check"><input type="checkbox" data-k="r4-script"><span class="box"></span><span class="txt">Apps Script del mapa (versión del 04/11) instalado con una cuenta de Lienzzo<small>R4.3 · Paso 3.4</small></span><span class="owner carat">Lienzzo</span></label>
-          <label class="check"><input type="checkbox" data-k="r4-owner"><span class="box"></span><span class="txt">Persona de Lienzzo que recibe el dashboard, la consulta programada y el Apps Script<small>R4.3</small></span><span class="owner carat">Lienzzo</span></label>
-          <label class="check"><input type="checkbox" data-k="r4-sheets"><span class="box"></span><span class="txt">Clientes que reportan leads por Google Sheets, con formato y frecuencia de la hoja<small>R4.4</small></span><span class="owner carat">Esparta</span></label>
           <label class="check"><input type="checkbox" data-k="r4-apply"><span class="box"></span><span class="txt">Cambios aplicados en el dashboard y respondidos en la hoja antes del 16/11<small>R4.1</small></span><span class="owner detrics">Detrics</span></label>
-          <label class="check"><input type="checkbox" data-k="r4-handover"><span class="box"></span><span class="txt">Entrega en la reunión: consulta programada, cuenta de servicio, código en Vercel de Lienzzo y accesos de Detrics quitados<small>R4.5</small></span><span class="owner both">Esparta, Lienzzo y Detrics</span></label>
           </div>
         </div>
       </div>
@@ -1614,7 +1658,7 @@ function bqRun(sql) {
     <div class="step is-carat">
       <div class="step-header">
         <div class="step-number">8</div>
-        <h4>Lo que queda en manos de Esparta y Lienzzo <small>Reunión 4 y después</small></h4>
+        <h4>Lo que queda en manos de Esparta y Lienzzo <small>Traspaso del 20/11 y después</small></h4>
       </div>
       <div class="step-body">
         <p>Las transferencias corren con la cuenta de servicio de Detrics, independiente de las personas. Hay tres piezas que sí corren con la cuenta de quien las crea: la consulta programada que arma las tablas consolidadas, el Apps Script del mapa de clientes (paso 3.4) y las credenciales del dashboard. Si las crea alguien de Detrics, dejan de funcionar el día que Esparta quite nuestros accesos. Por eso las crea Lienzzo o Esparta con su propia cuenta, y Detrics entrega el código listo para pegar.</p>
