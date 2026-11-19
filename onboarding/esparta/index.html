@@ -1454,7 +1454,7 @@ function bqRun(sql) {
             <ol>
               <li><strong>Zumex, inversión y leads de Meta (octubre).</strong> El dashboard trae la cuenta publicitaria ZUMEX GROUP (<code>act_108089193039095</code>), la del mapa: 3.518,40 €, 635.319 impresiones, 7.596 clics en el enlace y 882 clientes potenciales, igual que Meta. La hoja de Sofía dice 4.110,13 € y 1.147 leads, con las mismas impresiones y clics. Si los anuncios de la página Zumex LATAM salen de otra cuenta publicitaria, esa cuenta no está conectada. Para cerrarlo: el ID de cada página y de cada cuenta publicitaria desde la que se pautan sus anuncios (si hay una segunda, la conecta en Detrics alguien con acceso), una captura del Administrador de anuncios de octubre a nivel cuenta y de dónde sale el número de su informe.</li>
               <li><strong>Tipo de cambio.</strong> Las cuentas de Google Ads de Zumex USA y Zumex Group México facturan en dólares: de ahí los 35 € de diferencia en Google (2.504 € contra 2.539,27 €). Mándennos el tipo que usan para pasar a euros y lo cargamos en la pestaña Tipos de cambio.</li>
-              <li><strong>Calzados Benavente, compras de Google Ads.</strong> Resuelto: Google Ads da 173,11 compras y 6.969,67 € en octubre, como la hoja de Sara. Google sigue moviendo compras entre días más de 30 días después del clic; desde el 16/11 Detrics vuelve a bajar 60 días de conversiones cada noche.</li>
+              <li><strong>Calzados Benavente, compras de Google Ads.</strong> Resuelto: el dashboard da lo mismo que Google Ads en vivo. El 16/11 eran 173,11 compras y 6.969,67 € en octubre, como la hoja de Sara; al 19/11 Google suma 174,11 y 6.993,47 €, y el dashboard también. Google sigue moviendo compras entre días más de 30 días después del clic; desde el 16/11 Detrics vuelve a bajar 60 días de conversiones cada noche.</li>
               <li><strong>Calzados Benavente, abril de 2026.</strong> Purchase | GAds (143) y Purchase | Shopify (204) estaban las dos como principales y el dashboard suma las dos. Si es la misma compra medida dos veces, para abril queda solo una.</li>
               <li><strong>Conversiones que cambian de un año a otro</strong> (Stamp By Me, Juegos de la Mesa Redonda): Sofía manda el caso por correo, con el nombre exacto de cada conversión y desde qué fecha vale cada una.</li>
             </ol>
@@ -1487,12 +1487,13 @@ function bqRun(sql) {
               <li><strong>Cuenta de servicio y clave:</strong> <code>dashboard-esparta</code>, con los pasos de R2.1 (si Google bloquea la clave, R2.2). El <code>.json</code> queda en su gestor de contraseñas.</li>
               <li><strong>GitHub, Vercel y Claude:</strong> el usuario u organización de GitHub donde va a vivir el repositorio (privado), un team de Vercel donde crear el proyecto, y la cuenta de Claude con la que se conecta el MCP de Detrics.</li>
             </ol>
+            <div class="tip blue"><span class="tip-icon">&#9432;</span><span><strong>Al 19/11:</strong> dueña <code>info@lienzzo.com</code>. GitHub listo y código subido. Team de Vercel en plan Pro, con acceso a los repositorios de la organización. Claude con <code>juan@lienzzo.com</code>, que ya es miembro del workspace de Esparta en Detrics. Pendientes: BigQuery Admin para <code>info@lienzzo.com</code> (pedido a Borja) y la cuenta de servicio con su clave.</span></div>
           </li>
           <li data-n="R5.4">
             <strong>En la reunión, en este orden</strong>
             <ol>
               <li><strong>Consulta programada de las 08:00 (Madrid):</strong> pasa a la cuenta de Lienzzo (paso 8.1) y verificamos que corre.</li>
-              <li><strong>Código y Vercel:</strong> hacemos público el repositorio un rato, Lienzzo lo sube a su GitHub privado y lo publica en su Vercel con sus variables (dataset, clave de la cuenta de servicio, usuario y clave del login, <code>AUTH_SECRET</code>). Probamos juntos que muestra lo mismo que la versión de Detrics.</li>
+              <li><strong>Código y Vercel:</strong> el código ya está en el GitHub privado de Lienzzo (<code>LienzzoDev/esparta-dashboard</code>, subido el 19/11 con todo su historial). Lienzzo lo publica en su Vercel siguiendo R5.5 y probamos juntos que muestra lo mismo que la versión de Detrics.</li>
               <li><strong>Apps Script del mapa:</strong> Lienzzo lo instala con su cuenta (paso 3.4). Desde ahí cada cambio en la hoja llega solo a BigQuery cada noche; hasta hoy los cargamos a mano.</li>
               <li><strong>Cambios del día a día:</strong> cómo sumar una conversión a una transferencia de Detrics y llevarla al dashboard con el MCP de Detrics desde Claude.</li>
               <li><strong>Accesos:</strong> Esparta quita del proyecto la cuenta de servicio del dashboard de Detrics (<code>esparta-dashboard@dataplug-373101</code>). Las transferencias de Detrics escriben con otra cuenta de servicio, que queda.</li>
@@ -1500,6 +1501,70 @@ function bqRun(sql) {
             </ol>
           </li>
           <li data-n="R5.5">
+            <strong>Publicar el dashboard en Vercel, paso a paso</strong>
+            Lo hace alguien de Lienzzo con acceso al team de Vercel, con pantalla compartida. Hace falta tener a mano el archivo <code>.json</code> de la cuenta de servicio <code>dashboard-esparta</code> (R2.1) y el usuario y la clave que eligieron para el login. Son unos 15 minutos.
+            <div class="url-box">
+              <div class="url-icon"><svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg></div>
+              <a href="https://vercel.com/new" target="_blank" rel="noopener">vercel.com/new</a>
+            </div>
+            <p style="margin-top:10px"><strong>1. Importar el repositorio</strong></p>
+            <ol>
+              <li>Entren a Vercel con su cuenta. Arriba a la izquierda está el selector de team: elijan el team de <strong>Lienzzo</strong>, no la cuenta personal. El proyecto queda donde esté elegido el team en este momento.</li>
+              <li>Abran el enlace de arriba, o desde el panel: botón <strong>Add New…</strong> (arriba a la derecha) › <strong>Project</strong>.</li>
+              <li>En <strong>Import Git Repository</strong> aparece la lista de repositorios de GitHub de la organización. Busquen <code>esparta-dashboard</code> y click en <strong>Import</strong> al lado de <code>LienzzoDev/esparta-dashboard</code>.</li>
+              <li>Si no aparece en la lista: click en <strong>Adjust GitHub App Permissions</strong> (o <strong>Configure GitHub App</strong>) debajo de la lista, elijan la organización <strong>LienzzoDev</strong> y, en <strong>Repository access</strong>, sumen <code>esparta-dashboard</code> (o <strong>All repositories</strong>). <strong>Save</strong> y vuelvan a Vercel: ya aparece.</li>
+            </ol>
+            <p style="margin-top:10px"><strong>2. Configurar el proyecto</strong></p>
+            <ol start="5">
+              <li><strong>Project Name:</strong> el nombre que quieran; forma la dirección provisoria (<code>nombre.vercel.app</code>). Por ejemplo:</li>
+            </ol>
+            <div class="copyable"><span class="label">Nombre</span><code>informes-esparta</code><button class="copy-btn" type="button" data-copy="informes-esparta">Copiar</button></div>
+            <ol start="6">
+              <li><strong>Framework Preset</strong> tiene que decir <strong>Next.js</strong> (Vercel lo detecta solo). <strong>Root Directory</strong> queda en <code>./</code> y <strong>Build and Output Settings</strong> sin tocar.</li>
+              <li>Abran <strong>Environment Variables</strong>. Cada variable es un par: en <strong>Key</strong> el nombre, en <strong>Value</strong> el valor, y <strong>Add</strong> (o <strong>+ Add More</strong>) para la siguiente. Son siete:</li>
+            </ol>
+            <div class="sheet"><div class="sheet-scroll"><table>
+              <tr><th>Key</th><th>Value</th></tr>
+              <tr><td><code>BQ_DATASET</code></td><td><code>espartainformes2026v2.detrics_warehouse</code></td></tr>
+              <tr><td><code>BQ_JOB_PROJECT</code></td><td><code>espartainformes2026v2</code> (las consultas se facturan en el proyecto de Esparta)</td></tr>
+              <tr><td><code>GOOGLE_CREDENTIALS_JSON</code></td><td>El contenido entero del archivo <code>.json</code> de la cuenta de servicio: ábranlo con el Bloc de notas (o TextEdit), seleccionen todo, copien y peguen. Empieza con <code>{</code> y termina con <code>}</code></td></tr>
+              <tr><td><code>DASHBOARD_USER</code></td><td>El usuario que eligieron para el login</td></tr>
+              <tr><td><code>DASHBOARD_PASSWORD</code></td><td>La clave que eligieron para el login</td></tr>
+              <tr><td><code>AUTH_SECRET</code></td><td>Un texto aleatorio largo que firma las sesiones. Lo generan con el comando de abajo en una terminal y pegan el resultado. Si alguna vez cambian la clave del login, todas las sesiones abiertas se cierran solas</td></tr>
+              <tr><td colspan="2">Nada más: <code>GOOGLE_APPLICATION_CREDENTIALS</code> y <code>DATOS</code> son solo para correrlo en una computadora y en Vercel van vacías</td></tr>
+            </table></div></div>
+            <div class="copyable"><span class="label">BQ_DATASET</span><code>espartainformes2026v2.detrics_warehouse</code><button class="copy-btn" type="button" data-copy="espartainformes2026v2.detrics_warehouse">Copiar</button></div>
+            <div class="copyable"><span class="label">BQ_JOB_PROJECT</span><code>espartainformes2026v2</code><button class="copy-btn" type="button" data-copy="espartainformes2026v2">Copiar</button></div>
+            <div class="copyable"><span class="label">AUTH_SECRET</span><code>node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"</code><button class="copy-btn" type="button" data-copy="node -e &quot;console.log(require('crypto').randomBytes(32).toString('hex'))&quot;">Copiar</button></div>
+            <div class="tip blue"><span class="tip-icon">&#9432;</span><span>Sin Node instalado, sirve también <code>openssl rand -hex 32</code> en Mac o Linux. Cualquier texto de 64 letras y números al azar funciona; lo que importa es que no se reutilice ni se comparta.</span></div>
+            <p style="margin-top:10px"><strong>3. Publicar</strong></p>
+            <ol start="8">
+              <li>Click en <strong>Deploy</strong>. Vercel instala y compila; tarda entre uno y tres minutos. Al terminar aparece una pantalla de felicitación con una vista previa.</li>
+              <li><strong>Continue to Dashboard</strong> › arriba, en <strong>Domains</strong>, está la dirección (<code>informes-esparta.vercel.app</code> o parecida). Ábranla.</li>
+              <li>Tiene que aparecer la pantalla de login del dashboard. Entren con el usuario y la clave del paso 7.</li>
+            </ol>
+            <p style="margin-top:10px"><strong>4. Proteger las variables</strong></p>
+            <ol start="11">
+              <li>En el proyecto: <strong>Settings</strong> › <strong>Environment Variables</strong>. Revisen que <code>GOOGLE_CREDENTIALS_JSON</code>, <code>DASHBOARD_PASSWORD</code> y <code>AUTH_SECRET</code> figuren como <strong>Sensitive</strong> (con el valor oculto). Si alguna no: tres puntos a la derecha › <strong>Edit</strong> › activar <strong>Sensitive</strong> › <strong>Save</strong>. Una variable sensible ya no se puede leer desde Vercel, solo reemplazar, así que antes guarden los valores en el gestor de contraseñas de Lienzzo.</li>
+              <li>Cada cambio de una variable pide publicar de nuevo para que tome efecto: <strong>Deployments</strong> › tres puntos del último › <strong>Redeploy</strong>.</li>
+            </ol>
+            <p style="margin-top:10px"><strong>5. Comparar con la versión de Detrics</strong></p>
+            <ol start="13">
+              <li>Abran al lado la versión de Detrics (<code>esparta-dashboard.vercel.app</code>), que sigue funcionando hasta que esta coincida.</li>
+              <li>En las dos: todos los clientes, octubre de 2026. En <strong>Resumen</strong>, inversión, leads y sesiones tienen que ser iguales. Después un cliente: Calzados Benavente, octubre, <strong>Leads y ventas</strong>: la conversión Purchase | Shopify de Google Ads da 174,11 compras y 6.993,47 € (al 19/11). Las dos leen las mismas tablas, así que cualquier diferencia es de configuración, no de datos.</li>
+              <li>Si coinciden, la de Lienzzo queda como la oficial y se pasa a R5.4, punto 5 (Esparta quita la cuenta de servicio de Detrics) y luego Detrics borra su versión.</li>
+            </ol>
+            <p style="margin-top:10px"><strong>Si algo falla</strong></p>
+            <ul class="plain" style="margin:8px 0">
+              <li><strong>La compilación falla (Build Failed):</strong> click en el deployment › <strong>Build Logs</strong> y lean las últimas líneas en rojo. Si no es claro, lo resolvemos ahí mismo con pantalla compartida.</li>
+              <li><strong>Error que dice «Faltan DASHBOARD_USER, DASHBOARD_PASSWORD o AUTH_SECRET»:</strong> falta una de las tres o tiene un espacio en el nombre. Corregir en Settings › Environment Variables y Redeploy.</li>
+              <li><strong>«Falta la variable BQ_DATASET»:</strong> el valor tiene que ser exactamente <code>espartainformes2026v2.detrics_warehouse</code>, con el punto en el medio.</li>
+              <li><strong>Entra pero las páginas dan error o vienen vacías:</strong> casi siempre es la cuenta de servicio. Revisar que tenga <strong>BigQuery Job User</strong> en el proyecto y <strong>BigQuery Data Viewer</strong> en <code>detrics_warehouse</code> (R2.1, puntos 4 a 6), y que <code>GOOGLE_CREDENTIALS_JSON</code> tenga el archivo entero, de la primera llave a la última.</li>
+              <li><strong>Los números no se actualizan enseguida:</strong> el dashboard guarda cada consulta 15 minutos. Un Redeploy limpia esa memoria.</li>
+            </ul>
+            <div class="tip amber"><span class="tip-icon">&#9888;</span><span><strong>Recomendado en Vercel Pro:</strong> Settings del team › <strong>Billing</strong> › <strong>Spend Management</strong>, con un monto mensual y la opción de pausar los deployments de producción al llegar. Junto con los límites de Google Cloud (R2.7) pone techo al gasto ante un error.</span></div>
+          </li>
+          <li data-n="R5.6">
             <strong>Prioridad baja, se puede hacer después</strong>
             <ol>
               <li>La dirección del dashboard (por ejemplo <code>informes.espartadigital.com</code>, R2.6) y los límites de gasto de Google Cloud (tope diario de BigQuery en 1 TiB y presupuesto de 50 € al mes con aviso, R2.7).</li>
@@ -1521,7 +1586,7 @@ function bqRun(sql) {
           <label class="check"><input type="checkbox" data-k="r5-access"><span class="box"></span><span class="txt">BigQuery Admin para la cuenta de Lienzzo, cuenta de servicio con clave, GitHub, Vercel y Claude<small>R5.3</small></span><span class="owner both">Esparta y Lienzzo</span></label>
           <label class="check"><input type="checkbox" data-k="r4-handover"><span class="box"></span><span class="txt">En el traspaso: consulta programada, dashboard en el Vercel de Lienzzo, accesos de Detrics quitados y documentación<small>R5.4</small></span><span class="owner both">Esparta, Lienzzo y Detrics</span></label>
           <label class="check"><input type="checkbox" data-k="r4-script"><span class="box"></span><span class="txt">Apps Script del mapa (versión del 04/11) instalado con una cuenta de Lienzzo<small>R5.4 · Paso 3.4</small></span><span class="owner carat">Lienzzo</span></label>
-          <label class="check"><input type="checkbox" data-k="r4-sheets"><span class="box"></span><span class="txt">Clientes que reportan leads por Google Sheets, con formato y frecuencia de la hoja<small>R5.5</small></span><span class="owner carat">Esparta</span></label>
+          <label class="check"><input type="checkbox" data-k="r4-sheets"><span class="box"></span><span class="txt">Clientes que reportan leads por Google Sheets, con formato y frecuencia de la hoja<small>R5.6</small></span><span class="owner carat">Esparta</span></label>
           </div>
         </div>
       </div>
