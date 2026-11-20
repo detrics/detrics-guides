@@ -1440,11 +1440,72 @@ function bqRun(sql) {
       </div>
     </div>
 
+    <!-- ENTREGA FINAL (R6) -->
+    <div class="step is-carat">
+      <div class="step-header">
+        <div class="step-number">R6</div>
+        <h4>Entrega final · martes 24/11, 13:00 (Madrid) <small>Con Lienzzo. Media hora. Si para el lunes 23/11 no están los accesos de Borja, la movemos</small></h4>
+      </div>
+      <div class="step-body">
+        <p>El 20/11 quedaron listos el repositorio en el GitHub de Lienzzo, la copia del mapa y el proyecto en Vercel, todavía sin datos. Falta lo que depende de los accesos de Borja. Los puntos van de más a menos prioritario.</p>
+        <ol class="substeps">
+          <li data-n="R6.1">
+            <strong>Antes del martes, de Borja</strong> (IAM del proyecto <code>espartainformes2026v2</code>)
+            <ol>
+              <li><strong>BigQuery Admin para <code>info@lienzzo.com</code>.</strong> Con ese rol esa cuenta instala el Apps Script y se queda con la consulta programada.</li>
+              <li><strong>Para la cuenta de servicio de Lienzzo:</strong> BigQuery Data Viewer sobre el dataset <code>detrics_warehouse</code> y BigQuery Job User en el proyecto.</li>
+            </ol>
+          </li>
+          <li data-n="R6.2">
+            <strong>Antes del martes, de Lienzzo, cuando lleguen los accesos</strong>
+            <ol>
+              <li><strong>Copia del mapa:</strong> sumar la cuenta de Meta «Felxbrick» (<code>act_2083157709129341</code>) en la fila de Flexbrick, columna Meta Ads. Se agregó en la hoja de Detrics el 20/11, después de la copia. Va antes del Apps Script, que reemplaza el mapa de BigQuery con lo que tiene la hoja.</li>
+              <li><strong>Apps Script del mapa</strong> instalado con <code>info@lienzzo.com</code> (paso 3.4), en una ventana donde solo esté iniciada esa cuenta. Después, edición en la copia para Sara, Marta y Lourdes: desde ahí Esparta edita solo esa copia.</li>
+              <li><strong>Consulta programada «Esparta · masters»:</strong> Editar › Actualizar credenciales, con <code>info@lienzzo.com</code> (paso 8.1).</li>
+              <li><strong>Vercel:</strong> <code>BQ_JOB_PROJECT</code> = <code>espartainformes2026v2</code> y Redeploy (R5.5, punto 12).</li>
+            </ol>
+          </li>
+          <li data-n="R6.3">
+            <strong>En la reunión</strong>
+            <ol>
+              <li><strong>Comparar las dos versiones</strong> como en R5.5, paso 5: Zumex, Calzados Benavente y Flexbrick, octubre de 2026.</li>
+              <li><strong>Ver correr</strong> el Apps Script y la consulta programada con <code>info@lienzzo.com</code>.</li>
+              <li><strong>Accesos:</strong> si todo coincide, Esparta quita del proyecto la cuenta de servicio del dashboard de Detrics (<code>esparta-dashboard@dataplug-373101</code>) y Detrics da de baja su versión.</li>
+            </ol>
+          </li>
+          <li data-n="R6.4">
+            <strong>Lo que toma Lienzzo después</strong>
+            Está en la sección «Pendientes al traspaso» del <a href="https://docs.google.com/document/d/1YHTiUEmmIa3IedfpE9t0nGyaqRnlvTdTVuSFB_zs5pY/edit" target="_blank" rel="noopener">documento del dashboard</a> y en el README del repositorio: compras de Stamp By Me y Juegos de la Mesa Redonda, Zumex (Meta y tipo de cambio), HubSpot y tiendas, y leads por Google Sheets.
+          </li>
+          <li data-n="R6.5">
+            <strong>Encuesta del traspaso</strong>
+            Al cerrar la reunión, Detrics le manda a Juan una encuesta corta sobre el proyecto.
+          </li>
+        </ol>
+        <div class="todo-call">
+          <h5>Para la entrega final</h5>
+          <div class="checklist todo">
+          <label class="check"><input type="checkbox" data-k="r5-access"><span class="box"></span><span class="txt">BigQuery Admin para info@lienzzo.com y lectura para la cuenta de servicio de Lienzzo<small>R6.1</small></span><span class="owner carat">Esparta</span></label>
+          <label class="check"><input type="checkbox" data-k="r6-felxbrick"><span class="box"></span><span class="txt">Cuenta de Meta «Felxbrick» en la copia del mapa de Lienzzo<small>R6.2</small></span><span class="owner carat">Lienzzo</span></label>
+          <label class="check"><input type="checkbox" data-k="r4-script"><span class="box"></span><span class="txt">Apps Script del mapa (versión del 04/11) instalado con una cuenta de Lienzzo<small>R6.2 · Paso 3.4</small></span><span class="owner carat">Lienzzo</span></label>
+          <label class="check"><input type="checkbox" data-k="r6-query"><span class="box"></span><span class="txt">Consulta programada con las credenciales de info@lienzzo.com<small>R6.2 · Paso 8.1</small></span><span class="owner carat">Lienzzo</span></label>
+          <label class="check"><input type="checkbox" data-k="r6-vercel"><span class="box"></span><span class="txt">Dashboard de Lienzzo con datos y comparado contra el de Detrics<small>R6.3</small></span><span class="owner both">Lienzzo y Detrics</span></label>
+          <label class="check"><input type="checkbox" data-k="r4-handover"><span class="box"></span><span class="txt">Cuenta de servicio de Detrics quitada del proyecto y versión de Detrics dada de baja<small>R6.3</small></span><span class="owner both">Esparta y Detrics</span></label>
+          <label class="check"><input type="checkbox" data-k="r5-meta"><span class="box"></span><span class="txt">Zumex: IDs de páginas y cuentas publicitarias, captura de octubre y fuente de su informe<small>R6.4</small></span><span class="owner carat">Esparta</span></label>
+          <label class="check"><input type="checkbox" data-k="r5-fx"><span class="box"></span><span class="txt">Tipo de cambio que usan para pasar dólares a euros<small>R6.4</small></span><span class="owner carat">Esparta</span></label>
+          <label class="check"><input type="checkbox" data-k="r4-hubspot-rule"><span class="box"></span><span class="txt">Qué contactos de HubSpot cuentan, «Reemplaza» o «Se muestran los dos» por cliente, Servalesa y Sungrow, y ventas de WooCommerce y Shopify<small>R6.4</small></span><span class="owner carat">Esparta</span></label>
+          <label class="check"><input type="checkbox" data-k="r4-sheets"><span class="box"></span><span class="txt">Clientes que reportan leads por Google Sheets, con formato y frecuencia de la hoja<small>R6.4</small></span><span class="owner carat">Esparta</span></label>
+          <label class="check"><input type="checkbox" data-k="r6-survey"><span class="box"></span><span class="txt">Enviar la encuesta del traspaso<small>R6.5</small></span><span class="owner detrics">Detrics</span></label>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- TRASPASO (R5) -->
     <div class="step is-carat">
       <div class="step-header">
         <div class="step-number">R5</div>
-        <h4>Traspaso · viernes 20/11, 13:00 (Madrid) <small>Con Lienzzo. Lienzzo queda dueño del dashboard</small></h4>
+        <h4>Traspaso · viernes 20/11, 13:00 (Madrid) <small>Hecho. Lo que quedó abierto pasa a la entrega final del martes 24/11</small></h4>
       </div>
       <div class="step-body">
         <p>Los cambios que lleguen hasta el <strong>miércoles 18/11</strong> entran antes del traspaso; lo que llegue después lo toma Lienzzo. Los puntos van de más a menos prioritario.</p>
@@ -1575,18 +1636,11 @@ function bqRun(sql) {
         <div class="todo-call">
           <h5>Antes del traspaso</h5>
           <div class="checklist todo">
-          <label class="check"><input type="checkbox" data-k="r5-meta"><span class="box"></span><span class="txt">Zumex: IDs de páginas y cuentas publicitarias, captura de octubre y fuente de su informe<small>R5.1</small></span><span class="owner carat">Esparta</span></label>
-          <label class="check"><input type="checkbox" data-k="r5-fx"><span class="box"></span><span class="txt">Tipo de cambio que usan para pasar dólares a euros<small>R5.1</small></span><span class="owner carat">Esparta</span></label>
           <label class="check"><input type="checkbox" data-k="r5-gads" checked><span class="box"></span><span class="txt">Calzados Benavente: Google Ads vuelve a bajar 60 días de conversiones (16/11)<small>R5.1</small></span><span class="owner detrics">Detrics</span></label>
-          <label class="check"><input type="checkbox" data-k="r5-april"><span class="box"></span><span class="txt">Calzados Benavente: abril de 2026, una o dos compras principales<small>R5.1</small></span><span class="owner carat">Esparta</span></label>
-          <label class="check"><input type="checkbox" data-k="r5-yoy"><span class="box"></span><span class="txt">Caso de conversiones que cambian de año (Stamp By Me, Juegos) por correo<small>R5.1</small></span><span class="owner carat">Esparta</span></label>
+          <label class="check"><input type="checkbox" data-k="r5-april" checked><span class="box"></span><span class="txt">Calzados Benavente: abril de 2026, una o dos compras principales<small>R5.1</small></span><span class="owner carat">Esparta</span></label>
+          <label class="check"><input type="checkbox" data-k="r5-yoy" checked><span class="box"></span><span class="txt">Caso de conversiones que cambian de año (Stamp By Me, Juegos) por correo<small>R5.1</small></span><span class="owner carat">Esparta</span></label>
           <label class="check"><input type="checkbox" data-k="r5-transfers" checked><span class="box"></span><span class="txt">HubSpot (6 clientes), WooCommerce (3) y Shopify (1) cargándose en BigQuery (16/11)<small>R5.2</small></span><span class="owner detrics">Detrics</span></label>
-          <label class="check"><input type="checkbox" data-k="r4-hubspot-rule"><span class="box"></span><span class="txt">Qué contactos de HubSpot cuentan, «Reemplaza» o «Se muestran los dos» por cliente, Servalesa y Sungrow, y ventas de WooCommerce y Shopify<small>R5.2</small></span><span class="owner carat">Esparta</span></label>
-          <label class="check"><input type="checkbox" data-k="r4-owner"><span class="box"></span><span class="txt">Persona de Lienzzo que recibe el dashboard, la consulta programada y el Apps Script<small>R5.3</small></span><span class="owner carat">Lienzzo</span></label>
-          <label class="check"><input type="checkbox" data-k="r5-access"><span class="box"></span><span class="txt">BigQuery Admin para la cuenta de Lienzzo, cuenta de servicio con clave, GitHub, Vercel y Claude<small>R5.3</small></span><span class="owner both">Esparta y Lienzzo</span></label>
-          <label class="check"><input type="checkbox" data-k="r4-handover"><span class="box"></span><span class="txt">En el traspaso: consulta programada, dashboard en el Vercel de Lienzzo, accesos de Detrics quitados y documentación<small>R5.4</small></span><span class="owner both">Esparta, Lienzzo y Detrics</span></label>
-          <label class="check"><input type="checkbox" data-k="r4-script"><span class="box"></span><span class="txt">Apps Script del mapa (versión del 04/11) instalado con una cuenta de Lienzzo<small>R5.4 · Paso 3.4</small></span><span class="owner carat">Lienzzo</span></label>
-          <label class="check"><input type="checkbox" data-k="r4-sheets"><span class="box"></span><span class="txt">Clientes que reportan leads por Google Sheets, con formato y frecuencia de la hoja<small>R5.6</small></span><span class="owner carat">Esparta</span></label>
+          <label class="check"><input type="checkbox" data-k="r4-owner" checked><span class="box"></span><span class="txt">Persona de Lienzzo que recibe el dashboard, la consulta programada y el Apps Script<small>R5.3</small></span><span class="owner carat">Lienzzo</span></label>
           </div>
         </div>
       </div>
